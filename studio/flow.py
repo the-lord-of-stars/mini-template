@@ -12,9 +12,6 @@ from langchain_openai import ChatOpenAI
 
 from langgraph.graph import StateGraph, START, END
 
-# llm = ChatOpenAI(model="gpt-4o", temperature=0) 
-
-
 # High-level Procedure to create a multi-agent workflow
 # A. Decompose the task into several sub-tasks
 # B. Create an LLM-based agent for each sub-task
@@ -24,6 +21,7 @@ from langgraph.graph import StateGraph, START, END
 # 1. Define a state to store the messages
 #   State[message] to store the message
 #   State[sender] to store the which agent sends the message
+#   other fields to store the msgs
 
 # 2. Define a node for the workflow
     # 2.1 Get state
@@ -64,23 +62,56 @@ def generate_refinement(state):
 # 3. Add agent nodes into the graph workflow
 # 4. Add edges to connect the agents 
 # 5. Compile the workflow
-# register the workflow in langgraph.json with the graph_1 name
-
-builder_1 = StateGraph(State)
-builder_1.add_node("generate_msg", generate_msg)
-builder_1.add_node("generate_refinement", generate_refinement)
-builder_1.add_edge(START, "generate_msg")
-builder_1.add_edge("generate_msg", "generate_refinement")
-builder_1.add_edge("generate_refinement", END)
-graph_1 = builder_1.compile()
+# register the workflow in langgraph.json with the graph name
 
 
-# 6. Define a second workflow in the same way
-builder_2 = StateGraph(State)
-builder_2.add_node("generate_msg", generate_msg)
-builder_2.add_edge(START, "generate_msg")
-builder_2.add_edge("generate_msg", END)
-graph_2 = builder_2.compile()
+def create_workflow():
+    builder = StateGraph(State)
+    builder.add_node("generate_msg", generate_msg)
+    builder.add_node("generate_refinement", generate_refinement)
+    builder.add_edge(START, "generate_msg")
+    builder.add_edge("generate_msg", "generate_refinement")
+    builder.add_edge("generate_refinement", END)
+    graph = builder.compile()
+    return graph
+
+class Agent:
+    def __init__(self) -> None:
+        self.workflow = None  
+
+    def initialize(self) -> None:
+        """Load models, build the graph, etc."""
+        self.workflow = create_workflow()
+
+    def process(self, task: dict[str, any]) -> dict[str, any]:
+        # TBD: what is the input format; dataset or a single row?
+        if self.workflow is None:
+            raise RuntimeError("Agent not initialised. Call initialize() first.")
+        # Convert dataset info to LangGraph state as input
+        state = {
+            "message": str(task.get("message", task)),        # fallback: entire row as message
+            "refinement": str(task.get("refinement", "")),    # empty string if absent
+        }
+        # Invoke the workflow
+        output_state = self.workflow.invoke(state)
+        # Flatten AIMessage objects so json.dump doesn’t choke
+        def _flatten(val):
+            return getattr(val, "content", val)
+
+        return {k: _flatten(v) for k, v in output_state.items()}
+    def _demo(self) -> None:
+        # self.initialize()
+        demo_out = self.process(
+            {"message": "Hello world!", "refinement": "make it cheerful"}
+        )
+        print(demo_out)
+
+
+if __name__ == "__main__":
+    agent = Agent()
+    # agent.initialize()
+    # agent._demo()
+
 
 
 
