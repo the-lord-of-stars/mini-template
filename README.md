@@ -95,9 +95,9 @@ npx @langchain/langgraph-cli dev
 * Configuration file is the `/studio/langgraph.json` file.
 
 ### 3. Update your agentic workflow
-You can update the `agent.py` and related files to implement your own agentic configuration, and try to make the design and results better than the template baseline. 
+Feel free to customize the `agent.py` and its companion files to craft your own agentic configuration, and try to make your designs and results outperform the template baseline, by demonstrating your solution's generalizability to other datasets, efficiency in running, and effectiveness in generating effective and engaging narrative-driven visualization reports.
 
-Please ensure you refer to `dataset.csv` as the data file, e.g., specifying in the prompt; and include every dependency in `requirements.txt`
+Please ensure you refer to `dataset.csv` as the data file as input, e.g., specifying in the prompt; and refer to `output.html` or `output.pdf` as the output file, and include every dependency needed in `requirements.txt`
 
 
 ## 📬 Preparing Your Submission
