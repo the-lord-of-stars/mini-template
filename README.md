@@ -73,6 +73,16 @@ cd studio
 python run.py
 ```
 
+The output will be saved in the `studio/output.pdf` file. 
+
+If you want the template to generate Vega-Lite charts, please adjust the prompt and decode_output function in the `agent.py` file accordingly (see the comments in the code), then run the following command to view the output in the browser `http://localhost:8001/output.html`.
+
+```
+python run.py
+python -m http.server 8001
+```
+
+
 ### 2. Run LangGraph Studio
 LangGraph Studio is a custom IDE for viewing and testing agents, and it can be run locally and opened in your browser on Mac, Windows, and Linux.
 See documentation about LangGraph CLI [here](https://langchain-ai.github.io/langgraph/cloud/reference/cli/) for both Python and JS configurations.
