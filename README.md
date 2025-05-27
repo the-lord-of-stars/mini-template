@@ -21,7 +21,7 @@ python --version
 ### 1. Clone repo
 ```
 git clone https://github.com/ppphhhleo/mini-template.git
-$ cd mini-template/studio
+$ cd mini-template
 ```
 
 ### 2. Create an environment and install dependencies
@@ -29,6 +29,7 @@ $ cd mini-template/studio
 ```
 $ python -m venv mini-template-env
 $ source mini-template-env/bin/activate
+$ cd mini-template/studio
 $ pip install -r requirements.txt
 ```
 #### Windows Powershell
@@ -36,35 +37,39 @@ $ pip install -r requirements.txt
 PS> python -m venv mini-template-env
 PS> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
 PS> mini-template-env\scripts\activate
+PS> cd mini-template/studio
 PS> pip install -r requirements.txt
 ```
 
 ### 3. Configure API 
-* OpenAI. Origianlly, the template uses OpenAI API. You can sign up [here](https://openai.com/index/openai-api/). 
-    * Set `OPENAI_API_KEY` in your environment 
+* OpenAI. Origianlly, the template uses OpenAI API to run locally. You can sign up [here](https://openai.com/index/openai-api/). 
+    * Set `OPENAI_API_KEY` in `.studio/.env` file,
+    * Set `OPENAI_MODEL = "gpt-4o"` in `.studio/.env` file,
+    * Set `LLM_PROVIDER = "openai"` in `.studio/.env` file
+    The evaluation server uses Azure OpenAI to run your submission once you upload your submission, and you do not need to fill in the Azure OpenAI endpoint, API key, and deployment name.
 
-* Optional: LangSmith. Sign up for LangSmith [here](https://smith.langchain.com/). Use it within your workflow [here](https://www.langchain.com/langsmith), and relevant library [docs](https://docs.smith.langchain.com/).
-    *    Set `LANGCHAIN_API_KEY`, `LANGCHAIN_TRACING_V2=true` in your environment 
+* [Optional]: LangSmith. Sign up for LangSmith [here](https://smith.langchain.com/). Use it within your workflow [here](https://www.langchain.com/langsmith), and relevant library [docs](https://docs.smith.langchain.com/).
+    *    Set `LANGCHAIN_API_KEY`, `LANGCHAIN_TRACING_V2=true` in `.studio/.env` file 
 
-* Optional: Tavily. Tavily Search API is a web search engine optimized for LLMs and RAG, aimed at efficient, 
+* [Optional]: Tavily. Tavily Search API is a web search engine optimized for LLMs and RAG, aimed at efficient, 
 quick, and persistent search results. You can sign up for free for an API key [here](https://tavily.com/). 
-    *   Set `TAVILY_API_KEY` in your environment. 
+    *   Set `TAVILY_API_KEY` in `.studio/.env` file. 
 
-* Azure OpenAI. We provide a remote Azure LLM provider for free testing, and you can reach out to Pan Hao to get the AZURE_OPENAI_API_KEY and set the following environment variables:
+<!-- * Azure OpenAI. We provide a remote Azure LLM provider for free testing, and you can reach out to Pan Hao to get the AZURE_OPENAI_API_KEY and set the following environment variables:
 ```
 export LLM_PROVIDER=azure
 export AZURE_OPENAI_ENDPOINT=https://eval-models.openai.azure.com/
 export AZURE_OPENAI_API_KEY=api_key
 export AZURE_OPENAI_DEPLOYMENT=gpt-4o
-```
+``` -->
 
 
-
-## 🚀 Running the Studio Playground
+## 🚀 Begin with the Template & Studio
 
 ### 1. Run template locally
 
 ```
+cd studio
 python run.py
 ```
 
@@ -73,7 +78,6 @@ LangGraph Studio is a custom IDE for viewing and testing agents, and it can be r
 See documentation about LangGraph CLI [here](https://langchain-ai.github.io/langgraph/cloud/reference/cli/) for both Python and JS configurations.
 
 ```
-// from the studio folder
 npx @langchain/langgraph-cli dev
 ```
 
@@ -81,35 +85,30 @@ npx @langchain/langgraph-cli dev
 * Configuration file is the `/studio/langgraph.json` file.
 
 ### 3. Update your agentic workflow
-Please ensure your agent configuration references `dataset.csv` as the data file, e.g., specifying in the prompt. Include every dependency in `requirements.txt`, confirm that `agent.py` defines your Agent class, and verify that `run.py` runs without errors before packaging your submission.
+You can update the `agent.py` and related files to implement your own agentic configuration, and try to make the design and results better than the template baseline. 
+
+Please ensure you refer to `dataset.csv` as the data file, e.g., specifying in the prompt; and include every dependency in `requirements.txt`
 
 
 ## 📬 Preparing Your Submission
 
-1. Verify the code.
+1. Verify the codes. Please make sure the codes execute without errors before packing your submission.
 
 ```
 python run.py
 ```
-2. Copy into the submission/ folder.
+
+
+2. Copy related files into the `submission/` folder.
 * `agent.py` - your Agent implementation 
 * `requirements.txt` - all dependencies needed 
 * `report.py` - the code to generate the report
-* Other supplimentary files to run your agent, e.g., `helpers.py`
+* all other supplimentary files to run your agent, e.g., `helpers.py`, `report_html.py`, `report_pdf.py`, etc.
 
-3. ZIP the submission/ folder (do not include any extra files or foler)
-4. Submit the ZIP file via the challenge portal.
+3. ZIP the `submission/` folder (do not include any extra files or foler)
+4. Submit the ZIP file via the [challenge website](https://purple-glacier-014f19d1e.6.azurestaticapps.net/) to see the result, and you could submit multiple times.
+5. Submit your paper via PCS. 
 
-
-
-<!-- ### Optional: Set up Tavily API for web search
-
-* Tavily Search API is a search engine optimized for LLMs and RAG, aimed at efficient, 
-quick, and persistent search results. 
-* You can sign up for an API key [here](https://tavily.com/). 
-It's easy to sign up and offers a very generous free tier. Some lessons (in Module 4) will use Tavily. 
-
-* Set `TAVILY_API_KEY` in your environment. -->
 
 ## References
 - [Langchain Academy](https://github.com/langchain-ai/langchain-academy)

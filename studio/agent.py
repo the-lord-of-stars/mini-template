@@ -3,15 +3,15 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import StateGraph, START, END
 
 from helpers import get_llm
-from report import generate_report
-
+from report_html import generate_html_report
+from report_pdf import generate_pdf_report
 
 class State(TypedDict):
     message: str
 
 def generate_msg(state: State):
     message = state["message"]
-    sys_prompt = f"Please generate a Python code to visualize insights from the dataset, output should be codes and narrative: {message}"
+    sys_prompt = f"Please generate Vega-Lite graphs to visualize insights from the dataset, output should be graphs and narrative: {message}"
     llm = get_llm(temperature=0, max_tokens=4096)
     answer = llm.invoke(
         [SystemMessage(content=sys_prompt), HumanMessage(content="Generate a response.")]
@@ -46,9 +46,9 @@ class Agent:
         }
         return state
     def decode_output(self, output: dict):
-        # Decode the output and save it as a pdf
-        generate_report(output, "output.pdf")
-
+        # Decode the output and save it as a pdf or html based on input prompt
+        # generate_report(output, "output.pdf")
+        generate_html_report(output, "output.html")
     def process(self):
 
         if self.workflow is None:
@@ -56,6 +56,7 @@ class Agent:
         
         state = self.initialize_state()
         output_state = self.workflow.invoke(state)
+        print(output_state)
         def _flatten(value):
             return getattr(value, "content", value)
         result = {k: _flatten(v) for k, v in output_state.items()}

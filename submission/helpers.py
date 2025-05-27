@@ -29,7 +29,6 @@ def get_llm(**kw):
     else:  
         return ChatOpenAI(
             api_key =os.getenv("OPENAI_API_KEY"),
-            base_url=os.getenv("OPENAI_API_BASE"),   # optional
             model_name=os.getenv("OPENAI_MODEL", "gpt-4o"),
             **kw,
         )
