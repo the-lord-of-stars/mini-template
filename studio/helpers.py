@@ -11,6 +11,10 @@ def get_llm(**kw):
     Return a Chat‑compatible LLM whose backend (OpenAI, Azure, local stub…)
     is selected by env‑vars.  Extra **kw flow through so nodes can override
     temperature, max_tokens, etc. without knowing the backend.
+
+    Mini challenge evaluation server uses azure openai to run your submission.
+    You don't need to fill in the azure openai endpoint and api key, 
+    but you need to fill in the openai api key and model name to run locally.
     """
     provider = os.getenv("LLM_PROVIDER", "openai")
 
@@ -28,7 +32,6 @@ def get_llm(**kw):
     else:  
         return ChatOpenAI(
             api_key =os.getenv("OPENAI_API_KEY"),
-            base_url=os.getenv("OPENAI_API_BASE"),   # optional
             model_name=os.getenv("OPENAI_MODEL", "gpt-4o"),
             **kw,
         )

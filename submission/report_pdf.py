@@ -10,7 +10,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Image, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 
-def generate_report(output_state: dict, output_path: str):
+def generate_pdf_report(output_state: dict, output_path: str):
     content = output_state["message"]
 
     # 1. Prepare pdf
@@ -57,5 +57,5 @@ def generate_report(output_state: dict, output_path: str):
         story.append(Paragraph(tail, styles["Normal"]))
         story.append(Spacer(1, 0.2 * inch))
 
-    # 5. Build it!
+    # 5. Build it
     doc.build(story)

@@ -4,7 +4,6 @@ from langgraph.graph import StateGraph, START, END
 
 from helpers import get_llm
 from report_html import generate_html_report
-from report_pdf import generate_pdf_report
 
 class State(TypedDict):
     message: str
@@ -13,10 +12,10 @@ def generate_msg(state: State):
     message = state["message"]
     
     # if the prompt is to generate Vega-Lite charts, then specify in sys_prompt and use generate_html_report()
-    # sys_prompt = f"Please generate Vega-Lite graphs to visualize insights from the dataset, output should be graphs and narrative: {message}"
+    sys_prompt = f"Please generate Vega-Lite graphs to visualize insights from the dataset, output should be graphs and narrative: {message}"
    
     # if the prompt is to generate Python codes, then specify in sys_prompt and use generate_pdf_report()
-    sys_prompt = f"Please generate Python code to visualize insights from the dataset, output should be graphs and narrative: {message}"
+    # sys_prompt = f"Please generate Python code to visualize insights from the dataset, output should be graphs and narrative: {message}"
     
     # get the LLM instance
     llm = get_llm(temperature=0, max_tokens=4096)
@@ -59,8 +58,8 @@ class Agent:
         # if the final output contains Vega-Lite codes, then use generate_html_report
         # if the final output contains Python codes, then use generate_pdf_report
 
-        generate_pdf_report(output, "output.pdf")
-        # generate_html_report(output, "output.html")
+        generate_html_report(output, "output.html")
+        # generate_pdf_report(output, "output.pdf")
     def process(self):
 
         if self.workflow is None:
