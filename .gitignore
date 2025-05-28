@@ -226,3 +226,9 @@ mini-template-env
 
 studio/output.html
 studio/output.pdf
+
+submission.zip
+submission-html.zip
+submission-pdf.zip
+submission-html/
+submission-pdf/
