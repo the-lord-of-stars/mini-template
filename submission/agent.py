@@ -4,7 +4,7 @@ from langgraph.graph import StateGraph, START, END
 
 import csv
 from helpers import get_llm
-from report_html import generate_html_report
+# from report_html import generate_html_report
 from report_pdf import generate_pdf_report
 
 class State(TypedDict):
