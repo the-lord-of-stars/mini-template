@@ -5,6 +5,9 @@ Welcome! This repo provides:
 * `studio/`: A complete development playground for building and testing agent with LangGraph Studio UI. Please run the template locally in this folder. 
 * `submission/`: The minimal structure you’ll package, compress in ZIP file, and submit (only what’s required to submit to evaluation server).
 
+The template generates visualization reports with both charts and narrative (right part of the image).
+<img src="challenge.png" style="background-color: white; width: 70%; display: block; margin-left: auto; margin-right: auto;">
+
 Please follow the instructions below to get started.
 - [0 - Prerequisites](#0-prerequisites)
 - [1 - Configure local API](#1-configure-api)
