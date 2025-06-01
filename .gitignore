@@ -224,7 +224,7 @@ $RECYCLE.BIN/
 # environment
 mini-template-env
 
-studio/output.html
+studio/output*.html
 studio/output.pdf
 
 submission.zip

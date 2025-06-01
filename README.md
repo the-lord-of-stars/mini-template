@@ -75,7 +75,7 @@ python run.py
 
 If the template is running successfully the first time, the output will be saved in the `studio/output.pdf` file. 
 
-If you want the template to generate Vega-Lite charts, please adjust the prompt and decode_output function in the `agent.py` file accordingly (see the comments in the `agent.py` file), then run the following command to view the output in the browser `http://localhost:8001/output.html`.
+If you want the template to generate Vega-Lite charts, please adjust the prompt, file_name, and decode_output function in the `agent.py` file accordingly (see the comments in the `agent.py` file), then run the following command to view the output in the browser `http://localhost:8001/output.html`.
 
 ```
 python run.py
