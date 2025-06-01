@@ -97,7 +97,7 @@ npx @langchain/langgraph-cli dev
 
 Feel free to customize the `agent.py` and its companion files to craft your own agentic configuration, and try to make your designs and results outperform the template baseline, by demonstrating your solution's **generalizability to other datasets**, **efficiency in running**, and **effectiveness in generating effective and engaging narrative-driven visualization reports**.
 
-Please ensure you refer to `dataset.csv` as the data file as input, e.g., specifying in the prompt; and refer to `output.html` or `output.pdf` as the output file, and include every dependency needed in `requirements.txt`
+Please ensure you refer to `dataset.csv` or `https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv` as the file path to access the data, e.g., specifying in the prompt; and refer to `output.html` or `output.pdf` as the output file, and include every dependency needed in `requirements.txt`
 
 
 ## 3 Preparing Your Submission
