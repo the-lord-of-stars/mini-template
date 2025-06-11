@@ -3,7 +3,16 @@
 Welcome! This repo provides: 
 
 * `studio/`: A complete development playground for building and testing agent with LangGraph Studio UI. Please run the template locally in this folder. 
-* `submission/`: The minimal structure you’ll package, compress in ZIP file, and submit (only what’s required to submit to evaluation server).
+    * `agent.py`: core file for agentic configuration. 
+    * `dataset.csv`: dataset to visualize
+    * `run.py`: test and run `agent.py` locally.
+    * `report_html.py`, `report_pdf.py`, `helpers.py`: supplimentary files. 
+
+    * `langgraph.json`: LangGraph Studio setup
+* `submission/`: The minimal structure you’ll package, compress in ZIP file, and submit (only what’s required to submit to evaluation server). 
+    * `agent.py` - your Agent implementation (Required)
+    * `requirements.txt` - all dependencies needed  (Required)
+    * All supplimentary files if any, e.g., `helpers.py`, `report_html.py`, `report_pdf.py`, etc.
 
 The template generates visualization reports with both charts and narrative (right part of the image).
 <img src="challenge.png" style="background-color: white; width: 70%; display: block; margin-left: auto; margin-right: auto;">
@@ -120,21 +129,22 @@ python run.py
 
 3. ZIP the `submission/` folder (do not include any extra files or foler) as `submission.zip`
 
+<img src="./public/compress.png" style="background-color: white; width: 900%; display: block; margin-left: auto; margin-right: auto;" alt="VisAgent challenge site login page">
 
 ### 3.2 Submit for the Challenge
 
 1. Go to https://www.visagent.org/, sign in or register:
-<img src="./public/login.png" style="background-color: white; width: 70%; display: block; margin-left: auto; margin-right: auto;" alt="VisAgent challenge site login page">
+<img src="./public/login.png" style="background-color: white; width: 50%; display: block; margin-left: auto; margin-right: auto;" alt="VisAgent challenge site login page">
 
 2. Navigate to your submission page and upload your submission.zip file:
 
-<img src="./public/upload.png" style="background-color: white; width: 70%; display: block; margin-left: auto; margin-right: auto;" alt="Upload interface for submission.zip on VisAgent">
+<img src="./public/upload.png" style="background-color: white; width: 100%; display: block; margin-left: auto; margin-right: auto;" alt="Upload interface for submission.zip on VisAgent">
 
 3. View all your submissions with their status and results, then select one entry as your finalized submission for the public leaderboard:
 
-<img src="./public/running.png" style="background-color: white; width: 70%; display: block; margin-left: auto; margin-right: auto; margin-bottom: 5px;" alt="Dashboard showing a submission in progress">
-<img src="./public/success.png" style="background-color: white; width: 70%; display: block; margin-left: auto; margin-right: auto;" alt="Dashboard showing a successful submission"> 
-<img src="./public/finalize.png" style="background-color: white; width: 70%; display: block; margin-left: auto; margin-right: auto; margin-top: 5px;" alt="Interface to finalize a submission for the leaderboard">
+<img src="./public/running.png" style="background-color: white; width: 100%; display: block; margin-left: auto; margin-right: auto; margin-bottom: 5px;" alt="Dashboard showing a submission in progress">
+<img src="./public/success.png" style="background-color: white; width: 100%; display: block; margin-left: auto; margin-right: auto;" alt="Dashboard showing a successful submission"> 
+<img src="./public/finalize.png" style="background-color: white; width: 100%; display: block; margin-left: auto; margin-right: auto; margin-top: 5px;" alt="Interface to finalize a submission for the leaderboard">
 
 
 4. Reference the links for your finalized output with the same submission ID in your technical paper to be submitted to PCS:
