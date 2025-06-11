@@ -2,20 +2,19 @@
 
 Welcome! This repo provides: 
 
-* `studio/`: A complete development playground for building and testing agent with LangGraph Studio UI. Please run the template locally in this folder. 
-    * `agent.py`: core file for agentic configuration. 
-    * `dataset.csv`: dataset to visualize
-    * `run.py`: test and run `agent.py` locally.
-    * `report_html.py`, `report_pdf.py`, `helpers.py`: supplimentary files. 
-
-    * `langgraph.json`: LangGraph Studio setup
-* `submission/`: The minimal structure you’ll package, compress in ZIP file, and submit (only what’s required to submit to evaluation server). 
+* `studio/`: **A complete development playground** for building and testing agent with LangGraph Studio UI. Please run the template locally in this folder. 
+    * `agent.py`: Core agent configuration. 
+    * `dataset.csv`: Dataset for visualization.
+    * `run.py`: Test `agent.py` locally.
+    * `report_html.py`, `report_pdf.py`, `helpers.py`: Supplimentary files. 
+    * `langgraph.json`: Configuration file for LangGraph Studio.
+* `submission/`: **The minimal submission structure** you’ll package, compress in ZIP file, and submit via challenge website(only what’s required to submit to evaluation server). 
     * `agent.py` - your Agent implementation (Required)
     * `requirements.txt` - all dependencies needed  (Required)
     * All supplimentary files if any, e.g., `helpers.py`, `report_html.py`, `report_pdf.py`, etc.
 
 The template generates visualization reports with both charts and narrative (right part of the image).
-<img src="challenge.png" style="background-color: white; width: 70%; display: block; margin-left: auto; margin-right: auto;">
+<img src="./public/challenge.png" style="background-color: white; width: 70%; display: block; margin-left: auto; margin-right: auto;">
 
 Please follow the instructions below to get started.
 - [0 - Prerequisites](#0-prerequisites)
@@ -31,12 +30,15 @@ This version is required for optimal compatibility with LangGraph. If you're on 
 ```
 python --version
 ```
+
+Either download the Mini Challenge Template or clone it to local machine. 
+
 ```
 git clone https://github.com/ppphhhleo/mini-template.git
 $ cd mini-template
 ```
 
-Create an environment and install dependencies
+Create an environment and install dependencies.
 <!-- #### Mac/Linux/WSL -->
 ```
 $ python -m venv mini-template-env
@@ -108,46 +110,46 @@ npx @langchain/langgraph-cli dev
 
 Feel free to customize the `agent.py` and its companion files to craft your own agentic configuration, and try to make your designs and results outperform the template baseline, by demonstrating your solution's **generalizability to other datasets**, **efficiency in running**, and **effectiveness in generating effective and engaging narrative-driven visualization reports**.
 
-Please ensure you refer to `dataset.csv` or `https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv` as the file path to access the data, e.g., specifying in the prompt; and refer to `output.html` or `output.pdf` as the output file, and include every dependency needed in `requirements.txt`
+Please ensure you **refer the dataset** as `dataset.csv` or `https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv` as the file path to access the data, e.g., specifying in the prompt; and refer to `output.html` or `output.pdf` as the output file, and include every dependency needed in `requirements.txt`
 
 
 ## 3 Submission 
 
 ### 3.1 Preparing Your Submission
 
-1. Verify the codes. Please make sure the codes execute without errors before packing your submission.
+1. **Verify the codes.** Please make sure the codes execute without errors before packing your submission.
 
 ```
 python run.py
 ```
 
 
-2. Copy related files into the `submission/` folder. Currently submission folder contains example files to generate PDF report, please replace them with your own files.
+2. **Package the files.** Please copy all related files from `studio/` into the `submission/` folder (replace any files if needed).
 * `agent.py` - your Agent implementation (Required)
 * `requirements.txt` - all dependencies needed  (Required)
 * All supplimentary files if any, e.g., `helpers.py`, `report_html.py`, `report_pdf.py`, etc.
 
-3. ZIP the `submission/` folder (do not include any extra files or foler) as `submission.zip`
+3. **Compress in ZIP file.** ZIP the `submission/` folder (do not include any extra files or foler) as `submission.zip`
 
-<img src="./public/compress.png" style="background-color: white; width: 900%; display: block; margin-left: auto; margin-right: auto;" alt="VisAgent challenge site login page">
+<img src="./public/compress.png" style="background-color: white; width: 80%; display: block; margin-left: auto; margin-right: auto;" alt="VisAgent challenge site login page">
 
 ### 3.2 Submit for the Challenge
 
-1. Go to https://www.visagent.org/, sign in or register:
+#### 1. Go to https://www.visagent.org/, sign in or register:
 <img src="./public/login.png" style="background-color: white; width: 50%; display: block; margin-left: auto; margin-right: auto;" alt="VisAgent challenge site login page">
 
-2. Navigate to your submission page and upload your submission.zip file:
+#### 2. Navigate to your submission page and upload your submission.zip file:
 
-<img src="./public/upload.png" style="background-color: white; width: 100%; display: block; margin-left: auto; margin-right: auto;" alt="Upload interface for submission.zip on VisAgent">
+<img src="./public/upload.png" style="background-color: white; width: 80%; display: block; margin-left: auto; margin-right: auto;" alt="Upload interface for submission.zip on VisAgent">
 
-3. View all your submissions with their status and results, then select one entry as your finalized submission for the public leaderboard:
+#### 3. View all your submissions with their status and results, then select one entry as your finalized submission for the public leaderboard:
 
-<img src="./public/running.png" style="background-color: white; width: 100%; display: block; margin-left: auto; margin-right: auto; margin-bottom: 5px;" alt="Dashboard showing a submission in progress">
-<img src="./public/success.png" style="background-color: white; width: 100%; display: block; margin-left: auto; margin-right: auto;" alt="Dashboard showing a successful submission"> 
-<img src="./public/finalize.png" style="background-color: white; width: 100%; display: block; margin-left: auto; margin-right: auto; margin-top: 5px;" alt="Interface to finalize a submission for the leaderboard">
+<img src="./public/running.png" style="background-color: white; width: 80%; display: block; margin-left: auto; margin-right: auto; margin-bottom: 5px;" alt="Dashboard showing a submission in progress">
+<img src="./public/success.png" style="background-color: white; width: 80%; display: block; margin-left: auto; margin-right: auto;" alt="Dashboard showing a successful submission"> 
+<img src="./public/finalize.png" style="background-color: white; width: 80%; display: block; margin-right: auto; margin-top: 5px;" alt="Interface to finalize a submission for the leaderboard">
 
 
-4. Reference the links for your finalized output with the same submission ID in your technical paper to be submitted to PCS:
+#### 4. Reference the links for your finalized output with the same submission ID in your technical paper to be submitted to PCS:
 
 <img src="./public/links.png" style="background-color: white; width: 70%; display: block; margin-left: auto; margin-right: auto; margin-top: 5px;" alt="Links to the finalized output files for a submission">
 
