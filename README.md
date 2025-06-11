@@ -12,7 +12,7 @@ Please follow the instructions below to get started.
 - [0 - Prerequisites](#0-prerequisites)
 - [1 - Configure local API](#1-configure-api)
 - [2 - Begin the Template and Studio](#2-begin-the-template-and-studio)
-- [3 - Preparing Your Submission](#3-preparing-your-submission)
+- [3 - Submission](#3-Submission)
 
 ## 0 Prerequisites
 
@@ -27,22 +27,22 @@ git clone https://github.com/ppphhhleo/mini-template.git
 $ cd mini-template
 ```
 
-### Create an environment and install dependencies
-#### Mac/Linux/WSL
+Create an environment and install dependencies
+<!-- #### Mac/Linux/WSL -->
 ```
 $ python -m venv mini-template-env
 $ source mini-template-env/bin/activate
 $ cd mini-template/studio
 $ pip install -r requirements.txt
 ```
-#### Windows Powershell
+<!-- #### Windows Powershell
 ```
 PS> python -m venv mini-template-env
 PS> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
 PS> mini-template-env\scripts\activate
 PS> cd mini-template/studio
-PS> pip install -r requirements.txt
-```
+PS> pip install -r requirements.txt -->
+<!-- ``` -->
 
 ## 1 Configure API 
 * OpenAI. Origianlly, the template uses OpenAI API to run **locally**. You can sign up [here](https://openai.com/index/openai-api/). 
@@ -50,13 +50,13 @@ PS> pip install -r requirements.txt
     * Set `OPENAI_MODEL = "gpt-4o"` in `.studio/.env` file,
     * Set `LLM_PROVIDER = "openai"` in `.studio/.env` file
     The evaluation server uses Azure OpenAI to run your submission once you upload your submission, and you do *not* need to fill in the Azure OpenAI endpoint, API key, and deployment name.
+<!-- 
+* [Optional]: If you want to use LangSmith. Sign up for LangSmith [here](https://smith.langchain.com/). Use it within your workflow [here](https://www.langchain.com/langsmith), and relevant library [docs](https://docs.smith.langchain.com/).
+    *    Set `LANGCHAIN_API_KEY`, `LANGCHAIN_TRACING_V2=true` in `.studio/.env` file  -->
 
-* [Optional]: LangSmith. Sign up for LangSmith [here](https://smith.langchain.com/). Use it within your workflow [here](https://www.langchain.com/langsmith), and relevant library [docs](https://docs.smith.langchain.com/).
-    *    Set `LANGCHAIN_API_KEY`, `LANGCHAIN_TRACING_V2=true` in `.studio/.env` file 
-
-* [Optional]: Tavily. Tavily Search API is a web search engine optimized for LLMs and RAG, aimed at efficient, 
+<!-- * [Optional]: If web search is  Tavily. Tavily Search API is a web search engine optimized for LLMs and RAG, aimed at efficient, 
 quick, and persistent search results. You can sign up for free for an API key [here](https://tavily.com/). 
-    *   Set `TAVILY_API_KEY` in `.studio/.env` file. 
+    *   Set `TAVILY_API_KEY` in `.studio/.env` file.  -->
 
 <!-- * Azure OpenAI. We provide a remote Azure LLM provider for free testing, and you can reach out to Pan Hao to get the AZURE_OPENAI_API_KEY and set the following environment variables:
 ```
@@ -74,19 +74,18 @@ export AZURE_OPENAI_DEPLOYMENT=gpt-4o
 ```
 cd studio
 python run.py
-```
-
-If the template is running successfully the first time, the output will be saved in the `studio/output.pdf` file. 
-
-If you want the template to generate Vega-Lite charts, please adjust the prompt, file_name, and decode_output function in the `agent.py` file accordingly (see the comments in the `agent.py` file), then run the following command to view the output in the browser `http://localhost:8001/output.html`.
-
-```
-python run.py
 python -m http.server 8001
 ```
 
+If the template is running successfully the first time, the output can be viewed via `http://localhost:8001/output.html`. 
 
-### 2.2 Optionally, Run LangGraph Studio 
+If you want the template to generate Python charts, please adjust the ``sys_prompt``, ``file_name``, and ``decode_output`` function in the `agent.py` file accordingly (see the comments in the `agent.py` file), then run the following command, and the output will be saved in ``studio/output.pdf``
+```
+python run.py
+```
+
+
+### 2.2 Optionally, Run LangGraph Studio to Visualize the Agentic Configuration
 LangGraph Studio is a custom IDE for viewing and testing agents, and it can be run locally and opened in your browser on Mac, Windows, and Linux.
 See documentation about LangGraph CLI [here](https://langchain-ai.github.io/langgraph/cloud/reference/cli/) for both Python and JS configurations.
 
@@ -103,7 +102,9 @@ Feel free to customize the `agent.py` and its companion files to craft your own 
 Please ensure you refer to `dataset.csv` or `https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv` as the file path to access the data, e.g., specifying in the prompt; and refer to `output.html` or `output.pdf` as the output file, and include every dependency needed in `requirements.txt`
 
 
-## 3 Preparing Your Submission
+## 3 Submission 
+
+### 3.1 Preparing Your Submission
 
 1. Verify the codes. Please make sure the codes execute without errors before packing your submission.
 
@@ -117,10 +118,28 @@ python run.py
 * `requirements.txt` - all dependencies needed  (Required)
 * All supplimentary files if any, e.g., `helpers.py`, `report_html.py`, `report_pdf.py`, etc.
 
-3. ZIP the `submission/` folder (do not include any extra files or foler)
-4. Submit the ZIP file via the [challenge website](https://purple-glacier-014f19d1e.6.azurestaticapps.net/) to see the result, and you could submit multiple times.
-5. Submit your paper via PCS. 
+3. ZIP the `submission/` folder (do not include any extra files or foler) as `submission.zip`
 
+
+### 3.2 Submit for the Challenge
+
+1. Go to https://www.visagent.org/, sign in or register:
+<img src="./public/login.png" style="background-color: white; width: 70%; display: block; margin-left: auto; margin-right: auto;" alt="VisAgent challenge site login page">
+
+2. Navigate to your submission page and upload your submission.zip file:
+
+<img src="./public/upload.png" style="background-color: white; width: 70%; display: block; margin-left: auto; margin-right: auto;" alt="Upload interface for submission.zip on VisAgent">
+
+3. View all your submissions with their status and results, then select one entry as your finalized submission for the public leaderboard:
+
+<img src="./public/running.png" style="background-color: white; width: 70%; display: block; margin-left: auto; margin-right: auto; margin-bottom: 5px;" alt="Dashboard showing a submission in progress">
+<img src="./public/success.png" style="background-color: white; width: 70%; display: block; margin-left: auto; margin-right: auto;" alt="Dashboard showing a successful submission"> 
+<img src="./public/finalize.png" style="background-color: white; width: 70%; display: block; margin-left: auto; margin-right: auto; margin-top: 5px;" alt="Interface to finalize a submission for the leaderboard">
+
+
+4. Reference the links for your finalized output with the same submission ID in your technical paper to be submitted to PCS:
+
+<img src="./public/links.png" style="background-color: white; width: 70%; display: block; margin-left: auto; margin-right: auto; margin-top: 5px;" alt="Links to the finalized output files for a submission">
 
 ## References
 - [Langchain Academy](https://github.com/langchain-ai/langchain-academy)
