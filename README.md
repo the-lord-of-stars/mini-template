@@ -144,9 +144,9 @@ python run.py
 
 #### 3. View all your submissions with their status and results, then select one entry as your finalized submission for the public leaderboard:
 
-<img src="./public/running.png" style="background-color: white; width: 80%; display: block; margin-left: auto; margin-right: auto; margin-bottom: 5px;" alt="Dashboard showing a submission in progress">
-<img src="./public/success.png" style="background-color: white; width: 80%; display: block; margin-left: auto; margin-right: auto;" alt="Dashboard showing a successful submission"> 
-<img src="./public/finalize.png" style="background-color: white; width: 80%; display: block; margin-right: auto; margin-top: 5px;" alt="Interface to finalize a submission for the leaderboard">
+<img width="1039" alt="running" src="https://github.com/user-attachments/assets/e1a9592f-7e03-4b18-befa-615f8bfc53e0" style="background-color: white; width: 80%; display: block; margin-left: auto; margin-right: auto; margin-bottom: 5px;" alt="Dashboard showing a submission in progress" />
+<img width="1037" alt="success" src="https://github.com/user-attachments/assets/ade38524-b827-467f-964c-9cbc2ebdd6d1" style="background-color: white; width: 80%; display: block; margin-left: auto; margin-right: auto;" alt="Dashboard showing a successful submission"/>
+<img width="1033" alt="finalize" src="https://github.com/user-attachments/assets/1ed4bf81-868b-4601-81f6-905de9558be6" style="background-color: white; width: 80%; display: block; margin-right: auto; margin-top: 5px;" alt="Interface to finalize a submission for the leaderboard"/>
 
 
 #### 4. Reference the links for your finalized output with the same submission ID in your technical paper to be submitted to PCS:
