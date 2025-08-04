@@ -68,8 +68,6 @@ PS> pip install -r requirements.txt -->
   * Set `OPENAI_MODEL = "gpt-4o"` in `.studio/.env` file or any other model of your choice,
   * Set `LLM_PROVIDER = "openai"` in `.studio/.env` file
 
-The evaluation server uses Azure OpenAI to run your submission once you upload your submission, and you do \*not\* need to fill in the Azure OpenAI endpoint, API key, and deployment name.
-
 <!--
 - [Optional]: If you want to use LangSmith. Sign up for LangSmith [here](https://smith.langchain.com/). Use it within your workflow [here](https://www.langchain.com/langsmith), and relevant library [docs](https://docs.smith.langchain.com/).
   - Set `LANGCHAIN_API_KEY`, `LANGCHAIN_TRACING_V2=true` in `.studio/.env` file -->
@@ -78,7 +76,7 @@ The evaluation server uses Azure OpenAI to run your submission once you upload y
 quick, and persistent search results. You can sign up for free for an API key [here](https://tavily.com/).
     *   Set `TAVILY_API_KEY` in `.studio/.env` file.  -->
 
-- Azure OpenAI. When you upload you submission to our evaluation server, we inject the following api keys in the environment
+- Azure OpenAI. When you upload you submission to our evaluation server, we inject the following api keys in the environment. You do \*not\* need to fill in the Azure OpenAI endpoint, API key, and deployment name.
 
 ```
 LLM_PROVIDER="azure"
