@@ -64,9 +64,9 @@ PS> pip install -r requirements.txt -->
 
 - OpenAI. Origianlly, the template uses OpenAI API to run **locally**. You need to provide you own api key for testing your submission locally. For this, you can sign up [here](https://openai.com/index/openai-api/).
 
-* Set `OPENAI_API_KEY` in `.studio/.env` file,
-* Set `OPENAI_MODEL = "gpt-4o"` in `.studio/.env` file or any other model of your choice,
-* Set `LLM_PROVIDER = "openai"` in `.studio/.env` file
+  * Set `OPENAI_API_KEY` in `.studio/.env` file,
+  * Set `OPENAI_MODEL = "gpt-4o"` in `.studio/.env` file or any other model of your choice,
+  * Set `LLM_PROVIDER = "openai"` in `.studio/.env` file
 
 The evaluation server uses Azure OpenAI to run your submission once you upload your submission, and you do \*not\* need to fill in the Azure OpenAI endpoint, API key, and deployment name.
 
