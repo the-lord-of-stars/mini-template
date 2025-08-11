@@ -1,15 +1,10 @@
-from typing_extensions import TypedDict
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import StateGraph, START, END
-
 import csv
-from helpers import get_llm
-from report_html import generate_html_report
-from report_pdf import generate_pdf_report
+from components.llm import get_llm
+from process.output.report_html import generate_html_report
+from studio.components.state import State
 
-class State(TypedDict):
-    message: str
-    dataset_info: str
 
 def generate_msg(state: State):
     dataset_info = state["dataset_info"]
@@ -67,14 +62,15 @@ class Agent:
             "dataset_info": str(example_input)
         }
         return state
+
     def decode_output(self, output: dict):
         # if the final output contains Vega-Lite codes, then use generate_html_report
         # if the final output contains Python codes, then use generate_pdf_report
 
         # generate_pdf_report(output, "output.pdf")
         generate_html_report(output, "output.html")
-    def process(self):
 
+    def process(self):
         if self.workflow is None:
             raise RuntimeError("Agent not initialised. Call initialize() first.")
         

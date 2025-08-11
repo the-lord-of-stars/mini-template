@@ -55,12 +55,51 @@ def generate_html_report(output_state: dict, output_path: str):
         "  <script src='https://cdn.jsdelivr.net/npm/vega-lite@5'></script>",
         "  <script src='https://cdn.jsdelivr.net/npm/vega-embed@6'></script>",
         "  <style>",
-        "    body { font-family: sans-serif; margin: 2em; }",
-        "    h3 { margin-top: 1em; }",
-        "    hr { margin: 1.5em 0; }",
+        "    body {",
+        "      font-family: 'Segoe UI', sans-serif;",
+        "      background: #f8f9fa;",
+        "      width: 90%;",
+        "      max-width: 960px;",
+        "      margin: 2rem auto;",
+        "      padding: 1rem;",
+        "      color: #333;",
+        "    }",
+        "    h1 {",
+        "      text-align: center;",
+        "      border-bottom: 3px solid #003366;",
+        "      padding-bottom: 0.5rem;",
+        "      color: #003366;",
+        "      font-size: 2rem;",
+        "    }",
+        "    h3 {",
+        "      color: #1a5276;",
+        "      margin-top: 2rem;",
+        "      font-size: 1.5rem;",
+        "    }",
+        "    .block {",
+        "      background: white;",
+        "      padding: 1rem 1.5rem;",
+        "      border-radius: 0.5rem;",
+        "      box-shadow: 0 2px 6px rgba(0,0,0,0.1);",
+        "      margin-bottom: 2rem;",
+        "    }",
+        "    .vega-embed {",
+        "      width: 100%;",
+        "    }",
+        "   .chart-wrapper {",
+        "      display: flex;",
+        "      justify-content: center;",
+        "    }",
+        "    .footer {",
+        "      text-align: center;",
+        "      font-size: 0.875rem;",
+        "      color: #888;",
+        "      margin-top: 3rem;",
+        "    }",
         "  </style>",
         "</head>",
         "<body>",
+        "  <h1>Auto-generated Visual Report</h1>",
     ]
 
     # 3. Interleave narrative and charts
@@ -70,7 +109,7 @@ def generate_html_report(output_state: dict, output_path: str):
             html_lines.append(data)
         else:  # vega spec
             div_id = f"vis{vis_counter}"
-            html_lines.append(f"  <div id='{div_id}'></div>")
+            html_lines.append(f"  <div id='{div_id}' class='vega-embed'></div>")
             spec_json = json.dumps(data)
             html_lines.extend([
                 "  <script>",
@@ -79,6 +118,7 @@ def generate_html_report(output_state: dict, output_path: str):
                 "  </script>",
             ])
             vis_counter += 1
+
 
     html_lines.extend([
         "</body>",
