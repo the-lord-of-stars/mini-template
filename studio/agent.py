@@ -1,36 +1,9 @@
-from langchain_core.messages import HumanMessage, SystemMessage
-from langgraph.graph import StateGraph, START, END
-import csv
-from components.llm import get_llm
+import pandas as pd
+
 from process.output.report_html import generate_html_report
-from studio.components.state import State
+from studio.components.workflow import create_workflow
+from studio.process.preprocess.inspect_data import output_preprocess
 
-
-def generate_msg(state: State):
-    dataset_info = state["dataset_info"]
-    # if the prompt is to generate Vega-Lite charts, then specify in sys_prompt and use generate_html_report()
-    sys_prompt = f"Please generate Vega-Lite graphs to visualize insights from the dataset, output should be graphs and narrative: {dataset_info}"
-   
-    # if the prompt is to generate Python codes, then specify in sys_prompt and use generate_pdf_report()
-    # sys_prompt = f"Please generate Python code to visualize insights from the dataset, output should be graphs and narrative: {dataset_info}"
-    
-    # get the LLM instance
-    llm = get_llm(temperature=0, max_tokens=4096)
-
-    # generate the response
-    response = llm.invoke(
-        [SystemMessage(content=sys_prompt), HumanMessage(content="Generate a response.")]
-    )
-    return {"message": response}
-
-
-def create_workflow():
-    # create the agentic workflow using LangGraph
-    builder = StateGraph(State)
-    builder.add_node("generate_msg", generate_msg)
-    builder.add_edge(START, "generate_msg")
-    builder.add_edge("generate_msg", END)
-    return builder.compile()
 
 class Agent:
     def __init__(self):
@@ -42,25 +15,8 @@ class Agent:
     def initialize_state_from_csv(self) -> dict:
         # The dataset should be first input to the agentic configuration, and it should be generalizable to any dataset
         path = "./dataset.csv"
-        with open(path, newline='', encoding='utf-8') as f:
-            reader = csv.reader(f, delimiter=',')
-            header = next(reader)
-            first_row = next(reader)
-
-        attributes = ", ".join(header)
-        example_values = "\t".join(first_row)
-
-        # if the final output contains Vega-Lite codes, then use the github hosted dataset rather than the local dataset
-        file_name = "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv"
-        # file_name = "dataset.csv"
-        example_input = f"""
-            There is a dataset, there are the following {len(header)} attributes:
-            {attributes}
-            Name of csv file is {file_name}
-        """
-        state = {
-            "dataset_info": str(example_input)
-        }
+        df = pd.read_csv(path)
+        state = output_preprocess(df)
         return state
 
     def decode_output(self, output: dict):
