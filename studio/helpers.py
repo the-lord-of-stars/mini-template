@@ -22,8 +22,8 @@ def get_llm(**kw):
         return AzureChatOpenAI(
             azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
             api_key       =os.environ["AZURE_OPENAI_API_KEY"],
-            deployment_name=os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4o"), # For submission, the default value is always gpt-4o, but you can choose from o1, o3 and o4-mini too.
-            api_version   =os.getenv("AZURE_OPENAI_API_VERSION", "2025-01-01-preview"),
+            deployment_name=os.environ["AZURE_OPENAI_DEPLOYMENT"],
+            api_version   =os.getenv("AZURE_OPENAI_API_VERSION", "2024-12-01-preview"),
             **kw,
         )
     elif provider.lower() == "local-echo":
