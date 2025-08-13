@@ -1,12 +1,11 @@
-# node_task_discovery.py
 import json
 import hashlib
 from typing import Any, Dict, List, Optional
 
+import math
 import numpy as np
 import pandas as pd
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage, ToolMessage
-
 from studio.helpers import get_llm
 
 
@@ -29,28 +28,93 @@ def _quantiles(series: pd.Series) -> Dict[str, float]:
     q = series.quantile([0, 0.25, 0.5, 0.75, 1.0], interpolation="linear")
     return {str(k): float(v) for k, v in q.items()}
 
-def _infer_time_granularity(series: pd.Series) -> Dict[str, Any]:
+def _nice_step(value: float, allowed=(1, 2, 5, 10)) -> float:
+    if value <= 0:
+        return 1.0
+    exp = math.floor(math.log10(value))
+    base = 10 ** exp
+    frac = value / base
+    for a in allowed:
+        if frac <= a:
+            return a * base
+    return 10 * base
+
+def _infer_time_granularity(
+    series: pd.Series,
+    max_periods: int = 8,
+    allowed_steps=(1, 2, 5, 10),
+) -> Dict[str, Any]:
     s = pd.to_datetime(series, errors="coerce", utc=True)
     valid = s.dropna()
+
     if valid.empty:
         if series.dtype.kind in ("i", "u") and series.between(1800, 2100).mean() > 0.8:
-            return {"is_time_like": True, "granularity": "year", "coverage": None}
+            return {
+                "is_time_like": True,
+                "granularity": "year",
+                "year_interval": 1.0,
+                "year_interval_mean": 1.0,
+                "effective_interval_years": 1.0,
+                "suggested_periods": None,
+                "coverage": None,
+            }
         return {"is_time_like": False}
-    diffs = valid.sort_values().diff().dropna()
+
+    valid = valid.sort_values()
+    diffs = valid.diff().dropna()
+
+    # calculate year interval
     if diffs.empty:
-        gran = "unknown"
+        median_years = None
+        mean_years = None
     else:
-        md = diffs.dt.total_seconds().median()
-        if md <= 60: gran = "minute/second"
-        elif md <= 3600: gran = "hour"
-        elif md <= 86400: gran = "day"
-        elif md <= 86400 * 31: gran = "month"
-        else: gran = "year+"
+        year_diffs = diffs.dt.days / 365.25
+        median_years = float(round(year_diffs.median(), 2))
+        mean_years = float(round(year_diffs.mean(), 2))
+
+    cov_start = valid.min()
+    cov_end = valid.max()
+    span_years = max(1e-6, (cov_end - cov_start).days / 365.25)  # 防0
+
+    # target_interval
+    target_interval = span_years / max(1, max_periods)
+    nice_target_interval = _nice_step(target_interval, allowed=allowed_steps)
+
+    # some heuristics to choose the effective interval
+    if median_years is None:
+        effective_interval = nice_target_interval
+    else:
+        effective_interval = max(median_years, nice_target_interval)
+
+    # suggested_periods
+    suggested_periods = int(math.ceil(span_years / max(effective_interval, 1e-6)))
+
+    # generate granularity string
+    if effective_interval < 0.5:
+        gran = "month"
+    elif effective_interval < 1.5:
+        gran = "year"
+    else:
+        gran = f"{int(round(effective_interval))}-year"
+
     return {
         "is_time_like": True,
         "granularity": gran,
-        "coverage": {"start": str(valid.min()), "end": str(valid.max()), "n": int(len(valid))}
+        "year_interval": median_years,
+        "year_interval_mean": mean_years,
+        "effective_interval_years": float(effective_interval),
+        "suggested_periods": suggested_periods,
+        "coverage": {
+            "start": str(cov_start),
+            "start_year": int(cov_start.year),
+            "end": str(cov_end),
+            "end_year": int(cov_end.year),
+            "span_years": float(round(span_years, 2)),
+            "n": int(len(valid))
+        }
     }
+
+
 
 # --------- meta-functions -----------
 def list_columns_impl(df: pd.DataFrame) -> Dict[str, Any]:
@@ -143,71 +207,112 @@ def tool_schemas() -> List[Dict[str, Any]]:
         },
         {
             "type": "function",
-            "function": {"name": "finalize_tasks", "description": "Submit final list of promising analysis tasks.",
-                         "parameters": {"type": "object",
+            "function": {
+                "name": "finalize_tasks",
+                "description": "Submit final list of promising analysis tasks.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "analysis_tasks": {
+                            "type": "array",
+                            "minItems": 5,
+                            "maxItems": 8,
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "objective": {"type": "string"},
+                                    "target_columns": {
+                                        "type": "array",
+                                        "items": {"type": "string"}
+                                    },
+                                    "reason": {"type": "string"},
+                                    "priority": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "maximum": 10,
+                                        "default": 5
+                                    },
+                                    "suggested_ops": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "enum": [
+                                                "line_trend",
+                                                "scatter_corr",
+                                                "bar_group",
+                                                "box_by_category",
+                                                "histogram",
+                                                "heatmap_xy"
+                                            ]
+                                        }
+                                    },
+                                    "description": {"type": "string"},
+                                    "time_scope": {
+                                        "type": "object",
                                         "properties": {
-                                            "analysis_tasks": {"type": "array", "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "objective": {"type": "string"},
-                                                    "target_columns": {"type": "array", "items": {"type": "string"}},
-                                                    "reason": {"type": "string"},
-                                                    "priority": {"type": "integer", "minimum": 1, "maximum": 5, "default": 3},
-                                                    "suggested_ops": {"type": "array", "items": {"type": "string"}},
-                                                    "description": {"type": "string"},
-                                                },
-                                                "required": ["objective", "target_columns", "reason", "priority", "suggested_ops", "description"],
-                                            }}
-                                        },
-                                        "required": ["analysis_tasks"]}}
-        },
+                                            "start_year": {"type": "integer"},
+                                            "end_year": {"type": "integer"},
+                                            "interval_years": {"type": "number"}
+                                        }
+                                    }
+                                },
+                                "required": ["objective", "target_columns", "reason", "priority", "suggested_ops",
+                                             "description", "time_scope"]
+                            }
+                        }
+                    },
+                    "required": ["analysis_tasks"]
+                }
+            }
+        }
+
     ]
 
 # ---------- The Main Loop ----------
-def discover_tasks_with_function_calls(state: Dict[str, Any], llm, max_rounds: int = 6) -> Dict[str, Any]:
+def discover_tasks_with_function_calls(state: Dict[str, Any]) -> Dict[str, Any]:
+    max_rounds: int = 6
+    llm = get_llm()
+
     df: pd.DataFrame = state["dataframe"]
 
     system = SystemMessage(content=(
-        "You are a senior data analyst. Your mission is to discover analysis tasks focusing on "
-        "IMPORTANT TOPICS and PEOPLE over TIME (\"important topic and person over time\").\n"
+        "You are a senior data analyst tasked with discovering analysis tasks "
+        "IMPORTANT INSIGHTS must be focusing on TOPICS and PEOPLE over TIME.\n"
         "\n"
-        "Privacy rule: you never receive raw values. Tools only return aggregates or hashed keys.\n"
+        "Privacy: Never receive raw values. Tools return only aggregates or hashed keys.\n"
         "\n"
         "Workflow:\n"
-        "  (1) Always start with list_columns.\n"
-        "  (2) Explore with column_profile / time_granularity / relationship_probe in multiple rounds.\n"
-        "  (3) When READY, call finalize_tasks with 5–8 promising tasks "
-        "(each has objective, target_columns, reason, priority, suggested_ops and description of the current trend or distribution).\n"
+        "  1. Start with list_columns.\n"
+        "  2. Explore via column_profile / time_granularity / relationship_probe in multiple rounds.\n"
+        "  3. Finalize with 8 tasks (objective, target_columns, reason, priority, suggested_ops, "
+        "description ≥50 words) when evidence is sufficient.\n"
         "\n"
-        "Topic focus:\n"
-        "  • TIME: If any time-like column exists (e.g., 'Year', 'Date', 'Time', 'Timestamp'), use time_granularity on it.\n"
-        "  • TOPICS: Use categorical/text-ish columns (e.g., 'AuthorKeywords', 'PaperType') as topic proxies.\n"
-        "  • PEOPLE: Use author/affiliation/award columns (e.g., 'AuthorNames', 'AuthorAffiliation', 'Award') as person proxies.\n"
+        "Focus:\n"
+        "  • TIME: Use time_granularity for time-like columns (e.g., Year, Date).\n"
+        "  • TOPICS: Categorical/text columns (e.g., AuthorKeywords, PaperType).\n"
+        "  • PEOPLE: Author/affiliation/award columns (e.g., AuthorNames, AuthorAffiliation, Award).\n"
         "\n"
-        "Required evidence BEFORE finalize (do not finalize until all satisfied):\n"
-        "  • Run column_profile for at least 5 distinct columns combining time, numeric (e.g., citations/downloads), and categorical.\n"
-        "  • Run time_granularity on at least one time-like column (if present).\n"
-        "  • Run at least 3 relationship_probe calls covering:\n"
-        "      - corr(time, numeric) such as corr(Year, CitationCount_* or Downloads_*),\n"
-        "      - corr(numeric, numeric) e.g., corr(Downloads_*, CitationCount_*),\n"
-        "      - groupby_count(time, categorical) e.g., groupby_count(Year, AuthorKeywords) or (Year, AuthorNames).\n"
+        "Required before finalize:\n"
+        "  • column_profile on ≥5 distinct columns (time, numeric, categorical).\n"
+        "  • time_granularity on ≥1 time-like column.\n"
+        "  • ≥3 relationship_probe calls: corr(time, numeric), corr(numeric, numeric), groupby_count(time, categorical).\n"
         "\n"
-        "Selection heuristics:\n"
-        "  • Prefer columns whose profiles show variation (wide quantiles/histograms) or high frequency categories in top-k.\n"
-        "  • Prefer relationships showing strong signals (non-trivial corr, skewed counts across years).\n"
-        "  • If multiple time-like or candidate topic/person columns exist, sample more than one.\n"
+        "Selection:\n"
+        "  • Prefer varied distributions (wide quantiles, skewed counts).\n"
+        "  • Prefer strong relationships (non-trivial corr, skewed counts over time).\n"
+        "  • Use multiple time-like/topic/person columns if available.\n"
         "\n"
-        "Final task list MUST be diverse and theme-aligned:\n"
-        "  • Include at least: (a) 2+ time-trend tasks (topics or people over time),\n"
-        "    (b) 1+ numeric correlation task (e.g., downloads vs citations),\n"
-        "    (c) 1+ category-over-time task (e.g., keywords or authors over years),\n"
-        "    (d) 1 task explicitly about PEOPLE (authors/affiliations/awards) over time.\n"
+        "Final tasks must:\n"
+        "  • Include: ≥2 time-trend, ≥1 numeric correlation, ≥1 category-over-time, ≥1 people-over-time.\n"
+        "  • You must must must include time_scope {start_year, end_year, interval_years} from evidence to make your analysis actionable and the interval_years should be reasonable.\n"
+        "  • Objects must be measurable with clear metrics and exact year cycle.\n"
+        "  • Descriptions must analyze trends/distributions in detail (≥50 words), "
+        "with clear reasoning on importance.\n"
         "\n"
-        "Use only these values for suggested_ops: "
-        "[\"line_trend\",\"scatter_corr\",\"bar_group\",\"box_by_category\",\"histogram\",\"heatmap_xy\"].\n"
-        "Map your intent to the closest allowed op(s). Avoid vague labels like 'visualization' or 'trends'.\n"
+        "Use only: [\"line_trend\",\"scatter_corr\",\"bar_group\",\"box_by_category\",\"histogram\",\"heatmap_xy\"]. "
+        "Map intent to closest allowed op(s). Avoid vague labels.\n"
         "\n"
-        "If evidence is insufficient, keep exploring with tools instead of finalizing.\n"
+        "If evidence is insufficient, keep exploring before finalize.\n"
     ))
 
     user = HumanMessage(content="Discover which aspects are worth investigating for this dataset. Use tools and finish by calling finalize_tasks.")
@@ -275,15 +380,19 @@ def discover_tasks_with_function_calls(state: Dict[str, Any], llm, max_rounds: i
 
 # ---------- LangGraph Node----------
 def task_discovery_node(state: Dict[str, Any]) -> Dict[str, Any]:
-    return discover_tasks_with_function_calls(state, llm=get_llm(), max_rounds=6)
+    return discover_tasks_with_function_calls(state)
 
+# ---------- test ------------
 if __name__ == "__main__":
     df = pd.read_csv("./dataset.csv", encoding='utf-8')
 
     result = discover_tasks_with_function_calls(
-        {"dataframe": df, "messages": []},
-        llm=get_llm(),
-        max_rounds=6
+        {"dataframe": df, "messages": []}
     )
 
-    print(result["analysis_tasks"])
+    for task in result["analysis_tasks"]:
+        print(f"task: {task["objective"]}, priority: {task["priority"]}, suggested_ops: {task["suggested_ops"]}")
+
+    # output result["analysis_tasks"] to a json file
+    with open("analysis_tasks.json", "w", encoding="utf-8") as f:
+        json.dump(result["analysis_tasks"], f, ensure_ascii=False, indent=4)
