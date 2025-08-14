@@ -15,10 +15,27 @@ class State(InputState, TypedDict):
     data_summary: Optional[Dict[str, Any]]
     analysis_tasks: Optional[List[Dict[str, Any]]]  # LLM-planned analysis tasks
 
+    # For fig generation and report generation
+    artifacts: Optional[List[Dict[str, Any]]]  # results from data analysis, including figure object, metrics calculated, facts and insights
+    all_figures: Optional[List[Dict[str, Any]]]  # all figure objects
+
+    # For report generation
+    report_generated: Optional[bool]  # whether report is generated
+    report_filename: Optional[str]  # report file name
+    report_path: Optional[str]  # report path
+    report_config: Optional[Dict[str, Any]]  # report configuration
+
 class OutputState(TypedDict):
     analysis_tasks: List[Dict[str, Any]]
     final_messages: List[BaseMessage]
     analysis_result: Optional[Dict[str, Any]]
+
+    # figure and report info
+    artifacts: Optional[List[Dict[str, Any]]]  # analysis results
+    all_figures: Optional[List[Dict[str, Any]]]  # all figure objects
+    report_generated: Optional[bool]  # whether report is generated
+    report_filename: Optional[str]  # report name
+    report_path: Optional[str]  # report path
 
 
 #

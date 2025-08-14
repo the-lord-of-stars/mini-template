@@ -6,7 +6,8 @@ import math
 import numpy as np
 import pandas as pd
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage, ToolMessage
-from studio.helpers import get_llm
+# from studio.helpers import get_llm
+from helpers import get_llm
 
 
 # ---------- base functions ----------
@@ -391,16 +392,16 @@ def task_discovery_node(state: Dict[str, Any]) -> Dict[str, Any]:
     return discover_tasks_with_function_calls(state)
 
 # ---------- test ------------
-if __name__ == "__main__":
-    df = pd.read_csv("./dataset.csv", encoding='utf-8')
-
-    result = discover_tasks_with_function_calls(
-        {"dataframe": df, "messages": []}
-    )
-
-    for task in result["analysis_tasks"]:
-        print(f"task: {task["objective"]}, priority: {task["priority"]}, suggested_ops: {task["suggested_ops"]}")
-
-    # output result["analysis_tasks"] to a json file
-    with open("analysis_tasks.json", "w", encoding="utf-8") as f:
-        json.dump(result["analysis_tasks"], f, ensure_ascii=False, indent=4)
+# if __name__ == "__main__":
+#     df = pd.read_csv("./dataset.csv", encoding='utf-8')
+#
+#     result = discover_tasks_with_function_calls(
+#         {"dataframe": df, "messages": []}
+#     )
+#
+#     for task in result["analysis_tasks"]:
+#         print(f"task: {task["objective"]}, priority: {task["priority"]}, suggested_ops: {task["suggested_ops"]}")
+#
+#     # output result["analysis_tasks"] to a json file
+#     with open("analysis_tasks.json", "w", encoding="utf-8") as f:
+#         json.dump(result["analysis_tasks"], f, ensure_ascii=False, indent=4)
