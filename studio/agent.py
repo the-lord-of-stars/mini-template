@@ -1,8 +1,41 @@
-from module_report import decode_output_fixed_v2
-from graph import create_workflow
-from state import InputState, OutputState
-import json
-import re
+from typing_extensions import TypedDict
+from langchain_core.messages import HumanMessage, SystemMessage
+from langgraph.graph import StateGraph, START, END
+
+import csv
+from helpers import get_llm
+from report_html import generate_html_report
+from report_pdf import generate_pdf_report
+
+class State(TypedDict):
+    message: str
+    dataset_info: str
+
+def generate_msg(state: State):
+    dataset_info = state["dataset_info"]
+    # if the prompt is to generate Vega-Lite charts, then specify in sys_prompt and use generate_html_report()
+    sys_prompt = f"Please generate Vega-Lite graphs to visualize insights from the dataset, output should be graphs and narrative: {dataset_info}"
+   
+    # if the prompt is to generate Python codes, then specify in sys_prompt and use generate_pdf_report()
+    # sys_prompt = f"Please generate Python code to visualize insights from the dataset, output should be graphs and narrative: {dataset_info}"
+    
+    # get the LLM instance
+    llm = get_llm(temperature=0, max_tokens=4096)
+
+    # generate the response
+    response = llm.invoke(
+        [SystemMessage(content=sys_prompt), HumanMessage(content="Generate a response.")]
+    )
+    return {"message": response}
+
+
+def create_workflow():
+    # create the agentic workflow using LangGraph
+    builder = StateGraph(State)
+    builder.add_node("generate_msg", generate_msg)
+    builder.add_edge(START, "generate_msg")
+    builder.add_edge("generate_msg", END)
+    return builder.compile()
 
 class Agent:
     def __init__(self):
@@ -10,68 +43,55 @@ class Agent:
 
     def initialize(self):
         self.workflow = create_workflow()
-        png_data = self.workflow.get_graph().draw_mermaid_png()
-        with open("graph.png", "wb") as f:
-            f.write(png_data)
 
-    def initialize_state_from_csv(self, file_path: str, file_url: str, user_query: str) -> InputState:
-        """
-        Prepares the initial input state for the workflow.
-        """
-        if not file_path:
-            raise ValueError("File path must be provided to initialize_state_from_csv.")
+    def initialize_state_from_csv(self) -> dict:
+        # The dataset should be first input to the agentic configuration, and it should be generalizable to any dataset
+        path = "./dataset.csv"
+        with open(path, newline='', encoding='utf-8') as f:
+            reader = csv.reader(f, delimiter=',')
+            header = next(reader)
+            first_row = next(reader)
 
-        initial_state: InputState = {
-            "file_path": file_path,
-            "dataset_url": file_url,
-            "dataset_info": "",
-            "user_query": user_query,
-            "messages": []
+        attributes = ", ".join(header)
+        example_values = "\t".join(first_row)
+
+        # if the final output contains Vega-Lite codes, then use the github hosted dataset rather than the local dataset
+        file_name = "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv"
+        # file_name = "dataset.csv"
+        example_input = f"""
+            There is a dataset, there are the following {len(header)} attributes:
+            {attributes}
+            Name of csv file is {file_name}
+        """
+        state = {
+            "dataset_info": str(example_input)
         }
-        return initial_state
+        return state
+    def decode_output(self, output: dict):
+        # if the final output contains Vega-Lite codes, then use generate_html_report
+        # if the final output contains Python codes, then use generate_pdf_report
 
-    def decode_output(self, output_state):
-        # html_content = generate_report_html(output_state)
-        if 'analysis_result' in output_state:
-            spec = extract_vega_lite_spec_from_analysis_result(output_state['analysis_result'])
-            if spec:
-                output_state['analysis_result']['vega_lite_spec'] = spec
-        decode_output_fixed_v2(self, output_state)
-
-
+        # generate_pdf_report(output, "output.pdf")
+        generate_html_report(output, "output.html")
     def process(self):
+
         if self.workflow is None:
             raise RuntimeError("Agent not initialised. Call initialize() first.")
-
-        user_query = "Based on the provided research publication record dataset, what are the most meaningful analysis tasks that can be performed? Consider trends, topics, and authors."
-        file_path = "./dataset.csv"
-        file_url = "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv"
-        print(f"Agent: Starting processing for query: '{user_query}' with file: '{file_path}'")
-
+        
         # initialize the state & read the dataset
-        input_state = self.initialize_state_from_csv(file_path, file_url, user_query)
+        state = self.initialize_state_from_csv()
 
         # invoke the workflow
-        output_state: OutputState = self.workflow.invoke(input_state)
+        output_state = self.workflow.invoke(state)
+        print(output_state)
 
-        # print("------Output State-----")
-        # print(output_state)
+        # flatten the output
+        def _flatten(value):
+            return getattr(value, "content", value)
+        result = {k: _flatten(v) for k, v in output_state.items()}
 
         # decode the output
-        self.decode_output(output_state)
+        self.decode_output(result)
 
-        return output_state
-
-def extract_vega_lite_spec_from_analysis_result(analysis_result):
-    messages = analysis_result.get('messages', [])
-    for msg in messages:
-        content = getattr(msg, 'content', '')
-        match = re.search(r"```json\s*(\{.*?\})\s*```", content, re.DOTALL)
-        if match:
-            json_text = match.group(1)
-            try:
-                spec = json.loads(json_text)
-                return spec
-            except json.JSONDecodeError:
-                print("Failed to decode Vega-Lite JSON spec")
-    return None
+        # return the result
+        return result
