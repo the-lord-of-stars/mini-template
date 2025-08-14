@@ -1,121 +1,125 @@
 [
     {
-        "objective": "Examine trends in paper submissions over time",
+        "objective": "Analyze citation trends over time",
         "target_columns": [
-            "Year"
+            "Year",
+            "CitationCount_CrossRef"
         ],
-        "reason": "Understanding how the volume of paper submissions has evolved is crucial for assessing growth areas and engagement over the years.",
-        "priority": 9,
+        "reason": "Understanding how citation counts evolve over the years can provide insights into the impact of research work and identify trends in the academic community.",
+        "priority": 8,
         "suggested_ops": [
             "line_trend"
         ],
-        "description": "A time series analysis of the number of paper submissions over the years will help identify periods of significant growth or decline. This can inform strategies to better engage researchers and address trends in academic interest. Given the data spans from 1990 to 2024, it is timely to explore these changes in a detailed manner and assess if there are external factors influencing submission rates.",
+        "description": "By analyzing the citation counts over the years, we can observe trends that may indicate the rising or declining influence of certain research topics. This analysis will help identify periods of significant academic interest or shifts in research focus, revealing how the community's attention has changed over time.",
         "time_scope": {
             "start_year": 1990,
             "end_year": 2024,
-            "interval_years": 2
+            "interval_years": 1
         }
     },
     {
-        "objective": "Analyze citation trends from Aminer and CrossRef over time",
+        "objective": "Examine the relationship between citation counts and downloads",
         "target_columns": [
-            "Year",
-            "AminerCitationCount",
-            "CitationCount_CrossRef"
+            "CitationCount_CrossRef",
+            "Downloads_Xplore"
         ],
-        "reason": "Citations are key indicators of scholarly impact; understanding their trends can reveal the influence and relevance of the research community.",
-        "priority": 8,
-        "suggested_ops": [
-            "line_trend",
-            "scatter_corr"
-        ],
-        "description": "By analyzing the trends of citations from both Aminer and CrossRef over time, we can gain insights into how cited works evolve, identify years of significant academic output, and the reception of that output in subsequent years. The strong correlation (0.82) demonstrates potential insights into how citation practices may have changed or stabilized over time, which is vital for strategizing improvements in research visibility and impact.",
-        "time_scope": {
-            "start_year": 1990,
-            "end_year": 2024,
-            "interval_years": 2
-        }
-    },
-    {
-        "objective": "Explore the relationship between downloads and paper citations",
-        "target_columns": [
-            "Downloads_Xplore",
-            "CitationCount_CrossRef"
-        ],
-        "reason": "Understanding how downloads correlate with citation counts can highlight trends in research visibility and engagement.",
+        "reason": "Investigating the correlation between citations and downloads can reveal how access to research correlates with its academic impact.",
         "priority": 7,
         "suggested_ops": [
             "scatter_corr"
         ],
-        "description": "Investigation into the correlation between downloads from Xplore and citation counts reveals how often downloaded papers are being utilized and referenced by other works. A positive correlation suggests that higher download rates may lead to increased citations, indicating the impact of visibility on academic influence. Thus, focusing on this relationship can enhance strategies for promoting research outputs effectively to ensure they're widely disseminated across academic networks.",
+        "description": "This analysis will explore whether papers that are downloaded more frequently also receive more citations. A strong correlation could indicate that greater accessibility leads to higher academic recognition, while a weak correlation may suggest other factors at play.",
         "time_scope": {}
     },
     {
-        "objective": "Investigate paper types and their occurrences over time",
+        "objective": "Investigate changes in paper types over time",
         "target_columns": [
             "Year",
             "PaperType"
         ],
-        "reason": "Different paper types may exhibit varying trends in submissions and citations, providing insights into research focus areas.",
+        "reason": "Understanding how the types of papers published evolve over time can shed light on shifting research methodologies and topics of interest.",
         "priority": 6,
         "suggested_ops": [
             "bar_group"
         ],
-        "description": "Understanding how the different types of papers (e.g., research, review, etc.) have varied over time can uncover shifts in research focus and priorities within the academic community. Analyzing counts by each paper type across the years would reveal patterns, highlighting the types of contributions that have gained traction, which can guide future funding and research initiatives accordingly. Analyzing data from 1990 to 2024 will ensure clarity on how these patterns have shifted.",
+        "description": "By grouping paper types by year, we can visualize how the focus of research has shifted over the years. This analysis will help identify emerging research areas and the decline of others, providing a comprehensive view of academic trends.",
         "time_scope": {
             "start_year": 1990,
             "end_year": 2024,
-            "interval_years": 2
+            "interval_years": 1
         }
     },
     {
-        "objective": "Assess the contributions of authors from different affiliations over time",
+        "objective": "Explore the distribution of downloads across different paper types",
         "target_columns": [
-            "Year",
-            "AuthorAffiliation"
-        ],
-        "reason": "This analysis identifies which institutions have become prominent in scholarly output, possibly reflecting funding or research focus shifts.",
-        "priority": 5,
-        "suggested_ops": [
-            "groupby_count"
-        ],
-        "description": "This analysis will reveal how different institutions contribute to the overall body of research by examining how submissions from various author affiliations have changed over the years. Tracking this data may also highlight shifts in academic influence and collaboration dynamics among institutions over time. Focusing from 1990 through 2024 ensures adequate representation of trends and changes in institutional contributions.",
-        "time_scope": {
-            "start_year": 1990,
-            "end_year": 2024,
-            "interval_years": 2
-        }
-    },
-    {
-        "objective": "Delve into citation variation based on the type of papers submitted",
-        "target_columns": [
-            "CitationCount_CrossRef",
+            "Downloads_Xplore",
             "PaperType"
         ],
-        "reason": "This task will clarify how different types of papers perform in terms of citation, offering insights into academic reception.",
-        "priority": 6,
+        "reason": "Analyzing downloads by paper type can highlight which types of research are more popular or accessible to the audience.",
+        "priority": 5,
         "suggested_ops": [
             "box_by_category"
         ],
-        "description": "By analyzing how citation counts differ across various categories of paper types, we can gain insights that will inform researchers where to focus their efforts for higher impact. The trends will also indicate the academic community's preferences, helping guide future research directions. Analyzing data with a clear segmentation of paper types will enhance the visibility of patterns and influences on citations.",
+        "description": "This investigation will compare the distribution of downloads across different types of papers. By visualizing this data, we can identify which types of research are most engaging to readers, potentially guiding future research directions.",
         "time_scope": {}
     },
     {
-        "objective": "Identify trends in awards received by authors over the years",
+        "objective": "Examine author keyword trends over time",
         "target_columns": [
             "Year",
-            "Award"
+            "AuthorKeywords"
         ],
-        "reason": "Awards can reflect recognition of impactful research, and tracking these can highlight prestigious works across time.",
-        "priority": 5,
+        "reason": "Tracking the evolution of author keywords can reveal shifts in research focus and emerging topics of interest.",
+        "priority": 6,
         "suggested_ops": [
-            "groupby_count"
+            "heatmap_xy"
         ],
-        "description": "Investigating the trends surrounding awards presented to authors can highlight how recognition is distributed within different fields of research. Analyzing how many awards have been granted annually from 1990 to 2024 can also indicate shifts in focus areas or emerging fields worthy of accolades. A clear overview of how recognition aligns with submission trends and types can guide funding opportunities and research priorities moving forward.",
+        "description": "This analysis will visualize how the frequency of specific author keywords changes over time, allowing us to identify emerging research trends and the fading of others. Understanding these shifts can help researchers align their work with current academic interests.",
         "time_scope": {
             "start_year": 1990,
             "end_year": 2024,
-            "interval_years": 2
+            "interval_years": 1
         }
+    },
+    {
+        "objective": "Analyze the relationship between author keywords and citation counts",
+        "target_columns": [
+            "AuthorKeywords",
+            "CitationCount_CrossRef"
+        ],
+        "reason": "Understanding which keywords correlate with higher citation counts can help identify influential research areas.",
+        "priority": 5,
+        "suggested_ops": [
+            "scatter_corr"
+        ],
+        "description": "By examining the relationship between author keywords and citation counts, we can identify which topics tend to attract more academic attention. This analysis can guide future research efforts and funding decisions.",
+        "time_scope": {}
+    },
+    {
+        "objective": "Investigate the relationship between downloads and author keywords",
+        "target_columns": [
+            "Downloads_Xplore",
+            "AuthorKeywords"
+        ],
+        "reason": "Understanding which keywords are associated with higher downloads can inform authors about popular topics.",
+        "priority": 5,
+        "suggested_ops": [
+            "scatter_corr"
+        ],
+        "description": "This analysis will explore how author keywords relate to the number of downloads, providing insights into which topics are gaining traction among readers. This could influence future research directions and publication strategies.",
+        "time_scope": {}
+    },
+    {
+        "objective": "Analyze the distribution of citation counts",
+        "target_columns": [
+            "CitationCount_CrossRef"
+        ],
+        "reason": "Understanding the distribution of citation counts can help identify outliers and the general impact of research.",
+        "priority": 6,
+        "suggested_ops": [
+            "histogram"
+        ],
+        "description": "By visualizing the distribution of citation counts, we can identify how many papers are highly cited versus those with few citations. This analysis will help understand the overall impact of research published in the dataset and highlight influential works.",
+        "time_scope": {}
     }
 ]

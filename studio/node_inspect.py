@@ -242,7 +242,7 @@ def tool_schemas() -> List[Dict[str, Any]]:
                                                 "bar_group",
                                                 "box_by_category",
                                                 "histogram",
-                                                "heatmap_xy"
+                                                "heatmap_xy",
                                             ]
                                         }
                                     },
@@ -270,14 +270,14 @@ def tool_schemas() -> List[Dict[str, Any]]:
 
 # ---------- The Main Loop ----------
 def discover_tasks_with_function_calls(state: Dict[str, Any]) -> Dict[str, Any]:
-    max_rounds: int = 6
-    llm = get_llm()
+    max_rounds: int = 20
+    llm = get_llm(temperature=0.5)
 
     df: pd.DataFrame = state["dataframe"]
 
     system = SystemMessage(content=(
-        "You are a senior data analyst tasked with discovering analysis tasks "
-        "IMPORTANT INSIGHTS must be focusing on TOPICS and PEOPLE over TIME.\n"
+        "You are a senior data analyst tasked with discovering analysis tasks about autor network and themes changing you can at most call 19 times tool functions."
+        "IMPORTANT INSIGHTS must be focusing on the author's network of relationships and themes change over time.(All the insights must be under one big context)\n"
         "\n"
         "Privacy: Never receive raw values. Tools return only aggregates or hashed keys.\n"
         "\n"
@@ -285,7 +285,7 @@ def discover_tasks_with_function_calls(state: Dict[str, Any]) -> Dict[str, Any]:
         "  1. Start with list_columns.\n"
         "  2. Explore via column_profile / time_granularity / relationship_probe in multiple rounds.\n"
         "  3. Finalize with 8 tasks (objective, target_columns, reason, priority, suggested_ops, "
-        "description ≥50 words) when evidence is sufficient.\n"
+        "description ≥50 words) when evidence is sufficient. Each of them must have different suggested ops\n"
         "\n"
         "Focus:\n"
         "  • TIME: Use time_granularity for time-like columns (e.g., Year, Date).\n"
@@ -304,12 +304,20 @@ def discover_tasks_with_function_calls(state: Dict[str, Any]) -> Dict[str, Any]:
         "\n"
         "Final tasks must:\n"
         "  • Include: ≥2 time-trend, ≥1 numeric correlation, ≥1 category-over-time, ≥1 people-over-time.\n"
-        "  • You must must must include time_scope {start_year, end_year, interval_years} from evidence to make your analysis actionable and the interval_years should be reasonable.\n"
+        "  • Very Important:Each suggested_op [lne_trend, scatter_corr, bar_group, box_by_category, histogram, heatmap_xy] must be used at least once.\n"
+        "  • For each suggested_op, ensure target_columns strictly match the required data types:\n"
+        "      - line_trend: time, numeric (+optional category)\n"
+        "      - scatter_corr: numeric, numeric (+optional category)\n"
+        "      - bar_group: time, category\n"
+        "      - box_by_category: numeric, category\n"
+        "      - histogram: numeric (+optional category)\n"
+        "      - heatmap_xy: time/category, category (counts or binned numeric)\n"
+        "  • suggested_op must be from [lne_trend, scatter_corr, bar_group, box_by_category, histogram, heatmap_xy] it must not be groupby_count.\n"
+        "  • You must include time_scope {start_year, end_year, interval_years} from evidence if there's a trend to make your analysis actionable and the interval_years should be reasonable.\n"
         "  • Objects must be measurable with clear metrics and exact year cycle.\n"
         "  • Descriptions must analyze trends/distributions in detail (≥50 words), "
         "with clear reasoning on importance.\n"
         "\n"
-        "Use only: [\"line_trend\",\"scatter_corr\",\"bar_group\",\"box_by_category\",\"histogram\",\"heatmap_xy\"]. "
         "Map intent to closest allowed op(s). Avoid vague labels.\n"
         "\n"
         "If evidence is insufficient, keep exploring before finalize.\n"
