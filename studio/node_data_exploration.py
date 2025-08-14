@@ -2,6 +2,8 @@ from typing import Dict, Any, List, Optional
 import pandas as pd
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, AIMessage, ToolMessage
 
+# TODO: add the tools that Zefei developed for better research direction suggestion
+
 # Node 1: analysis_planner_node_with_react's step 1
 def data_exploration_node(state: Dict[str, Any]) -> Dict[str, Any]:
     """

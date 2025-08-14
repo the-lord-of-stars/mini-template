@@ -11,9 +11,13 @@ class InputState(TypedDict):
 
 class State(InputState, TypedDict):
     messages: List[BaseMessage]
+    task: Optional[Dict[str, Any]]
     dataframe: Optional[pd.DataFrame]
     data_summary: Optional[Dict[str, Any]]
     analysis_tasks: Optional[List[Dict[str, Any]]]  # LLM-planned analysis tasks
+    processed_dataframe: Optional[pd.DataFrame]
+    processed_summary: Optional[Dict[str, Any]]
+    analysis_result: Optional[Dict[str, Any]]
 
 class OutputState(TypedDict):
     analysis_tasks: List[Dict[str, Any]]
