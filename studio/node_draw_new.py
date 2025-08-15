@@ -12,35 +12,7 @@ from state import State, Visualization
 from helpers import get_llm, get_dataset_info
 
 
-def create_simplified_figure_config(fig):
-    """
-    Create a simplified figure configuration for better performance
-    """
-    if fig is None:
-        return None
-    
-    # Use to_json() to get properly formatted data, then parse it back
-    import json
-    fig_json = fig.to_json()
-    fig_dict = json.loads(fig_json)
-    
-    # Create simplified config with only essential data
-    simplified_config = {
-        "data": fig_dict.get("data", []),
-        "layout": {
-            "title": fig_dict.get("layout", {}).get("title", {}),
-            "xaxis": fig_dict.get("layout", {}).get("xaxis", {}),
-            "yaxis": fig_dict.get("layout", {}).get("yaxis", {}),
-            "width": fig_dict.get("layout", {}).get("width", 1200),
-            "height": fig_dict.get("layout", {}).get("height", 600),
-            "margin": fig_dict.get("layout", {}).get("margin", {"l": 60, "r": 30, "t": 60, "b": 40}),
-            "showlegend": fig_dict.get("layout", {}).get("showlegend", True),
-            "barmode": fig_dict.get("layout", {}).get("barmode", "relative"),
-            "coloraxis": fig_dict.get("layout", {}).get("coloraxis", {}),
-        }
-    }
-    
-    return simplified_config
+
 
 
 def fig_line_trend(dff, bucket_col, nums, objective):
@@ -350,18 +322,19 @@ def draw(state: State) -> State:
             error_msg = f"Error generating {op} plot: {str(e)}"
             print(f"Drawing error: {error_msg}")
 
-        # 6. Save image (if successful)
-        image_path = ""
+        # 6. Generate HTML for the figure (if successful)
+        figure_html = ""
         if success and fig:
-            os.makedirs("./charts", exist_ok=True)
-            fname = f"{uuid.uuid4().hex[:8]}_{op}.png"
-            image_path = os.path.join("./charts", fname)
             try:
-                fig.write_image(image_path, scale=2.0)
-                print(f"✅ Image saved successfully: {image_path}")
+                # Generate HTML snippet for the figure
+                figure_html = fig.to_html(
+                    full_html=False,           # Don't include full HTML structure
+                    include_plotlyjs='cdn'     # Include plotly.js from CDN
+                )
+                print(f"✅ Figure HTML generated successfully")
             except Exception as e:
-                print(f"Failed to save image: {e}")
-                image_path = ""
+                print(f"Failed to generate figure HTML: {e}")
+                figure_html = ""
 
         # 7. Create visualization result
         visualization = Visualization(
@@ -370,9 +343,9 @@ def draw(state: State) -> State:
             altair_code="",  # Using plotly here, not altair
             description=viz_choice.get('reasoning', 'Auto-generated visualization'),
             is_appropriate=success,
-            image_path=image_path,  # Save the image path
+            image_path="",  # No image path needed
             success=success,
-            figure_object=None,  # We'll use image_path instead
+            figure_object=figure_html,  # Save the HTML content
             code=f"Generated using {op} with columns {cols}"
         )
 

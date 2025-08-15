@@ -81,52 +81,23 @@ def add_visualization_to_html(html_lines, iteration, i):
     html_lines.append(f"  <div class='visualization-section'>")
     html_lines.append(f"    <h4>📊 Visualization</h4>")
 
-    # Display figure if available using image file
-    if vis.get("image_path") and vis["image_path"]:
+    # Display figure if available using embedded HTML
+    if vis.get("figure_object") and vis["figure_object"]:
         try:
-            # Get the image path and convert to relative path for HTML
-            image_path = vis["image_path"]
-            
-            # Convert absolute path to relative path for HTML
-            if image_path.startswith("./charts/"):
-                relative_path = image_path
-            elif "/charts/" in image_path:
-                relative_path = "./charts/" + image_path.split("/charts/")[-1]
-            elif "charts/" in image_path:
-                relative_path = "./charts/" + image_path.split("charts/")[-1]
-            else:
-                relative_path = image_path
+            # Get the HTML content from figure_object
+            figure_html = vis["figure_object"]
             
             html_lines.append(f"    <div class='chart-container'>")
             html_lines.append(f"      <div class='chart-title'>Chart for Iteration {i}</div>")
-            html_lines.append(f"      <img src='{relative_path}' alt='Chart for Iteration {i}' style='width: 100%; max-width: 1200px; height: auto;' />")
+            # Directly append the HTML snippet
+            html_lines.append(figure_html)
             html_lines.append(f"    </div>")
             
-            print(f"✅ Added image to HTML: {relative_path}")
+            print(f"✅ Added embedded HTML chart for iteration {i}")
             
         except Exception as e:
-            print(f"❌ Error adding image for iteration {i}: {e}")
-            html_lines.append(f"    <div class='error'>Error loading chart: {str(e)}</div>")
-    elif vis.get("figure_object"):
-        # Fallback to Plotly.js if image_path is not available
-        try:
-            figure_json = vis["figure_object"]
-            div_id = f"chart_iteration_{i}"
-            
-            html_lines.append(f"    <div class='chart-container'>")
-            html_lines.append(f"      <div class='chart-title'>Chart for Iteration {i}</div>")
-            html_lines.append(f"      <div id='{div_id}' style='width: 100%; height: 500px;'></div>")
-            html_lines.append(f"    </div>")
-            
-            html_lines.append(f"    <script>")
-            html_lines.append(f"      Plotly.newPlot('{div_id}', {figure_json});")
-            html_lines.append(f"    </script>")
-            
-            print(f"✅ Added Plotly chart for iteration {i}")
-            
-        except Exception as e:
-            print(f"❌ Error rendering Plotly chart for iteration {i}: {e}")
-            html_lines.append(f"    <div class='error'>Error rendering chart: {str(e)}</div>")
+            print(f"❌ Error embedding HTML chart for iteration {i}: {e}")
+            html_lines.append(f"    <div class='error'>Error embedding chart: {str(e)}</div>")
     else:
         print(f"❌ No visualization data found for iteration {i}")
 
