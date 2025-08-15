@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='utf-8'>
+  <title>Insights Report</title>
+  <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+  <style>
+    body { font-family: sans-serif; margin: 2em; line-height: 1.6; }
+    h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+    h2 { color: #34495e; margin-top: 2em; }
+    .insight { margin-bottom: 1.5em; padding: 1em; background-color: #f8f9fa; border-left: 4px solid #3498db; border-radius: 3px; }
+    .insight-number { font-weight: bold; color: #3498db; margin-bottom: 0.5em; }
+    .topic { font-size: 1.2em; color: #7f8c8d; margin-bottom: 1em; }
+    .question { font-style: italic; color: #95a5a6; margin-bottom: 1em; }
+    .iteration { margin-bottom: 2em; padding: 1.5em; background-color: #f8f9fa; border-radius: 5px; border: 1px solid #e9ecef; }
+    .iteration h3 { color: #2c3e50; margin-top: 0; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+    .facts { margin: 1em 0; }
+    .facts pre { background-color: #f1f3f4; padding: 1em; border-radius: 3px; overflow-x: auto; font-size: 0.8em; }
+    .facts-output { margin: 1em 0; }
+    .facts-output pre { background-color: #e8f5e8; padding: 1em; border-radius: 3px; overflow-x: auto; font-size: 0.8em; }
+    .insights { margin: 1em 0; }
+    .section-title { font-weight: bold; color: #34495e; margin-bottom: 0.5em; }
+    .collapsible { cursor: pointer; }
+    .collapsible:hover { background-color: #e9ecef; }
+    .collapsible-content { display: none; padding: 1em; background-color: #f8f9fa; border-radius: 3px; margin-top: 0.5em; }
+    hr { margin: 2em 0; border: none; border-top: 1px solid #ecf0f1; }
+    .chart-container { margin: 20px 0; }
+    .chart-title { font-size: 18px; font-weight: bold; color: #555; margin-bottom: 10px; }
+    .visualization-section { background-color: #e8f4f8; padding: 20px; border-radius: 8px; margin: 20px 0; }
+  </style>
+  <script>
+    function toggleSection(id) {
+      var content = document.getElementById(id);
+      if (content.style.display === 'none' || content.style.display === '') {
+        content.style.display = 'block';
+      } else {
+        content.style.display = 'none';
+      }
+    }
+  </script>
+</head>
+<body>
+<h1>Data Insights Report</h1>
+<div class='topic'><strong>Topic:</strong> evolution of research on sensemaking</div>
+<hr/>
+<h2>Key Insights</h2>
+<div class='insight'>
+  <div class='insight-number'>Insight 1</div>
+  <div>The frequency of the keyword 'sensemaking' in research titles and abstracts has shown fluctuations over the years. Notably, there was a significant increase in 2012 with 14 mentions, followed by a peak in 2015 with 18 mentions. This suggests a growing interest or focus on sensemaking during these years.</div>
+</div>
+<div class='insight'>
+  <div class='insight-number'>Insight 2</div>
+  <div>After 2015, the frequency of 'sensemaking' decreased, with a notable drop to just 1 mention in 2020 and 2022, indicating a potential shift in research focus or terminology.</div>
+</div>
+<div class='insight'>
+  <div class='insight-number'>Insight 3</div>
+  <div>The years 2010 and 2011 also saw a moderate level of interest with 7 and 6 mentions respectively, which aligns with the dataset examples from those years discussing sensemaking in the context of visual analytics and user interaction.</div>
+</div>
+</body>
+</html>

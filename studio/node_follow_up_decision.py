@@ -104,7 +104,8 @@ def follow_up_decision(state: State):
         "reasoning": response.reasoning
     }
 
-    # Don't increment iteration count here, it's already incremented in draw node
+    # Increment iteration count after completing this iteration
+    new_state["iteration_count"] = current_iteration + 1
 
     # Save the state to memory
     shared_memory.save_state(new_state)

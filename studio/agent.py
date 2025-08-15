@@ -3,6 +3,7 @@ from state import InputState, OutputState, State
 import json
 import re
 from report_html import generate_html_report
+from node_synthesise import generate_html_reportv2
 from memory import shared_memory
 from datetime import datetime
 
@@ -50,10 +51,10 @@ class Agent:
         # if the final output contains Python codes, then use generate_pdf_report
 
         # generate_pdf_report(output, "output.pdf")
-        output_path = f"outputs/simple_iteration/{shared_memory.thread_id}/output.html"
-        generate_html_report(output, output_path, shared_memory)
+        # output_path = f"outputs/simple_iteration/{shared_memory.thread_id}/output.html"
+        # generate_html_reportv2(output, output_path, shared_memory)
         output_path = f"output.html"
-        generate_html_report(output, output_path, shared_memory)
+        generate_html_reportv2(output, output_path, shared_memory)
         print(f"Visualization report generated: {output_path}")
 
 
@@ -131,18 +132,18 @@ class Agent:
         # Save the final state to memory
         shared_memory.save_state(output_state)
         
-        facts = output_state['facts']
-        print(output_state)
+        # facts = output_state['facts']
+        # print(output_state)
 
         # flatten the output
-        def _flatten(value):
-            return getattr(value, "content", value)
+        # def _flatten(value):
+        #     return getattr(value, "content", value)
 
-        result = {k: _flatten(v) for k, v in output_state.items()}
+        # result = {k: _flatten(v) for k, v in output_state.items()}
 
-        # decode the output (for backward compatibility)
-        if not use_workflow_synthesise:
-            self.decode_output(result)
+        # # decode the output (for backward compatibility)
+        # if not use_workflow_synthesise:
+        #     self.decode_output(result)
 
         # return the result
-        return result
+        return output_state

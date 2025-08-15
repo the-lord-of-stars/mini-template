@@ -12,7 +12,7 @@ import time
 # Configuration for retry mechanism and timeouts
 FACTS_TIMEOUT_CONFIG = {
     "timeout": 30,  # seconds
-    "max_retries": 3,
+    "max_retries": 0,
     "retry_delays": [1, 2, 4]  # seconds between retries
 }
 

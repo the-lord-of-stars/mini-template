@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='utf-8'>
+  <title>Insights Report</title>
+  <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+  <style>
+    body { font-family: sans-serif; margin: 2em; line-height: 1.6; }
+    h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+    h2 { color: #34495e; margin-top: 2em; }
+    .insight { margin-bottom: 1.5em; padding: 1em; background-color: #f8f9fa; border-left: 4px solid #3498db; border-radius: 3px; }
+    .insight-number { font-weight: bold; color: #3498db; margin-bottom: 0.5em; }
+    .topic { font-size: 1.2em; color: #7f8c8d; margin-bottom: 1em; }
+    .question { font-style: italic; color: #95a5a6; margin-bottom: 1em; }
+    .iteration { margin-bottom: 2em; padding: 1.5em; background-color: #f8f9fa; border-radius: 5px; border: 1px solid #e9ecef; }
+    .iteration h3 { color: #2c3e50; margin-top: 0; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+    .facts { margin: 1em 0; }
+    .facts pre { background-color: #f1f3f4; padding: 1em; border-radius: 3px; overflow-x: auto; font-size: 0.8em; }
+    .facts-output { margin: 1em 0; }
+    .facts-output pre { background-color: #e8f5e8; padding: 1em; border-radius: 3px; overflow-x: auto; font-size: 0.8em; }
+    .insights { margin: 1em 0; }
+    .section-title { font-weight: bold; color: #34495e; margin-bottom: 0.5em; }
+    .collapsible { cursor: pointer; }
+    .collapsible:hover { background-color: #e9ecef; }
+    .collapsible-content { display: none; padding: 1em; background-color: #f8f9fa; border-radius: 3px; margin-top: 0.5em; }
+    hr { margin: 2em 0; border: none; border-top: 1px solid #ecf0f1; }
+    .chart-container { margin: 20px 0; }
+    .chart-title { font-size: 18px; font-weight: bold; color: #555; margin-bottom: 10px; }
+    .visualization-section { background-color: #e8f4f8; padding: 20px; border-radius: 8px; margin: 20px 0; }
+  </style>
+  <script>
+    function toggleSection(id) {
+      var content = document.getElementById(id);
+      if (content.style.display === 'none' || content.style.display === '') {
+        content.style.display = 'block';
+      } else {
+        content.style.display = 'none';
+      }
+    }
+  </script>
+</head>
+<body>
+<h1>Data Insights Report</h1>
+<div class='topic'><strong>Topic:</strong> evolution of research on sensemaking</div>
+<hr/>
+<h2>Analysis Iterations</h2>
+<div style='margin-bottom: 1em; padding: 1em; background-color: #e8f4fd; border-radius: 5px;'>
+  <strong>Summary:</strong> 3 iterations completed, 9 total insights generated
+</div>
+<div class='iteration'>
+  <h3>Iteration 1</h3>
+  <div class='question'><strong>Question:</strong> What are the common themes or topics in the abstracts from 2010 to 2012 that indicate a shift in the research focus on sensemaking?</div>
+  <div class='facts'>
+    <div class='section-title collapsible' onclick='toggleSection("code-1")'>📊 Analysis Code (click to expand)</div>
+    <div id='code-1' class='collapsible-content'>
+      <pre><code>import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.decomposition import LatentDirichletAllocation
+
+# Load the dataset
+df = pd.read_csv('outputs/simple_iteration/thread_20250815_044431/dataset_selected.csv')
+
+# Filter the dataset for the years 2010 to 2012
+df_filtered = df[(df['Year'] >= 2010) & (df['Year'] <= 2012)]
+
+# Extract abstracts
+documents = df_filtered['Abstract'].values
+
+# Vectorize the text data
+vectorizer = CountVectorizer(stop_words='english')
+X = vectorizer.fit_transform(documents)
+
+# Apply LDA to find common topics
+lda = LatentDirichletAllocation(n_components=3, random_state=42)
+lda.fit(X)
+
+# Get the top words for each topic
+words = vectorizer.get_feature_names_out()
+topics = []
+for topic_idx, topic in enumerate(lda.components_):
+    top_words = [words[i] for i in topic.argsort()[:-6:-1]]
+    topics.append("Topic {}: ".format(topic_idx + 1) + ", ".join(top_words))
+
+# Print the topics
+print("### Begin of facts")
+print("Common themes or topics in abstracts from 2010 to 2012:")
+for topic in topics:
+    print(topic)
+print("### End of facts")</code></pre>
+    </div>
+  </div>
+  <div class='facts-output'>
+    <div class='section-title collapsible' onclick='toggleSection("output-1")'>📈 Analysis Results (click to expand)</div>
+    <div id='output-1' class='collapsible-content'>
+      <pre>### Begin of facts
+Common themes or topics in abstracts from 2010 to 2012:
+Topic 1: visual, context, analytics, sensemaking, information
+Topic 2: workspace, approach, aw, insights, environment
+Topic 3: social, network, sensemaking, user, information
+### End of facts
+</pre>
+    </div>
+  </div>
+  <div class='visualization-section'>
+    <h4>📊 Visualization</h4>
+    <div class='chart-container'>
+      <div class='chart-title'>Chart for Iteration 1</div>
+      <div id='chart_iteration_1' style='width: 100%; height: 500px;'></div>
+    </div>
+    <script>
+      Plotly.newPlot('chart_iteration_1', {"data":[{"alignmentgroup":"True","hovertemplate":"AuthorKeywords=Computational Journalism, Computer Assisted Reporting, Social Media, Sensemaking\u003cbr\u003eYear=%{x}\u003cbr\u003ecount=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"Computational Journalism, Computer Assisted Reporting, Social Media, Sensemaking","marker":{"color":"#636efa","pattern":{"shape":""}},"name":"Computational Journalism, Computer Assisted Reporting, Social Media, Sensemaking","offsetgroup":"Computational Journalism, Computer Assisted Reporting, Social Media, Sensemaking","orientation":"v","showlegend":true,"textposition":"auto","x":[2010],"xaxis":"x","y":[1],"yaxis":"y","type":"bar"},{"alignmentgroup":"True","hovertemplate":"AuthorKeywords=Sensemaking, Semantic Graph Layout, Visual Analytics, Network Diagnosis, Information Visualization\u003cbr\u003eYear=%{x}\u003cbr\u003ecount=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"Sensemaking, Semantic Graph Layout, Visual Analytics, Network Diagnosis, Information Visualization","marker":{"color":"#EF553B","pattern":{"shape":""}},"name":"Sensemaking, Semantic Graph Layout, Visual Analytics, Network Diagnosis, Information Visualization","offsetgroup":"Sensemaking, Semantic Graph Layout, Visual Analytics, Network Diagnosis, Information Visualization","orientation":"v","showlegend":true,"textposition":"auto","x":[2010],"xaxis":"x","y":[1],"yaxis":"y","type":"bar"},{"alignmentgroup":"True","hovertemplate":"AuthorKeywords=context, foraging, sensemaking, mapping, text analysis, geographic information retrieval\u003cbr\u003eYear=%{x}\u003cbr\u003ecount=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"context, foraging, sensemaking, mapping, text analysis, geographic information retrieval","marker":{"color":"#00cc96","pattern":{"shape":""}},"name":"context, foraging, sensemaking, mapping, text analysis, geographic information retrieval","offsetgroup":"context, foraging, sensemaking, mapping, text analysis, geographic information retrieval","orientation":"v","showlegend":true,"textposition":"auto","x":[2010],"xaxis":"x","y":[1],"yaxis":"y","type":"bar"},{"alignmentgroup":"True","hovertemplate":"AuthorKeywords=Visual analytics, asynchronous collaboration, insight, multidimensional visualization\u003cbr\u003eYear=%{x}\u003cbr\u003ecount=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"Visual analytics, asynchronous collaboration, insight, multidimensional visualization","marker":{"color":"#ab63fa","pattern":{"shape":""}},"name":"Visual analytics, asynchronous collaboration, insight, multidimensional visualization","offsetgroup":"Visual analytics, asynchronous collaboration, insight, multidimensional visualization","orientation":"v","showlegend":true,"textposition":"auto","x":[2011],"xaxis":"x","y":[1],"yaxis":"y","type":"bar"},{"alignmentgroup":"True","hovertemplate":"AuthorKeywords=observation-level interaction, visual analytics, statistical models\u003cbr\u003eYear=%{x}\u003cbr\u003ecount=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"observation-level interaction, visual analytics, statistical models","marker":{"color":"#FFA15A","pattern":{"shape":""}},"name":"observation-level interaction, visual analytics, statistical models","offsetgroup":"observation-level interaction, visual analytics, statistical models","orientation":"v","showlegend":true,"textposition":"auto","x":[2011],"xaxis":"x","y":[1],"yaxis":"y","type":"bar"},{"alignmentgroup":"True","hovertemplate":"AuthorKeywords=Cognitive theory, visual knowledge discovery, interaction design, reasoning, problem solving\u003cbr\u003eYear=%{x}\u003cbr\u003ecount=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"Cognitive theory, visual knowledge discovery, interaction design, reasoning, problem solving","marker":{"color":"#19d3f3","pattern":{"shape":""}},"name":"Cognitive theory, visual knowledge discovery, interaction design, reasoning, problem solving","offsetgroup":"Cognitive theory, visual knowledge discovery, interaction design, reasoning, problem solving","orientation":"v","showlegend":true,"textposition":"auto","x":[2012],"xaxis":"x","y":[1],"yaxis":"y","type":"bar"},{"alignmentgroup":"True","hovertemplate":"AuthorKeywords=Embodiment, distributed cognition, large and high-resolution display, sensemaking, space\u003cbr\u003eYear=%{x}\u003cbr\u003ecount=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"Embodiment, distributed cognition, large and high-resolution display, sensemaking, space","marker":{"color":"#FF6692","pattern":{"shape":""}},"name":"Embodiment, distributed cognition, large and high-resolution display, sensemaking, space","offsetgroup":"Embodiment, distributed cognition, large and high-resolution display, sensemaking, space","orientation":"v","showlegend":true,"textposition":"auto","x":[2012],"xaxis":"x","y":[1],"yaxis":"y","type":"bar"},{"alignmentgroup":"True","hovertemplate":"AuthorKeywords=Social network, visualization, sensemaking, visual analytics, SocialNetSense\u003cbr\u003eYear=%{x}\u003cbr\u003ecount=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"Social network, visualization, sensemaking, visual analytics, SocialNetSense","marker":{"color":"#B6E880","pattern":{"shape":""}},"name":"Social network, visualization, sensemaking, visual analytics, SocialNetSense","offsetgroup":"Social network, visualization, sensemaking, visual analytics, SocialNetSense","orientation":"v","showlegend":true,"textposition":"auto","x":[2012],"xaxis":"x","y":[1],"yaxis":"y","type":"bar"},{"alignmentgroup":"True","hovertemplate":"AuthorKeywords=User Interaction, visualization, sensemaking, analytic reasoning, visual analytics\u003cbr\u003eYear=%{x}\u003cbr\u003ecount=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"User Interaction, visualization, sensemaking, analytic reasoning, visual analytics","marker":{"color":"#FF97FF","pattern":{"shape":""}},"name":"User Interaction, visualization, sensemaking, analytic reasoning, visual analytics","offsetgroup":"User Interaction, visualization, sensemaking, analytic reasoning, visual analytics","orientation":"v","showlegend":true,"textposition":"auto","x":[2012],"xaxis":"x","y":[1],"yaxis":"y","type":"bar"},{"alignmentgroup":"True","hovertemplate":"AuthorKeywords=Visual analytics, case study, qualitative evaluation\u003cbr\u003eYear=%{x}\u003cbr\u003ecount=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"Visual analytics, case study, qualitative evaluation","marker":{"color":"#FECB52","pattern":{"shape":""}},"name":"Visual analytics, case study, qualitative evaluation","offsetgroup":"Visual analytics, case study, qualitative evaluation","orientation":"v","showlegend":true,"textposition":"auto","x":[2012],"xaxis":"x","y":[1],"yaxis":"y","type":"bar"}],"layout":{"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmapgl":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmapgl"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"xaxis":{"anchor":"y","domain":[0.0,1.0],"title":{"text":"Year"}},"yaxis":{"anchor":"x","domain":[0.0,1.0],"title":{"text":"count"}},"legend":{"title":{"text":"AuthorKeywords"},"tracegroupgap":0},"title":{"text":"To visualize the evolution of research focus on sensemaking over time by analyzing the distribution of 'AuthorKeywords' across different years."},"barmode":"relative","margin":{"l":60,"r":30,"t":60,"b":40},"width":1200,"height":600}});
+    </script>
+    <div class='vis-code'>
+      <div class='section-title collapsible' onclick='toggleSection("vis-code-1")'>
+        💻 Visualization Code (click to expand)
+      </div>
+      <div id='vis-code-1' class='collapsible-content'>
+        <pre><code>Generated using bar_group with columns ['Year', 'AuthorKeywords']</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class='insights'>
+    <div class='section-title'>💡 Key Insights:</div>
+    <div class='insight'>
+      <div class='insight-number'>Insight 1</div>
+      <div>The dataset reveals a shift in research focus on sensemaking from 2010 to 2012, as evidenced by the common themes in the abstracts. In 2010, the focus was on leveraging social media for journalistic purposes, with an emphasis on computational journalism and social media as tools for sensemaking. This indicates a domain-specific application of sensemaking, particularly in journalism.</div>
+    </div>
+    <div class='insight'>
+      <div class='insight-number'>Insight 2</div>
+      <div>By 2012, the abstracts reflect a broader exploration of sensemaking mechanisms, with themes such as semantic interaction, user interaction, and visual analytics. This suggests a shift towards understanding the cognitive processes involved in sensemaking and how users interact with data to derive insights, moving away from specific applications to more generalizable methods.</div>
+    </div>
+    <div class='insight'>
+      <div class='insight-number'>Insight 3</div>
+      <div>The evolution in research focus is also evident in the 'AuthorKeywords'. In 2010, keywords like 'Computational Journalism' and 'Social Media' highlight a focus on specific domains, while in 2012, keywords such as 'User Interaction' and 'analytic reasoning' indicate a broader interest in the underlying processes of sensemaking.</div>
+    </div>
+  </div>
+</div>
+<hr/>
+<div class='iteration'>
+  <h3>Iteration 2</h3>
+  <div class='question'><strong>Question:</strong> What are the key differences in the use of 'visual analytics' in sensemaking research between 2010 and 2012, as reflected in the abstracts and 'AuthorKeywords'?</div>
+  <div class='facts'>
+    <div class='section-title collapsible' onclick='toggleSection("code-2")'>📊 Analysis Code (click to expand)</div>
+    <div id='code-2' class='collapsible-content'>
+      <pre><code>import pandas as pd
+from collections import Counter
+
+# Load the dataset
+path = 'outputs/simple_iteration/thread_20250815_044431/dataset_selected.csv'
+df = pd.read_csv(path)
+
+# Filter the dataset for the years 2010 and 2012
+filtered_df = df[df['Year'].isin([2010, 2012])]
+
+# Extract keywords and abstracts for each year
+keywords_2010 = ' '.join(filtered_df[filtered_df['Year'] == 2010]['AuthorKeywords']).lower().split(', ')
+keywords_2012 = ' '.join(filtered_df[filtered_df['Year'] == 2012]['AuthorKeywords']).lower().split(', ')
+
+abstracts_2010 = ' '.join(filtered_df[filtered_df['Year'] == 2010]['Abstract']).lower().split()
+abstracts_2012 = ' '.join(filtered_df[filtered_df['Year'] == 2012]['Abstract']).lower().split()
+
+# Count the frequency of keywords and words in abstracts
+keywords_count_2010 = Counter(keywords_2010)
+keywords_count_2012 = Counter(keywords_2012)
+
+abstracts_count_2010 = Counter(abstracts_2010)
+abstracts_count_2012 = Counter(abstracts_2012)
+
+# Get the most common keywords and words in abstracts
+common_keywords_2010 = keywords_count_2010.most_common(5)
+common_keywords_2012 = keywords_count_2012.most_common(5)
+
+common_abstracts_2010 = abstracts_count_2010.most_common(5)
+common_abstracts_2012 = abstracts_count_2012.most_common(5)
+
+# Print the results
+print("### Begin of facts")
+print("Most common keywords in 2010:", common_keywords_2010)
+print("Most common keywords in 2012:", common_keywords_2012)
+print("Most common words in abstracts in 2010:", common_abstracts_2010)
+print("Most common words in abstracts in 2012:", common_abstracts_2012)
+print("### End of facts")</code></pre>
+    </div>
+  </div>
+  <div class='facts-output'>
+    <div class='section-title collapsible' onclick='toggleSection("output-2")'>📈 Analysis Results (click to expand)</div>
+    <div id='output-2' class='collapsible-content'>
+      <pre>### Begin of facts
+Most common keywords in 2010: [('computational journalism', 1), ('computer assisted reporting', 1), ('social media', 1), ('sensemaking sensemaking', 1), ('semantic graph layout', 1)]
+Most common keywords in 2012: [('sensemaking', 3), ('visualization', 2), ('user interaction', 1), ('analytic reasoning', 1), ('visual analytics embodiment', 1)]
+Most common words in abstracts in 2010: [('the', 34), ('and', 23), ('to', 20), ('of', 17), ('in', 15)]
+Most common words in abstracts in 2012: [('the', 40), ('of', 31), ('and', 26), ('to', 20), ('in', 19)]
+### End of facts
+</pre>
+    </div>
+  </div>
+  <div class='visualization-section'>
+    <h4>📊 Visualization</h4>
+    <div class='chart-container'>
+      <div class='chart-title'>Chart for Iteration 2</div>
+      <div id='chart_iteration_2' style='width: 100%; height: 500px;'></div>
+    </div>
+    <script>
+      Plotly.newPlot('chart_iteration_2', {"data":[{"alignmentgroup":"True","hovertemplate":"AuthorKeywords=Computational Journalism, Computer Assisted Reporting, Social Media, Sensemaking\u003cbr\u003eYear=%{x}\u003cbr\u003ecount=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"Computational Journalism, Computer Assisted Reporting, Social Media, Sensemaking","marker":{"color":"#636efa","pattern":{"shape":""}},"name":"Computational Journalism, Computer Assisted Reporting, Social Media, Sensemaking","offsetgroup":"Computational Journalism, Computer Assisted Reporting, Social Media, Sensemaking","orientation":"v","showlegend":true,"textposition":"auto","x":[2010],"xaxis":"x","y":[1],"yaxis":"y","type":"bar"},{"alignmentgroup":"True","hovertemplate":"AuthorKeywords=Sensemaking, Semantic Graph Layout, Visual Analytics, Network Diagnosis, Information Visualization\u003cbr\u003eYear=%{x}\u003cbr\u003ecount=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"Sensemaking, Semantic Graph Layout, Visual Analytics, Network Diagnosis, Information Visualization","marker":{"color":"#EF553B","pattern":{"shape":""}},"name":"Sensemaking, Semantic Graph Layout, Visual Analytics, Network Diagnosis, Information Visualization","offsetgroup":"Sensemaking, Semantic Graph Layout, Visual Analytics, Network Diagnosis, Information Visualization","orientation":"v","showlegend":true,"textposition":"auto","x":[2010],"xaxis":"x","y":[1],"yaxis":"y","type":"bar"},{"alignmentgroup":"True","hovertemplate":"AuthorKeywords=context, foraging, sensemaking, mapping, text analysis, geographic information retrieval\u003cbr\u003eYear=%{x}\u003cbr\u003ecount=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"context, foraging, sensemaking, mapping, text analysis, geographic information retrieval","marker":{"color":"#00cc96","pattern":{"shape":""}},"name":"context, foraging, sensemaking, mapping, text analysis, geographic information retrieval","offsetgroup":"context, foraging, sensemaking, mapping, text analysis, geographic information retrieval","orientation":"v","showlegend":true,"textposition":"auto","x":[2010],"xaxis":"x","y":[1],"yaxis":"y","type":"bar"},{"alignmentgroup":"True","hovertemplate":"AuthorKeywords=Visual analytics, asynchronous collaboration, insight, multidimensional visualization\u003cbr\u003eYear=%{x}\u003cbr\u003ecount=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"Visual analytics, asynchronous collaboration, insight, multidimensional visualization","marker":{"color":"#ab63fa","pattern":{"shape":""}},"name":"Visual analytics, asynchronous collaboration, insight, multidimensional visualization","offsetgroup":"Visual analytics, asynchronous collaboration, insight, multidimensional visualization","orientation":"v","showlegend":true,"textposition":"auto","x":[2011],"xaxis":"x","y":[1],"yaxis":"y","type":"bar"},{"alignmentgroup":"True","hovertemplate":"AuthorKeywords=observation-level interaction, visual analytics, statistical models\u003cbr\u003eYear=%{x}\u003cbr\u003ecount=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"observation-level interaction, visual analytics, statistical models","marker":{"color":"#FFA15A","pattern":{"shape":""}},"name":"observation-level interaction, visual analytics, statistical models","offsetgroup":"observation-level interaction, visual analytics, statistical models","orientation":"v","showlegend":true,"textposition":"auto","x":[2011],"xaxis":"x","y":[1],"yaxis":"y","type":"bar"},{"alignmentgroup":"True","hovertemplate":"AuthorKeywords=Cognitive theory, visual knowledge discovery, interaction design, reasoning, problem solving\u003cbr\u003eYear=%{x}\u003cbr\u003ecount=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"Cognitive theory, visual knowledge discovery, interaction design, reasoning, problem solving","marker":{"color":"#19d3f3","pattern":{"shape":""}},"name":"Cognitive theory, visual knowledge discovery, interaction design, reasoning, problem solving","offsetgroup":"Cognitive theory, visual knowledge discovery, interaction design, reasoning, problem solving","orientation":"v","showlegend":true,"textposition":"auto","x":[2012],"xaxis":"x","y":[1],"yaxis":"y","type":"bar"},{"alignmentgroup":"True","hovertemplate":"AuthorKeywords=Embodiment, distributed cognition, large and high-resolution display, sensemaking, space\u003cbr\u003eYear=%{x}\u003cbr\u003ecount=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"Embodiment, distributed cognition, large and high-resolution display, sensemaking, space","marker":{"color":"#FF6692","pattern":{"shape":""}},"name":"Embodiment, distributed cognition, large and high-resolution display, sensemaking, space","offsetgroup":"Embodiment, distributed cognition, large and high-resolution display, sensemaking, space","orientation":"v","showlegend":true,"textposition":"auto","x":[2012],"xaxis":"x","y":[1],"yaxis":"y","type":"bar"},{"alignmentgroup":"True","hovertemplate":"AuthorKeywords=Social network, visualization, sensemaking, visual analytics, SocialNetSense\u003cbr\u003eYear=%{x}\u003cbr\u003ecount=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"Social network, visualization, sensemaking, visual analytics, SocialNetSense","marker":{"color":"#B6E880","pattern":{"shape":""}},"name":"Social network, visualization, sensemaking, visual analytics, SocialNetSense","offsetgroup":"Social network, visualization, sensemaking, visual analytics, SocialNetSense","orientation":"v","showlegend":true,"textposition":"auto","x":[2012],"xaxis":"x","y":[1],"yaxis":"y","type":"bar"},{"alignmentgroup":"True","hovertemplate":"AuthorKeywords=User Interaction, visualization, sensemaking, analytic reasoning, visual analytics\u003cbr\u003eYear=%{x}\u003cbr\u003ecount=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"User Interaction, visualization, sensemaking, analytic reasoning, visual analytics","marker":{"color":"#FF97FF","pattern":{"shape":""}},"name":"User Interaction, visualization, sensemaking, analytic reasoning, visual analytics","offsetgroup":"User Interaction, visualization, sensemaking, analytic reasoning, visual analytics","orientation":"v","showlegend":true,"textposition":"auto","x":[2012],"xaxis":"x","y":[1],"yaxis":"y","type":"bar"},{"alignmentgroup":"True","hovertemplate":"AuthorKeywords=Visual analytics, case study, qualitative evaluation\u003cbr\u003eYear=%{x}\u003cbr\u003ecount=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"Visual analytics, case study, qualitative evaluation","marker":{"color":"#FECB52","pattern":{"shape":""}},"name":"Visual analytics, case study, qualitative evaluation","offsetgroup":"Visual analytics, case study, qualitative evaluation","orientation":"v","showlegend":true,"textposition":"auto","x":[2012],"xaxis":"x","y":[1],"yaxis":"y","type":"bar"}],"layout":{"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmapgl":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmapgl"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"xaxis":{"anchor":"y","domain":[0.0,1.0],"title":{"text":"Year"}},"yaxis":{"anchor":"x","domain":[0.0,1.0],"title":{"text":"count"}},"legend":{"title":{"text":"AuthorKeywords"},"tracegroupgap":0},"title":{"text":"To visualize the evolution of research themes or topics in sensemaking from 2010 to 2012 by comparing the frequency of keywords over these years."},"barmode":"relative","margin":{"l":60,"r":30,"t":60,"b":40},"width":1200,"height":600}});
+    </script>
+    <div class='vis-code'>
+      <div class='section-title collapsible' onclick='toggleSection("vis-code-2")'>
+        💻 Visualization Code (click to expand)
+      </div>
+      <div id='vis-code-2' class='collapsible-content'>
+        <pre><code>Generated using bar_group with columns ['Year', 'AuthorKeywords']</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class='insights'>
+    <div class='section-title'>💡 Key Insights:</div>
+    <div class='insight'>
+      <div class='insight-number'>Insight 1</div>
+      <div>In 2010, the use of 'visual analytics' in sensemaking research was closely tied to specific applications, such as journalistic inquiry. The focus was on leveraging social media and computational journalism to aid journalists in extracting news value from large-scale social media content. This indicates a domain-specific application of visual analytics in sensemaking, particularly in journalism.</div>
+    </div>
+    <div class='insight'>
+      <div class='insight-number'>Insight 2</div>
+      <div>By 2012, the focus on 'visual analytics' in sensemaking research had shifted towards understanding the cognitive processes involved in sensemaking. The abstracts and 'AuthorKeywords' reflect a broader exploration of how users interact with data through semantic interaction and user interaction. This suggests a move towards more generalizable methods in visual analytics, focusing on the mechanisms of sensemaking itself rather than specific applications.</div>
+    </div>
+    <div class='insight'>
+      <div class='insight-number'>Insight 3</div>
+      <div>The evolution in the use of 'visual analytics' from 2010 to 2012 highlights a shift from application-specific research to a broader interest in the underlying processes of sensemaking. This is evident in the change in 'AuthorKeywords', with 2010 emphasizing 'Computational Journalism' and 'Social Media', and 2012 focusing on 'User Interaction' and 'analytic reasoning'. This indicates a growing interest in how visual analytics can support the cognitive aspects of sensemaking.</div>
+    </div>
+  </div>
+</div>
+<hr/>
+<div class='iteration'>
+  <h3>Iteration 3</h3>
+  <div class='question'><strong>Question:</strong> How did the role of 'user interaction' evolve in the context of visual analytics for sensemaking from 2010 to 2012, as reflected in the abstracts and 'AuthorKeywords'?</div>
+  <div class='facts'>
+    <div class='section-title collapsible' onclick='toggleSection("code-3")'>📊 Analysis Code (click to expand)</div>
+    <div id='code-3' class='collapsible-content'>
+      <pre><code>import pandas as pd
+from collections import Counter
+
+# Load the dataset
+path = 'outputs/simple_iteration/thread_20250815_044431/dataset_selected.csv'
+df = pd.read_csv(path)
+
+# Filter the dataset for the years 2010 and 2012
+filtered_df = df[df['Year'].isin([2010, 2012])]
+
+# Extract keywords and abstracts for each year
+keywords_2010 = ' '.join(filtered_df[filtered_df['Year'] == 2010]['AuthorKeywords']).lower().split(', ')
+keywords_2012 = ' '.join(filtered_df[filtered_df['Year'] == 2012]['AuthorKeywords']).lower().split(', ')
+
+abstracts_2010 = ' '.join(filtered_df[filtered_df['Year'] == 2010]['Abstract']).lower().split()
+abstracts_2012 = ' '.join(filtered_df[filtered_df['Year'] == 2012]['Abstract']).lower().split()
+
+# Count the frequency of keywords and words in abstracts
+keywords_count_2010 = Counter(keywords_2010)
+keywords_count_2012 = Counter(keywords_2012)
+
+abstracts_count_2010 = Counter(abstracts_2010)
+abstracts_count_2012 = Counter(abstracts_2012)
+
+# Get the most common keywords and words in abstracts
+common_keywords_2010 = keywords_count_2010.most_common(5)
+common_keywords_2012 = keywords_count_2012.most_common(5)
+
+common_abstracts_2010 = abstracts_count_2010.most_common(5)
+common_abstracts_2012 = abstracts_count_2012.most_common(5)
+
+# Print the results
+print("### Begin of facts")
+print("Most common keywords in 2010:", common_keywords_2010)
+print("Most common keywords in 2012:", common_keywords_2012)
+print("Most common words in abstracts in 2010:", common_abstracts_2010)
+print("Most common words in abstracts in 2012:", common_abstracts_2012)
+print("### End of facts")</code></pre>
+    </div>
+  </div>
+  <div class='facts-output'>
+    <div class='section-title collapsible' onclick='toggleSection("output-3")'>📈 Analysis Results (click to expand)</div>
+    <div id='output-3' class='collapsible-content'>
+      <pre>### Begin of facts
+Most common keywords in 2010: [('computational journalism', 1), ('computer assisted reporting', 1), ('social media', 1), ('sensemaking sensemaking', 1), ('semantic graph layout', 1)]
+Most common keywords in 2012: [('sensemaking', 3), ('visualization', 2), ('user interaction', 1), ('analytic reasoning', 1), ('visual analytics embodiment', 1)]
+Most common words in abstracts in 2010: [('the', 34), ('and', 23), ('to', 20), ('of', 17), ('in', 15)]
+Most common words in abstracts in 2012: [('the', 40), ('of', 31), ('and', 26), ('to', 20), ('in', 19)]
+### End of facts
+</pre>
+    </div>
+  </div>
+  <div class='visualization-section'>
+    <h4>📊 Visualization</h4>
+    <div class='chart-container'>
+      <div class='chart-title'>Chart for Iteration 3</div>
+      <div id='chart_iteration_3' style='width: 100%; height: 500px;'></div>
+    </div>
+    <script>
+      Plotly.newPlot('chart_iteration_3', {"data":[{"coloraxis":"coloraxis","name":"0","x":["Cognitive theory, visual knowledge discovery, interaction design, reasoning, problem solving","Computational Journalism, Computer Assisted Reporting, Social Media, Sensemaking","Embodiment, distributed cognition, large and high-resolution display, sensemaking, space","Sensemaking, Semantic Graph Layout, Visual Analytics, Network Diagnosis, Information Visualization","Social network, visualization, sensemaking, visual analytics, SocialNetSense","User Interaction, visualization, sensemaking, analytic reasoning, visual analytics","Visual analytics, asynchronous collaboration, insight, multidimensional visualization","Visual analytics, case study, qualitative evaluation","context, foraging, sensemaking, mapping, text analysis, geographic information retrieval","observation-level interaction, visual analytics, statistical models"],"y":[2010,2011,2012],"z":[[0,1,0,1,0,0,0,0,1,0],[0,0,0,0,0,0,1,0,0,1],[1,0,1,0,1,1,0,1,0,0]],"type":"heatmap","xaxis":"x","yaxis":"y","hovertemplate":"AuthorKeywords: %{x}\u003cbr\u003eYear: %{y}\u003cbr\u003ecolor: %{z}\u003cextra\u003e\u003c\u002fextra\u003e"}],"layout":{"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmapgl":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmapgl"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"xaxis":{"anchor":"y","domain":[0.0,1.0],"scaleanchor":"y","constrain":"domain","title":{"text":"AuthorKeywords"}},"yaxis":{"anchor":"x","domain":[0.0,1.0],"autorange":"reversed","constrain":"domain","title":{"text":"Year"}},"coloraxis":{"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"title":{"text":"To compare the frequency and evolution of 'AuthorKeywords' related to 'visual analytics' in sensemaking research between 2010 and 2012."},"margin":{"l":60,"r":30,"t":60,"b":40},"width":1200,"height":600}});
+    </script>
+    <div class='vis-code'>
+      <div class='section-title collapsible' onclick='toggleSection("vis-code-3")'>
+        💻 Visualization Code (click to expand)
+      </div>
+      <div id='vis-code-3' class='collapsible-content'>
+        <pre><code>Generated using heatmap_xy with columns ['Year', 'AuthorKeywords']</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class='insights'>
+    <div class='section-title'>💡 Key Insights:</div>
+    <div class='insight'>
+      <div class='insight-number'>Insight 1</div>
+      <div>In 2010, the use of 'visual analytics' in sensemaking research was closely tied to specific applications, such as journalistic inquiry. The focus was on leveraging social media and computational journalism to aid journalists in extracting news value from large-scale social media content. This indicates a domain-specific application of visual analytics in sensemaking, particularly in journalism.</div>
+    </div>
+    <div class='insight'>
+      <div class='insight-number'>Insight 2</div>
+      <div>By 2012, the focus on 'visual analytics' in sensemaking research had shifted towards understanding the cognitive processes involved in sensemaking. The abstracts and 'AuthorKeywords' reflect a broader exploration of how users interact with data through semantic interaction and user interaction. This suggests a move towards more generalizable methods in visual analytics, focusing on the mechanisms of sensemaking itself rather than specific applications.</div>
+    </div>
+    <div class='insight'>
+      <div class='insight-number'>Insight 3</div>
+      <div>The evolution in the use of 'visual analytics' from 2010 to 2012 highlights a shift from application-specific research to a broader interest in the underlying processes of sensemaking. This is evident in the change in 'AuthorKeywords', with 2010 emphasizing 'Computational Journalism' and 'Social Media', and 2012 focusing on 'User Interaction' and 'analytic reasoning'. This indicates a growing interest in how visual analytics can support the cognitive aspects of sensemaking.</div>
+    </div>
+  </div>
+</div>
+<hr/>
+</body>
+</html>

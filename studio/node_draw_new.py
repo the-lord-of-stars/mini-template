@@ -4,11 +4,44 @@ import os
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage, ToolMessage
-
-from helpers import get_llm, get_dataset_info
+from pydantic import BaseModel
+from sandbox import run_visualization_in_sandbox
 from state import State, Visualization
+from helpers import get_llm, get_dataset_info
+
+
+def create_simplified_figure_config(fig):
+    """
+    Create a simplified figure configuration for better performance
+    """
+    if fig is None:
+        return None
+    
+    # Use to_json() to get properly formatted data, then parse it back
+    import json
+    fig_json = fig.to_json()
+    fig_dict = json.loads(fig_json)
+    
+    # Create simplified config with only essential data
+    simplified_config = {
+        "data": fig_dict.get("data", []),
+        "layout": {
+            "title": fig_dict.get("layout", {}).get("title", {}),
+            "xaxis": fig_dict.get("layout", {}).get("xaxis", {}),
+            "yaxis": fig_dict.get("layout", {}).get("yaxis", {}),
+            "width": fig_dict.get("layout", {}).get("width", 1200),
+            "height": fig_dict.get("layout", {}).get("height", 600),
+            "margin": fig_dict.get("layout", {}).get("margin", {"l": 60, "r": 30, "t": 60, "b": 40}),
+            "showlegend": fig_dict.get("layout", {}).get("showlegend", True),
+            "barmode": fig_dict.get("layout", {}).get("barmode", "relative"),
+            "coloraxis": fig_dict.get("layout", {}).get("coloraxis", {}),
+        }
+    }
+    
+    return simplified_config
+
 
 def fig_line_trend(dff, bucket_col, nums, objective):
     # Year-only line chart
@@ -325,6 +358,7 @@ def draw(state: State) -> State:
             image_path = os.path.join("./charts", fname)
             try:
                 fig.write_image(image_path, scale=2.0)
+                print(f"✅ Image saved successfully: {image_path}")
             except Exception as e:
                 print(f"Failed to save image: {e}")
                 image_path = ""
@@ -336,9 +370,9 @@ def draw(state: State) -> State:
             altair_code="",  # Using plotly here, not altair
             description=viz_choice.get('reasoning', 'Auto-generated visualization'),
             is_appropriate=success,
-            image_path=image_path,
+            image_path=image_path,  # Save the image path
             success=success,
-            figure_object=fig,
+            figure_object=None,  # We'll use image_path instead
             code=f"Generated using {op} with columns {cols}"
         )
 
@@ -351,7 +385,7 @@ def draw(state: State) -> State:
         }
 
         # Increment iteration count after visualization is complete
-        new_state["iteration_count"] = state.get("iteration_count", 0) + 1
+        # new_state["iteration_count"] = state.get("iteration_count", 0) + 1
 
         print(f"Visualization {'successful' if success else 'failed'}: {op}")
         if not success:

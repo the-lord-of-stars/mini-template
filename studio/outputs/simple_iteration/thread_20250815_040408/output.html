@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='utf-8'>
+  <title>Insights Report</title>
+  <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+  <style>
+    body { font-family: sans-serif; margin: 2em; line-height: 1.6; }
+    h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+    h2 { color: #34495e; margin-top: 2em; }
+    .insight { margin-bottom: 1.5em; padding: 1em; background-color: #f8f9fa; border-left: 4px solid #3498db; border-radius: 3px; }
+    .insight-number { font-weight: bold; color: #3498db; margin-bottom: 0.5em; }
+    .topic { font-size: 1.2em; color: #7f8c8d; margin-bottom: 1em; }
+    .question { font-style: italic; color: #95a5a6; margin-bottom: 1em; }
+    .iteration { margin-bottom: 2em; padding: 1.5em; background-color: #f8f9fa; border-radius: 5px; border: 1px solid #e9ecef; }
+    .iteration h3 { color: #2c3e50; margin-top: 0; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+    .facts { margin: 1em 0; }
+    .facts pre { background-color: #f1f3f4; padding: 1em; border-radius: 3px; overflow-x: auto; font-size: 0.8em; }
+    .facts-output { margin: 1em 0; }
+    .facts-output pre { background-color: #e8f5e8; padding: 1em; border-radius: 3px; overflow-x: auto; font-size: 0.8em; }
+    .insights { margin: 1em 0; }
+    .section-title { font-weight: bold; color: #34495e; margin-bottom: 0.5em; }
+    .collapsible { cursor: pointer; }
+    .collapsible:hover { background-color: #e9ecef; }
+    .collapsible-content { display: none; padding: 1em; background-color: #f8f9fa; border-radius: 3px; margin-top: 0.5em; }
+    hr { margin: 2em 0; border: none; border-top: 1px solid #ecf0f1; }
+    .chart-container { margin: 20px 0; }
+    .chart-title { font-size: 18px; font-weight: bold; color: #555; margin-bottom: 10px; }
+    .visualization-section { background-color: #e8f4f8; padding: 20px; border-radius: 8px; margin: 20px 0; }
+  </style>
+  <script>
+    function toggleSection(id) {
+      var content = document.getElementById(id);
+      if (content.style.display === 'none' || content.style.display === '') {
+        content.style.display = 'block';
+      } else {
+        content.style.display = 'none';
+      }
+    }
+  </script>
+</head>
+<body>
+<h1>Data Insights Report</h1>
+<div class='topic'><strong>Topic:</strong> evolution of research on sensemaking</div>
+<hr/>
+<h2>Key Insights</h2>
+<div class='insight'>
+  <div class='insight-number'>Insight 1</div>
+  <div>The dataset includes papers from the VAST conference, which is known for its focus on visual analytics and sensemaking. This suggests that the dataset is well-suited for exploring the evolution of research on sensemaking.</div>
+</div>
+<div class='insight'>
+  <div class='insight-number'>Insight 2</div>
+  <div>The author keywords associated with sensemaking in the selected papers include 'Computational Journalism', 'Computer Assisted Reporting', 'Social Media', 'Sensemaking', 'User Interaction', 'Visualization', 'Analytic Reasoning', 'Visual Analytics', 'Observation-level Interaction', and 'Statistical Models'. These keywords indicate a strong focus on the intersection of sensemaking with technology and data visualization.</div>
+</div>
+<div class='insight'>
+  <div class='insight-number'>Insight 3</div>
+  <div>Over the years, the keywords have shown a trend towards integrating more advanced technological concepts such as 'Semantic Interaction', 'Model Steering', and 'Observation-level Interaction'. This suggests an evolution from basic sensemaking techniques to more sophisticated, technology-driven approaches.</div>
+</div>
+<div class='insight'>
+  <div class='insight-number'>Insight 4</div>
+  <div>The presence of keywords like 'Social Media' and 'Computational Journalism' in earlier papers indicates an early interest in applying sensemaking to real-world data sources and journalism, which has likely influenced the development of tools and methods in this field.</div>
+</div>
+</body>
+</html>
