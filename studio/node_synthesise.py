@@ -127,12 +127,6 @@ def generate_llm_summary_structured(iteration_history: List[Dict], llm) -> Repor
         print(summary)
         print("--------------------------------")
         
-        # Add visualization data to each iteration after generation
-        # for i, iteration in enumerate(summary.iterations):
-        #     if i < len(iteration_history) and "visualization" in iteration_history[i]:
-        #         # Add visualization as a dynamic attribute since it's not in the model
-        #         setattr(iteration, 'visualization', iteration_history[i]["visualization"])
-        
         return summary
         
     except Exception as e:
@@ -147,9 +141,7 @@ def generate_llm_summary_structured(iteration_history: List[Dict], llm) -> Repor
                 findings="please check the detailed iteration results below",
                 narrative="please check the detailed iteration results below"
             )
-            # Add visualization data if available
-            # if "visualization" in iteration_history[i]:
-            #     setattr(iteration, 'visualization', iteration_history[i]["visualization"])
+
             iterations.append(iteration)
         
         return ReportSummary(
@@ -222,33 +214,11 @@ def add_structured_summary_to_html(html_lines: List[str], summary: ReportSummary
                 f"        </div>",
                 f"      </details>"
             ])
-            
-            # html_lines.extend([
-            #     f"    <div class='iteration-summary' style='margin-bottom: 20px; padding: 20px; background-color: white; border-radius: 8px; border: 1px solid #e9ecef; box-shadow: 0 1px 3px rgba(0,0,0,0.1);'>",
-            #     f"      <h4 style='color: #28a745; margin-top: 0; margin-bottom: 15px; font-size: 16px; border-bottom: 1px solid #e9ecef; padding-bottom: 8px;'>",
-            #     f"        iteration {i}",
-            #     "      </h4>",
-            #     "      <div style='margin-bottom: 12px;'>",
-            #     f"        <strong style='color: #6c757d;'>🎯 problem: </strong>",
-            #     f"        <span style='color: #495057;'>{iteration.problem}</span>",
-            #     "      </div>",
-            #     "      <div style='margin-bottom: 12px;'>",
-            #     f"        <strong style='color: #6c757d;'>🔍 analysis method: </strong>",
-            #     f"        <span style='color: #495057;'>{iteration.analysis}</span>",
-            #     "      </div>",
-            #     "      <div style='margin-bottom: 12px;'>",
-            #     f"        <strong style='color: #6c757d;'>💡 key findings: </strong>",
-            #     f"        <span style='color: #495057;'>{iteration.findings}</span>",
-            #     "      </div>",
-            #     "    </div>"
-            # ])
+
             print(f"iteration {i} visualization")
             # Add visualization if available
             if "visualization" in iteration_history[i-1]:
                 print("Existed visualization")
-                # Add visualization as a dynamic attribute since it's not in the model
-                # setattr(iteration, 'visualization', iteration_history[i-1]["visualization"])
-                # add_visualization_to_html(html_lines, {"visualization": iteration.visualization}, i)
                 add_visualization_to_html(html_lines, iteration_history[i-1], i)
                 print("Added visualization")
             else:
@@ -398,11 +368,6 @@ def synthesise(state: State) -> State:
         print(f"HTML report generated: {output_path}")
 
         root_output_path = ""
-        # root_output_path = f"{output_dir}/output_final.html"
-        # generate_html_report_final(iteration_history, root_output_path, state)
-        # root_output_path = f"{output_dir}/output_debug.html"
-        # generate_html_report_debug(state, root_output_path, shared_memory)
-        # print(f"HTML report also saved to: {root_output_path}")
         
         # Update state with report information
         new_state = state.copy()
@@ -441,7 +406,7 @@ def generate_html_report_final(iteration_history: List[Dict[str, Any]], output_p
         "  <title>CiteMiner | Sensemaking Evolution</title>",
         "  <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>",
         "  <link href='https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap' rel='stylesheet'>",
-        get_modern_css_styles(),  # 新的CSS样式函数
+        get_modern_css_styles(),
         "</head>",
         "<body>",
         
@@ -549,94 +514,6 @@ def generate_html_report_final(iteration_history: List[Dict[str, Any]], output_p
     # Write the file
     Path(output_path).write_text("\n".join(html_lines), encoding="utf-8")
     return output_path
-    
-# def generate_html_report_final(iteration_history: List[Dict[str, Any]], output_path: str, output_state: Optional[Dict] = None) -> str:
-#     """
-#     Generate HTML report from iteration history
-#     """
-#     # 2. Build the HTML document
-#     html_lines = [
-#         "<!DOCTYPE html>",
-#         "<html lang='en'>",
-#         "<head>",
-#         "  <meta charset='utf-8'>",
-#         "  <title>Insights Report</title>",
-#         "  <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>",
-#         "  <style>",
-#         "    body { font-family: sans-serif; margin: 2em; line-height: 1.6; }",
-#         "    h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }",
-#         "    h2 { color: #34495e; margin-top: 2em; }",
-#         "    .insight { margin-bottom: 1.5em; padding: 1em; background-color: #f8f9fa; border-left: 4px solid #3498db; border-radius: 3px; }",
-#         "    .insight-number { font-weight: bold; color: #3498db; margin-bottom: 0.5em; }",
-#         "    .topic { font-size: 1.2em; color: #7f8c8d; margin-bottom: 1em; }",
-#         "    .question { font-style: italic; color: #95a5a6; margin-bottom: 1em; }",
-#         "    .iteration { margin-bottom: 2em; padding: 1.5em; background-color: #f8f9fa; border-radius: 5px; border: 1px solid #e9ecef; }",
-#         "    .iteration h3 { color: #2c3e50; margin-top: 0; border-bottom: 2px solid #3498db; padding-bottom: 10px; }",
-#         "    .facts { margin: 1em 0; }",
-#         "    .facts pre { background-color: #f1f3f4; padding: 1em; border-radius: 3px; overflow-x: auto; font-size: 0.8em; }",
-#         "    .facts-output { margin: 1em 0; }",
-#         "    .facts-output pre { background-color: #e8f5e8; padding: 1em; border-radius: 3px; overflow-x: auto; font-size: 0.8em; }",
-#         "    .insights { margin: 1em 0; }",
-#         "    .section-title { font-weight: bold; color: #34495e; margin-bottom: 0.5em; }",
-#         "    .collapsible { cursor: pointer; }",
-#         "    .collapsible:hover { background-color: #e9ecef; }",
-#         "    .collapsible-content { display: none; padding: 1em; background-color: #f8f9fa; border-radius: 3px; margin-top: 0.5em; }",
-#         "    hr { margin: 2em 0; border: none; border-top: 1px solid #ecf0f1; }",
-#         "    .chart-container { margin: 20px 0; }",
-#         "    .chart-title { font-size: 18px; font-weight: bold; color: #555; margin-bottom: 10px; }",
-#         "    .visualization-section { background-color: #e8f4f8; padding: 20px; border-radius: 8px; margin: 20px 0; }",
-#         "  </style>",
-#         "  <script>",
-#         "    function toggleSection(id) {",
-#         "      var content = document.getElementById(id);",
-#         "      if (content.style.display === 'none' || content.style.display === '') {",
-#         "        content.style.display = 'block';",
-#         "      } else {",
-#         "        content.style.display = 'none';",
-#         "      }",
-#         "    }",
-#         "  </script>",
-#         "</head>",
-#         "<body>",
-#     ]
-    
-#     # Add topic information if available
-#     if "topic" in output_state:
-#         html_lines.append(f"<h1>Data Insights Report</h1>")
-#         html_lines.append(f"<div class='topic'><strong>Topic:</strong> {output_state['topic']}</div>")
-
-#     html_lines.append("<hr/>")
-#     if iteration_history:
-#         total_iterations = len(iteration_history)
-#         total_insights = sum(len(iter.get("insights", [])) for iter in iteration_history)
-
-#         # integrate structured summary into report
-#         llm = get_llm(temperature=0.5) 
-#         integrate_structured_summary_into_report(html_lines, iteration_history, llm)
-#     elif output_state and "insights" in output_state and output_state["insights"]:
-#         html_lines.append("<h2>Key Insights</h2>")
-
-#         insights = output_state["insights"]
-#         for i, insight in enumerate(insights, 1):
-#             html_lines.append(f"<div class='insight'>")
-#             html_lines.append(f"  <div class='insight-number'>Insight {i}</div>")
-#             html_lines.append(f"  <div>{insight}</div>")
-#             html_lines.append("</div>")
-#     else:
-#         html_lines.append("<h2>Key Insights</h2>")
-#         html_lines.append("<p><em>No insights available in the current state.</em></p>")
-
-#     html_lines.extend([
-#         "</body>",
-#         "</html>"
-#     ])
-
-#     # Write out html file
-#     Path(output_path).write_text("\n".join(html_lines), encoding="utf-8")
-
-#     return output_path
-    
-
 
 def generate_html_report_debug(output_state: dict, output_path: str, shared_memory) -> str:
     """
@@ -772,9 +649,6 @@ def generate_html_report_debug(output_state: dict, output_path: str, shared_memo
         except Exception as e:
             print(f"Warning: Could not load history from shared memory: {e}")
 
-    # Use iteration_history from state if available, otherwise use complete_history
-    # iteration_history = state.get("iteration_history", [])
-    # if not iteration_history and complete_history:
     iteration_history = complete_history
 
     # Display iteration history if available

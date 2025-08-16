@@ -41,7 +41,7 @@ class Agent:
             "topic": "evolution of visualization for sensemaking",
             # "topic": "evolution of research on automated data visualization",
             "iteration_count": 0,  # Initialize iteration counter
-            "max_iterations": 1,  # Set maximum iterations (adjust as needed)
+            "max_iterations": 3,  # Set maximum iterations (adjust as needed)
             "should_continue": True,  # Initialize to continue
             "iteration_history": []  # yuhan: this is not used
         }

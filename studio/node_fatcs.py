@@ -103,51 +103,6 @@ def get_facts(state: State):
     # Get path of the main program being executed
     dataset_info = get_dataset_info(state['select_data_state']['dataset_path'])
 
-    # sys_prompt = f"""
-    #     You are a data analyst who write python script to analyse the dataset by understanding the fundamental statistics.
-    #     CRITICAL: This is a CSV file. Use pd.read_csv(path) with NO separator parameter, or explicitly use delimiter=','.
-    #     DO NOT use sep='\t' or assume it's a tab-separated file.
-
-    #     The dataset is as follows:
-    #     {dataset_info}
-
-    #     Please generate a python code to analyse the dataset, the goal is to get {fact_term} about the dataset that can answer the given question.
-
-    #     You should read the dataset from the following path:
-    #     {state['select_data_state']['dataset_path']}
-
-    #     Requirements:
-    #     1. only get the most relevant {fact_term}, don't generate too many.
-    #     2. make the code concise
-    #     3. example {fact_term}: statistics, top k papers, trends, most cited authors, etc. you are free to choose the {fact_term} that are most relevant to the question. just keep in mind that you are an expert in data analysis.
-    #     4. the {fact_term} should be relevant to the question
-    #     5. irrelevant or meaningless facts should be avoided
-    #     6. each {fact_term} should be printed as:
-    #         ### Begin of {fact_term}
-    #         <{fact_term}>
-    #         ### End of {fact_term}
-    #     7. feel free to use python libraries to help you analyse the dataset. supported libraries: pandas, numpy, matplotlib, seaborn, networkx.
-    #     8. make sure the code is executable.
-    #     9. if the question is too complex and can not be solved by a short code, just ignore it and do the most basic and simple analysis.
-    #     10. keep the code short and concise.
-        
-    #     GOOD EXAMPLES OF FACTS CODE:
-    #     ```python
-    #     import pandas as pd
-    #     import numpy as np
-        
-    #     df = pd.read_csv('dataset.csv')
-        
-    #     # Calculate citation statistics
-    #     print("### Begin of facts")
-    #     print(f"Total papers: {{len(df)}}")
-    #     print(f"Average citation count: {{df['CitationCount_CrossRef'].mean():.2f}}")
-    #     print(f"Most cited paper: {{df.loc[df['CitationCount_CrossRef'].idxmax(), 'Title']}}")
-    #     print(f"Citation count: {{df['CitationCount_CrossRef'].max()}}")
-    #     print("### End of facts")
-    #     ```
-    # """
-
     sys_prompt = f"""
 You are an expert data analyst who writes robust Python scripts to analyze datasets by understanding data types and applying appropriate preprocessing.
 
@@ -219,18 +174,6 @@ COMMON DATA ISSUES TO HANDLE:
 
 Remember: ALWAYS inspect the actual data content, not just types. Look for patterns like semicolons, commas, or "and" that indicate multi-value fields requiring special processing!
 """
-
-# human_prompt = f"""
-# I would like to explore the dataset about the topic of {state['topic']}.
-# The current analysis question is: {state['question']['question']}.
-
-# Please generate robust Python code that:
-# 1. First inspects the data structure and types
-# 2. Applies necessary preprocessing based on the data characteristics
-# 3. Performs analysis appropriate for the data types found
-# 4. Handles potential errors and edge cases
-# 5. Generates meaningful insights about {state['topic']}
-# """
 
     human_prompt = f"""
     I would like to explore the dataset about the topic of {state['topic']}.
