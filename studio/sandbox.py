@@ -18,7 +18,7 @@ def run_in_sandbox(code: str, python_path: str = "python3"):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            timeout=30  # 5 second timeout
+            timeout=120  # 5 second timeout
         )
 
         return {
@@ -118,7 +118,7 @@ else:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
-                timeout=30,  # Increase timeout to 30 seconds
+                timeout=120,  # Increase timeout to 30 seconds
                 cwd=temp_dir  # Run in temporary directory
             )
 

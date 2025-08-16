@@ -105,3 +105,4 @@ class SimpleMemory:
 
 # Global memory instance that can be accessed by all nodes
 shared_memory = SimpleMemory(output_dir="outputs/simple_iteration/")
+

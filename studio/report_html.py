@@ -74,8 +74,11 @@ def add_visualization_to_html(html_lines, iteration, i):
     if "visualization" not in iteration or not iteration["visualization"]:
         print("-------no visualisation in iteration history------")
         return
+    print(f"iteration {i} visualization exist")
 
     vis = iteration["visualization"]
+
+    print(f"working on iteration {i} visualization ...")
 
     # Visualization section header
     html_lines.append(f"  <div class='visualization-section'>")

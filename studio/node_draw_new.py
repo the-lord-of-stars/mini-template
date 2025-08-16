@@ -313,9 +313,10 @@ def draw(state: State) -> State:
                 # 统一样式
                 fig.update_layout(
                     template="plotly_white",
-                    width=1200,
+                    # width=1200,
                     height=600,
                     margin=dict(l=60, r=30, t=60, b=40),
+                    autosize=True,
                 )
 
         except Exception as e:
@@ -363,6 +364,8 @@ def draw(state: State) -> State:
         print(f"Visualization {'successful' if success else 'failed'}: {op}")
         if not success:
             print(f"Error message: {error_msg}")
+        
+        new_state["iteration_count"] = state.get("iteration_count", 0) + 1
 
         return new_state
 

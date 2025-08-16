@@ -93,7 +93,13 @@ def get_dataset_info(dataset_path: str):
         header = next(reader)
 
         # first five rows
-        rows = [next(reader) for _ in range(num_example_rows)]
+        # rows = [next(reader) for _ in range(num_example_rows)]
+        rows = []
+        for _ in range(num_example_rows):
+            try:
+                rows.append(next(reader))
+            except StopIteration:
+                break
 
     attributes = ", ".join(header)
     example_values = "\n".join("\t".join(row) for row in rows)

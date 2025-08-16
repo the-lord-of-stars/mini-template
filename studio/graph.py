@@ -77,3 +77,4 @@ def create_workflow():
 
     # Compile the graph
     return builder.compile()
+    # return builder.compile(recursion_limit=50)

@@ -3,7 +3,7 @@ from state import InputState, OutputState, State
 import json
 import re
 from report_html import generate_html_report
-from node_synthesise import generate_html_reportv2
+from node_synthesise import generate_html_report_debug
 from memory import shared_memory
 from datetime import datetime
 
@@ -38,9 +38,10 @@ class Agent:
         #     "iteration_history": []  # yuhan: this is not used
         # }
         state = {
-            "topic": "evolution of research on sensemaking",
+            "topic": "evolution of visualization for sensemaking",
+            # "topic": "evolution of research on automated data visualization",
             "iteration_count": 0,  # Initialize iteration counter
-            "max_iterations": 2,  # Set maximum iterations (adjust as needed)
+            "max_iterations": 1,  # Set maximum iterations (adjust as needed)
             "should_continue": True,  # Initialize to continue
             "iteration_history": []  # yuhan: this is not used
         }
