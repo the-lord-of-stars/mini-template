@@ -43,11 +43,11 @@ def question(state: State):
         Here are the information of the selected dataset:
         {dataset_info}
 
-        Please generate the most relevant question to explore the dataset.
+        Please generate one question that is the most relevant to explore the dataset.
 
         Rules:
         1. the question should be focused and relevant
-        2. the question should be a subtask that is operationalizable
+        2. the question should be one task that is operationalizable
 
         {context}
     """

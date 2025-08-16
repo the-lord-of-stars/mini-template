@@ -84,13 +84,8 @@ def get_insights(state: State):
         [SystemMessage(content=sys_prompt), HumanMessage(content=human_prompt)]
     )
 
-    # Decide whether to continue based on iteration count and insights
-    should_continue = current_iteration < max_iterations and len(response.insights) > 0
-
     new_state = state.copy()
     new_state["insights"] = response.insights
-    # Don't increment iteration_count here, keep it as is
-    new_state["should_continue"] = should_continue
 
     # Save current iteration data to history
     current_iteration_data = {
@@ -103,6 +98,6 @@ def get_insights(state: State):
     # Save the state to memory
     shared_memory.save_state(new_state)
     print(f"state saved to memory for thread {shared_memory.thread_id}")
-    print(f"Iteration {current_iteration}/{max_iterations}, continuing: {should_continue}")
+    
 
     return new_state

@@ -7,13 +7,9 @@ import plotly.graph_objects as go
 from typing import Dict, Any, List, Optional
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage, ToolMessage
 from pydantic import BaseModel
-from sandbox import run_visualization_in_sandbox
+# from sandbox import run_visualization_in_sandbox
 from state import State, Visualization
 from helpers import get_llm, get_dataset_info
-
-
-
-
 
 def fig_line_trend(dff, bucket_col, nums, objective):
     # Year-only line chart
@@ -260,6 +256,9 @@ def draw(state: State) -> State:
     """
     New drawing node: Use function calling to intelligently select visualization tools and generate charts
     """
+    # current_iteration = state.get("iteration_count", 0)
+    # max_iterations = state.get("max_iterations", 3)
+    # current_insights = state.get("insights", [])
     try:
         # 1. Let LLM select the most appropriate visualization tool
         viz_choice = get_visualization_choice_with_tools(state)
@@ -358,15 +357,19 @@ def draw(state: State) -> State:
             "visualizations": [visualization]
         }
 
-        # Increment iteration count after visualization is complete
-        # new_state["iteration_count"] = state.get("iteration_count", 0) + 1
+
+        # Decide whether to continue based on iteration count and insights
+        # should_continue = current_iteration < max_iterations and len(current_insights) > 0
+        # new_state["should_continue"] = should_continue
+        # print(f"Iteration {current_iteration}/{max_iterations}, continuing: {should_continue}")
 
         print(f"Visualization {'successful' if success else 'failed'}: {op}")
         if not success:
             print(f"Error message: {error_msg}")
         
-        new_state["iteration_count"] = state.get("iteration_count", 0) + 1
-
+        # Increment iteration count after visualization is complete
+        # new_state["iteration_count"] = state.get("iteration_count", 0) + 1
+        
         return new_state
 
     except Exception as e:
@@ -388,6 +391,13 @@ def draw(state: State) -> State:
         new_state["visualizations"] = {
             "visualizations": [error_visualization]
         }
+
+        # Decide whether to continue based on iteration count and insights
+        # should_continue = current_iteration < max_iterations and len(current_insights) > 0
+        # new_state["should_continue"] = should_continue
+        # print(f"Iteration {current_iteration}/{max_iterations}, continuing: {should_continue}")
+        # Increment iteration count after visualization is complete
+        # new_state["iteration_count"] = state.get("iteration_count", 0) + 1
 
         return new_state
 

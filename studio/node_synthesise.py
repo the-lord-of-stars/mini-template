@@ -7,14 +7,29 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from pydantic import BaseModel, Field
 from helpers import get_llm
 from pathlib import Path
+import re
 
 class IterationSummary(BaseModel):
     """summary of one iteration"""
-    problem: str = Field(description="the problem this iteration is trying to solve")
-    analysis: str = Field(description="summary of the analysis method and approach")
-    findings: str = Field(description="key findings and insights from this iteration")
-    narrative: str = Field(description="a short, engaging, story-like paragraph combining the problem, analysis, and findings for this iteration")
+    title: str = Field(description="a very brief title of this iteration, no more than 10 words")
+    # problem: str = Field(description="the problem this iteration is trying to solve")
+    # analysis: str = Field(description="summary of the analysis method and approach")
+    # findings: str = Field(description="key findings and insights from this iteration")
+    narrative: str = Field(description="engaging, story-like paragraphs combining the problem, analysis, and findings for this iteration, no more than 200 words")
 
+def format_insights_list(insights_text):
+    """简单的insights格式化"""
+    if not insights_text:
+        return "No insights available"
+    
+    # 直接替换* 为HTML bullet point
+    formatted = insights_text.replace('* ', '<br>• ')
+    
+    # 如果第一个字符是bullet point，移除开头的<br>
+    if formatted.startswith('<br>• '):
+        formatted = '• ' + formatted[6:]
+    
+    return formatted
 
 class ReportSummary(BaseModel):
     """summary of the report"""
@@ -76,13 +91,11 @@ def build_analysis_prompt_structured(iteration_history: List[Dict]) -> str:
     prompt_parts.extend([
         "please generate the report summary based on the above information, including:",
         "",
-        "1. intro: Set the scene: explain why the topic matters in a broader context.Introduce the problem or observation that triggered the analysis.Briefly state the investigation goal.",
+        "1. intro: Set the scene: explain why the topic matters in a broader context based on your knowledge of the field. Introduce the problem or observation that triggered the analysis.Briefly state the investigation goal.",
         "2. quick_summary: Tell the overall “story arc” of the analysis in 3–5 sentences.Show how each iteration built upon the previous one (discovery → new question → deeper investigation → conclusions).Include any surprising or notable findings that shaped the direction.",
-        "3. iterations: For each iteration:",
-        "   - problem: Describe the research question in the context of the story.",
-        "   - analysis: Explain the method briefly but connect it to the motivation.",
-        "   - findings: Present the key insights, noting whether they confirmed or challenged expectations.",
-        "For each iteration, also write 'narrative': a detailed story-like paragraph that naturally integrates the problem, method, and findings. Use smooth transitions and a human, blog-like tone while staying professional."
+        "3. iterations: For each iteration, based on the research question and key findings, write ",
+        "- 'title': a very brief title of this iteration, no more than 10 words",
+        "- 'narrative': a detailed story-like paragraph that naturally integrates the problem, method, and findings. Use smooth transitions and a human, blog-like tone while staying professional.",
         "Add one sentence (if relevant) on how this iteration influenced the next step."
         "4. conclusion: Summarize the big-picture trends and their significance.If possible, Highlight the implications for the field. and Suggest possible next steps or open questions.",
         "",
@@ -136,9 +149,10 @@ def generate_llm_summary_structured(iteration_history: List[Dict], llm) -> Repor
         iterations = []
         for i in range(len(iteration_history)):
             iteration = IterationSummary(
-                problem=f"analysis of iteration {i+1}",
-                analysis="detailed analysis is unavailable",
-                findings="please check the detailed iteration results below",
+                title=f"iteration {i+1}",
+                # problem=f"analysis of iteration {i+1}",
+                # analysis="detailed analysis is unavailable",
+                # findings="please check the detailed iteration results below",
                 narrative="please check the detailed iteration results below"
             )
 
@@ -150,118 +164,6 @@ def generate_llm_summary_structured(iteration_history: List[Dict], llm) -> Repor
             iterations=iterations,
             conclusion="please check the detailed iteration results below to understand the complete analysis."
         )
-
-def add_structured_summary_to_html(html_lines: List[str], summary: ReportSummary, iteration_history: List[Dict]) -> None:
-    """add structured LLM summary to HTML"""
-    
-    # add summary section
-    html_lines.extend([
-        "<div class='llm-summary-section' style='background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 25px; border-radius: 12px; margin: 25px 0; border-left: 5px solid #28a745; box-shadow: 0 2px 10px rgba(0,0,0,0.1);'>",
-        "  <h2 style='color: #28a745; margin-top: 0; font-size: 24px; font-weight: 600; display: flex; align-items: center;'>",
-        "    <span style='margin-right: 10px;'>📋</span>execution summary",
-        "  </h2>",
-        ""
-    ])
-    
-    # intro section
-    if summary.intro:
-        html_lines.extend([
-            "  <div class='summary-intro' style='margin-bottom: 25px; padding: 20px; background-color: white; border-radius: 8px; border-left: 3px solid #17a2b8;'>",
-            "    <h3 style='margin-top: 0; color: #17a2b8; font-size: 18px;'>🎯 analysis overview</h3>",
-            f"    <p style='line-height: 1.6; margin-bottom: 0; color: #495057;'>{summary.intro}</p>",
-            "  </div>"
-        ])
-    
-    # quick summary section
-    if summary.quick_summary:
-        html_lines.extend([
-            "  <div class='quick-summary' style='margin-bottom: 25px; padding: 20px; background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%); border-radius: 8px; border: 1px solid #c3e6cb;'>",
-            "    <h3 style='margin-top: 0; color: #155724; font-size: 18px;'>⚡ key points</h3>",
-            f"    <p style='line-height: 1.6; margin-bottom: 0; color: #155724; font-weight: 500;'>{summary.quick_summary}</p>",
-            "  </div>"
-        ])
-    
-    # iteration summary section
-    if summary.iterations:
-        html_lines.extend([
-            "  <div class='iterations-summary' style='margin-bottom: 25px;'>",
-            "    <h3 style='color: #495057; font-size: 20px; margin-bottom: 20px; border-bottom: 2px solid #dee2e6; padding-bottom: 10px;'>",
-            "      Main analysis",
-            "    </h3>"
-        ])
-        
-        for i, iteration in enumerate(summary.iterations, 1):
-
-            html_lines.extend([
-                f"    <div class='iteration-summary' style='margin-bottom: 20px; padding: 20px; background-color: white; border-radius: 8px; border: 1px solid #e9ecef; box-shadow: 0 1px 3px rgba(0,0,0,0.1);'>",
-                f"      <h4 style='color: #28a745; margin-top: 0; margin-bottom: 15px; font-size: 16px; border-bottom: 1px solid #e9ecef; padding-bottom: 8px;'>",
-                f"        Iteration {i}",
-                "      </h4>",
-            ])
-
-            if hasattr(iteration, "narrative") and iteration.narrative:
-                html_lines.extend([
-                    f"      <p style='color: #495057; line-height: 1.6; margin-bottom: 15px;'>{iteration.narrative}</p>"
-                ])
-
-            html_lines.extend([
-                f"      <details style='margin-bottom: 15px;'>",
-                f"        <summary style='cursor: pointer; color: #6c757d; font-weight: bold;'>📄 Show details</summary>",
-                f"        <div style='margin-top: 10px;'>",
-                f"          <div style='margin-bottom: 8px;'><strong style='color: #6c757d;'>🎯 Problem: </strong><span style='color: #495057;'>{iteration.problem}</span></div>",
-                f"          <div style='margin-bottom: 8px;'><strong style='color: #6c757d;'>🔍 Analysis Method: </strong><span style='color: #495057;'>{iteration.analysis}</span></div>",
-                f"          <div style='margin-bottom: 8px;'><strong style='color: #6c757d;'>💡 Key Findings: </strong><span style='color: #495057;'>{iteration.findings}</span></div>",
-                f"        </div>",
-                f"      </details>"
-            ])
-
-            print(f"iteration {i} visualization")
-            # Add visualization if available
-            if "visualization" in iteration_history[i-1]:
-                print("Existed visualization")
-                add_visualization_to_html(html_lines, iteration_history[i-1], i)
-                print("Added visualization")
-            else:
-                print("No visualization")
-        
-        html_lines.append("  </div>")
-    
-    # conclusion section
-    if summary.conclusion:
-        html_lines.extend([
-            "  <div class='summary-conclusion' style='margin-bottom: 0; padding: 20px; background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%); border-radius: 8px; border: 1px solid #abdde5;'>",
-            "    <h3 style='margin-top: 0; color: #0c5460; font-size: 18px;'>🎯 conclusion</h3>",
-            f"    <p style='line-height: 1.6; margin-bottom: 0; color: #0c5460; font-weight: 500;'>{summary.conclusion}</p>",
-            "  </div>"
-        ])
-    
-    html_lines.append("</div>")
-    html_lines.append("<hr style='margin: 30px 0; border: none; border-top: 2px solid #e9ecef;'/>")
-
-def integrate_structured_summary_into_report(html_lines: List[str], iteration_history: List[Dict], llm) -> None:
-    """integrate structured LLM summary into HTML report"""
-    
-    if iteration_history and llm:
-        try:
-            # generate structured LLM summary
-            summary = generate_llm_summary_structured(iteration_history, llm)
-            print("-------------Summary double-check-------------------")
-            print(summary)
-            print("--------------------------------")
-            
-            # add summary to HTML
-            add_structured_summary_to_html(html_lines, summary, iteration_history)
-            
-        except Exception as e:
-            print(f"Warning: Failed to generate structured LLM summary: {e}")
-            # add error hint to HTML
-            html_lines.extend([
-                "<div class='llm-summary-error' style='background-color: #f8d7da; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 5px solid #dc3545;'>",
-                "  <h3 style='margin-top: 0; color: #721c24;'>⚠️ note</h3>",
-                "  <p style='margin-bottom: 0; color: #721c24;'><strong>structured LLM summary is currently unavailable.</strong> please check the detailed analysis content below.</p>",
-                "</div>",
-                "<hr style='margin: 30px 0; border: none; border-top: 2px solid #e9ecef;'/>"
-            ])
 
 def extract_iteration_history(output_state: dict, shared_memory) -> List[Dict[str, Any]]:
     """
@@ -362,7 +264,9 @@ def synthesise(state: State) -> State:
         os.makedirs(output_dir, exist_ok=True)
 
         # Generate final report
+        print("-------------Synthesise node-------------------")
         iteration_history = extract_iteration_history(state, shared_memory)
+        print("Iteration history collected")
         output_path = f"output.html"
         generate_html_report_final(iteration_history, output_path, state)
         print(f"HTML report generated: {output_path}")
@@ -433,16 +337,18 @@ def generate_html_report_final(iteration_history: List[Dict[str, Any]], output_p
     if iteration_history:
         # Generate structured summary
         llm = get_llm(temperature=0.5)
+        print("LLM initialized")
         summary = generate_llm_summary_structured(iteration_history, llm)
-        
+        print("Summary generated")
         # Add Overview section
         add_overview_section(html_lines, summary)
-        
+        print("Overview section added")
         # Add Findings section
         add_findings_section(html_lines, summary, iteration_history)
-        
+        print("Findings section added")
         # Add Conclusion section
         add_conclusion_section(html_lines, summary)
+        print("Conclusion section added")
     
     # Close main content and add footer
     html_lines.extend([
@@ -514,260 +420,6 @@ def generate_html_report_final(iteration_history: List[Dict[str, Any]], output_p
     # Write the file
     Path(output_path).write_text("\n".join(html_lines), encoding="utf-8")
     return output_path
-
-def generate_html_report_debug(output_state: dict, output_path: str, shared_memory) -> str:
-    """
-    Builds a simple HTML report that displays insights from the state data and shared memory.
-    This is a direct copy of generate_html_report from report_html.py
-    """
-
-    # 2. Build the HTML document
-    html_lines = [
-        "<!DOCTYPE html>",
-        "<html lang='en'>",
-        "<head>",
-        "  <meta charset='utf-8'>",
-        "  <title>Insights Report</title>",
-        "  <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>",
-        "  <style>",
-        "    body { font-family: sans-serif; margin: 2em; line-height: 1.6; }",
-        "    h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }",
-        "    h2 { color: #34495e; margin-top: 2em; }",
-        "    .insight { margin-bottom: 1.5em; padding: 1em; background-color: #f8f9fa; border-left: 4px solid #3498db; border-radius: 3px; }",
-        "    .insight-number { font-weight: bold; color: #3498db; margin-bottom: 0.5em; }",
-        "    .topic { font-size: 1.2em; color: #7f8c8d; margin-bottom: 1em; }",
-        "    .question { font-style: italic; color: #95a5a6; margin-bottom: 1em; }",
-        "    .iteration { margin-bottom: 2em; padding: 1.5em; background-color: #f8f9fa; border-radius: 5px; border: 1px solid #e9ecef; }",
-        "    .iteration h3 { color: #2c3e50; margin-top: 0; border-bottom: 2px solid #3498db; padding-bottom: 10px; }",
-        "    .facts { margin: 1em 0; }",
-        "    .facts pre { background-color: #f1f3f4; padding: 1em; border-radius: 3px; overflow-x: auto; font-size: 0.8em; }",
-        "    .facts-output { margin: 1em 0; }",
-        "    .facts-output pre { background-color: #e8f5e8; padding: 1em; border-radius: 3px; overflow-x: auto; font-size: 0.8em; }",
-        "    .insights { margin: 1em 0; }",
-        "    .section-title { font-weight: bold; color: #34495e; margin-bottom: 0.5em; }",
-        "    .collapsible { cursor: pointer; }",
-        "    .collapsible:hover { background-color: #e9ecef; }",
-        "    .collapsible-content { display: none; padding: 1em; background-color: #f8f9fa; border-radius: 3px; margin-top: 0.5em; }",
-        "    hr { margin: 2em 0; border: none; border-top: 1px solid #ecf0f1; }",
-        "    .chart-container { margin: 20px 0; }",
-        "    .chart-title { font-size: 18px; font-weight: bold; color: #555; margin-bottom: 10px; }",
-        "    .visualization-section { background-color: #e8f4f8; padding: 20px; border-radius: 8px; margin: 20px 0; }",
-        "  </style>",
-        "  <script>",
-        "    function toggleSection(id) {",
-        "      var content = document.getElementById(id);",
-        "      if (content.style.display === 'none' || content.style.display === '') {",
-        "        content.style.display = 'block';",
-        "      } else {",
-        "        content.style.display = 'none';",
-        "      }",
-        "    }",
-        "  </script>",
-        "</head>",
-        "<body>",
-    ]
-
-    # Add topic information if available
-    if "topic" in output_state:
-        html_lines.append(f"<h1>Data Insights Report</h1>")
-        html_lines.append(f"<div class='topic'><strong>Topic:</strong> {output_state['topic']}</div>")
-
-    html_lines.append("<hr/>")
-
-    # Get complete history from shared memory if available
-    complete_history = []
-    if shared_memory is not None:
-        try:
-            memory_states = shared_memory.get_history()
-            # Group states by iteration and select the last state from each iteration
-            iteration_groups = {}
-
-            for state in memory_states:
-                iteration_count = state.get("iteration_count", 0)
-                if iteration_count > 0:  # Skip initial states without iteration
-                    if iteration_count not in iteration_groups:
-                        iteration_groups[iteration_count] = []
-                    iteration_groups[iteration_count].append(state)
-
-            # print(iteration_groups.keys())
-
-            # Select the first complete state from each iteration
-            for iteration_num in sorted(iteration_groups.keys()):
-                states_in_iteration = iteration_groups[iteration_num]
-
-                # Find the LAST state in this iteration that has complete information including visualizations
-                selected_state = None
-                for i, state in enumerate(reversed(states_in_iteration)):
-                    if "question" in state and "facts" in state and "insights" in state:
-                        # Prefer states with visualizations
-                        if "visualizations" in state:
-                            selected_state = state
-                            break
-                        elif selected_state is None:
-                            selected_state = state
-                
-                # If no complete state found, use the last state
-                if selected_state is None:
-                    selected_state = states_in_iteration[-1]
-
-                if selected_state:
-                    visualization_data = None
-
-                    # Method 1: Get from single field
-                    if "visualization" in selected_state and selected_state["visualization"]:
-                        visualization_data = selected_state["visualization"]
-                        print(
-                            f"✅ Found single visualization with keys: {list(visualization_data.keys()) if isinstance(visualization_data, dict) else type(visualization_data)}")
-
-                    # Method 2: Get from plural field
-                    elif "visualizations" in selected_state and selected_state["visualizations"]:
-                        viz_container = selected_state["visualizations"]
-                        if isinstance(viz_container, dict) and "visualizations" in viz_container:
-                            viz_list = viz_container["visualizations"]
-                            if isinstance(viz_list, list) and len(viz_list) > 0:
-                                visualization_data = viz_list[-1]
-                                print(f"✅ Found visualization from list")
-
-                    if not visualization_data:
-                        print("⚠️ No visualization found, creating empty structure")
-                        visualization_data = {
-                            "figure_object": None,
-                            "code": "",
-                            "altair_code": "",
-                            "success": False
-                        }
-                    iteration_data = {
-                        "question": selected_state.get("question", {}),
-                        "facts": selected_state.get("facts", {}),
-                        "insights": selected_state.get("insights", []),
-                        "visualization": visualization_data
-                    }
-                    complete_history.append(iteration_data)
-                    
-
-
-        except Exception as e:
-            print(f"Warning: Could not load history from shared memory: {e}")
-
-    iteration_history = complete_history
-
-    # Display iteration history if available
-    if iteration_history:
-        total_iterations = len(iteration_history)
-        total_insights = sum(len(iter.get("insights", [])) for iter in iteration_history)
-
-        # integrate structured summary into report
-        llm = get_llm(temperature=0.5) 
-        integrate_structured_summary_into_report(html_lines, iteration_history, llm)
-
-        # display iteration history
-        html_lines.append("<h2>Analysis Iterations</h2>")
-        html_lines.append(
-            f"<div style='margin-bottom: 1em; padding: 1em; background-color: #e8f4fd; border-radius: 5px;'>")
-        html_lines.append(
-            f"  <strong>Summary:</strong> {total_iterations} iterations completed, {total_insights} total insights generated")
-        html_lines.append("</div>")
-
-        for i, iteration in enumerate(iteration_history, 1):
-            html_lines.append(f"<div class='iteration'>")
-            html_lines.append(f"  <h3>Iteration {i}</h3>")
-
-            # Display question
-            if "question" in iteration and iteration["question"]:
-                question_text = iteration["question"].get("question", "No question available")
-                html_lines.append(f"  <div class='question'><strong>Question:</strong> {question_text}</div>")
-
-            # Display facts (code and output) - make them collapsible
-            if "facts" in iteration and iteration["facts"]:
-                facts = iteration["facts"]
-
-                # Analysis Code (collapsible)
-                if facts.get("code"):
-                    html_lines.append(f"  <div class='facts'>")
-                    html_lines.append(
-                        f"    <div class='section-title collapsible' onclick='toggleSection(\"code-{i}\")'>📊 Analysis Code (click to expand)</div>")
-                    html_lines.append(f"    <div id='code-{i}' class='collapsible-content'>")
-                    html_lines.append(f"      <pre><code>{facts['code']}</code></pre>")
-                    html_lines.append(f"    </div>")
-                    html_lines.append(f"  </div>")
-
-                # Analysis Results (collapsible)
-                if facts.get("stdout"):
-                    html_lines.append(f"  <div class='facts-output'>")
-                    html_lines.append(
-                        f"    <div class='section-title collapsible' onclick='toggleSection(\"output-{i}\")'>📈 Analysis Results (click to expand)</div>")
-                    html_lines.append(f"    <div id='output-{i}' class='collapsible-content'>")
-                    html_lines.append(f"      <pre>{facts['stdout']}</pre>")
-                    html_lines.append(f"    </div>")
-                    html_lines.append(f"  </div>")
-                else:
-                    html_lines.append(f"  <div class='facts-output'>")
-                    html_lines.append(
-                        f"    <div class='section-title collapsible' onclick='toggleSection(\"output-{i}\")'>📈 Analysis Results (click to expand)</div>")
-                    html_lines.append(f"    <div id='output-{i}' class='collapsible-content'>")
-                    html_lines.append(f"      <pre> None </pre>")
-                    html_lines.append(f"      <pre>STDERR {facts['stderr']}</pre>")
-                    html_lines.append(f"      <pre>EXIT_CODE {facts['exit_code']}</pre>")
-                    html_lines.append(f"    </div>")
-                    html_lines.append(f"  </div>")
-
-            # Display vis (code and output) - make them collapsible
-            add_visualization_to_html(html_lines, iteration, i)
-
-            # Display insights
-            if "insights" in iteration and iteration["insights"]:
-                html_lines.append(f"  <div class='insights'>")
-                html_lines.append(f"    <div class='section-title'>💡 Key Insights:</div>")
-                for j, insight in enumerate(iteration["insights"], 1):
-                    html_lines.append(f"    <div class='insight'>")
-                    html_lines.append(f"      <div class='insight-number'>Insight {j}</div>")
-                    html_lines.append(f"      <div>{insight}</div>")
-                    html_lines.append(f"    </div>")
-                html_lines.append(f"  </div>")
-
-            html_lines.append("</div>")
-            html_lines.append("<hr/>")
-
-    # Display current insights if available (for backward compatibility)
-    elif "insights" in output_state and output_state["insights"]:
-        html_lines.append("<h2>Key Insights</h2>")
-
-        insights = output_state["insights"]
-        for i, insight in enumerate(insights, 1):
-            html_lines.append(f"<div class='insight'>")
-            html_lines.append(f"  <div class='insight-number'>Insight {i}</div>")
-            html_lines.append(f"  <div>{insight}</div>")
-            html_lines.append("</div>")
-    else:
-        html_lines.append("<h2>Key Insights</h2>")
-        html_lines.append("<p><em>No insights available in the current state.</em></p>")
-
-    html_lines.extend([
-        "</body>",
-        "</html>"
-    ])
-
-    # 4. Write out html file
-    Path(output_path).write_text("\n".join(html_lines), encoding="utf-8")
-    
-    return output_path
-  
-
-
-def synthesise_final(state: State) -> State:
-    """
-    Final synthesise node: Generate the final HTML report
-    This is typically used at the end of the workflow
-    """
-    return synthesise(state)
-
-
-def synthesise_intermediate(state: State) -> State:
-    """
-    Intermediate synthesise node: Generate HTML report for intermediate results
-    This can be used during the workflow to capture intermediate states
-    """
-    return synthesise(state)
 
 def get_modern_css_styles() -> str:
     """Return the modern CSS styles as a string"""
@@ -1376,21 +1028,6 @@ def add_overview_section(html_lines: List[str], summary: ReportSummary) -> None:
         "      <section class='article' id='overview'>",
         "        <h2>Overview</h2>",
         f"        <p>{summary.intro}</p>",
-        "        ",
-        # "        <div class='summary-grid'>",
-        # "          <div class='summary-card'>",
-        # "            <h4>🎯 Research Evolution</h4>",
-        # "            <p>Understanding how research evolved through collaborative networks and emerging methodologies.</p>",
-        # "          </div>",
-        # "          <div class='summary-card'>",
-        # "            <h4>⚡ Key Discovery</h4>",
-        # "            <p>Strong partnerships between researchers drove significant diversification in research topics and methodological innovations.</p>",
-        # "          </div>",
-        # "          <div class='summary-card'>",
-        # "            <h4>📈 Impact</h4>",
-        # "            <p>The interconnected research community fostered a renaissance of innovation and methodological progress.</p>",
-        # "          </div>",
-        # "        </div>",
         "      </section>",
     ])
 
@@ -1402,12 +1039,15 @@ def add_findings_section(html_lines: List[str], summary: ReportSummary, iteratio
         "        <h2>Findings</h2>",
     ])
     
-    for iteration_idx, iteration in enumerate(summary.iterations, 1):
+    for iteration_idx, iteration in enumerate(summary.iterations):
+        history_data = iteration_history[iteration_idx]
+        question = str(history_data["question"].get("question", "No question specified"))
+        insights = format_insights_list(str(history_data["insights"]))
         html_lines.extend([
             "        <div class='iteration-card'>",
             "          <div class='iteration-header'>",
             f"            <div class='iteration-number'>{iteration_idx:02d}</div>",
-            f"            <h3 class='iteration-title'>{get_iteration_title(iteration_idx)}</h3>",
+            f"            <h3 class='iteration-title'>{get_iteration_title(iteration_idx, summary)}</h3>",
             "          </div>",
             "          <div class='iteration-content'>",
             f"            <p class='iteration-summary'>{iteration.narrative}</p>",
@@ -1417,16 +1057,19 @@ def add_findings_section(html_lines: List[str], summary: ReportSummary, iteratio
             "              <div class='details-content'>",
             "                <div class='detail-item'>",
             "                  <div class='detail-label'>🎯 Research Question</div>",
-            f"                  <p>{iteration.problem}</p>",
+            # f"                  <p>{iteration.problem}</p>",
+            f"                  <p>{question}</p>",
             "                </div>",
             "                <div class='detail-item'>",
-            "                  <div class='detail-label'>🔍 Analysis Method</div>",
-            f"                  <p>{iteration.analysis}</p>",
+            "                  <div class='detail-label'>🔍 Insights</div>",
+            # f"                  <p>{iteration.analysis}</p>",
+            # f"                  <p>{insights}</p>",
+            f"                  <div>{insights}</div>",
             "                </div>",
-            "                <div class='detail-item'>",
-            "                  <div class='detail-label'>💡 Key Findings</div>",
-            f"                  <p>{iteration.findings}</p>",
-            "                </div>",
+            # "                <div class='detail-item'>",
+            # "                  <div class='detail-label'>💡 Key Findings</div>",
+            # f"                  <p>{iteration.findings}</p>",
+            # "                </div>",
             "              </div>",
             "            </details>",
         ])
@@ -1456,14 +1099,9 @@ def add_conclusion_section(html_lines: List[str], summary: ReportSummary) -> Non
         "        </section>",
     ])
 
-def get_iteration_title(iteration_num: int) -> str:
+def get_iteration_title(iteration_num: int, summary: ReportSummary) -> str:
     """Generate iteration titles"""
-    titles = {
-        1: "Author Contributions & Collaborative Networks",
-        2: "Collaboration Networks & Topic Diversity", 
-        3: "Methodological Innovations & Tools"
-    }
-    return titles.get(iteration_num, f"Analysis Iteration {iteration_num}")
+    return summary.iterations[iteration_num-1].title
 
 def add_modern_visualization_to_html(html_lines: List[str], iteration: Dict, iteration_num: int) -> None:
     """Add visualization with modern styling"""

@@ -22,6 +22,7 @@ def follow_up_decision(state: State):
     # Get current iteration info
     current_iteration = state.get("iteration_count", 0)
     max_iterations = state.get("max_iterations", 3)
+    current_insights = state.get("insights", [])
 
     # Get dataset info
     dataset_info = get_dataset_info(state['select_data_state']['dataset_path'])
@@ -103,6 +104,10 @@ def follow_up_decision(state: State):
         "should_reselect_data": response.should_reselect_data,
         "reasoning": response.reasoning
     }
+
+    should_continue = current_iteration < max_iterations and len(current_insights) > 0
+    new_state["should_continue"] = should_continue
+    print(f"Iteration {current_iteration}/{max_iterations}, continuing: {should_continue}")
 
     # Increment iteration count after completing this iteration
     new_state["iteration_count"] = current_iteration + 1

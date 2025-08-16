@@ -5,12 +5,9 @@ from state import State, InputState, OutputState
 # ----------Graph ----------
 def create_workflow():
     # create the agentic workflow using LangGraph
-    # builder = StateGraph(State, input_schema=InputState, output_schema=OutputState)
     builder = StateGraph(State)
 
     # --- Add the nodes ---
-    # from node_data_loading import data_loading_node
-    # builder.add_node("data_loading", data_loading_node)
 
     from node_select_data import select_data
     builder.add_node("select_data", select_data)
@@ -33,14 +30,6 @@ def create_workflow():
     from node_synthesise import synthesise
     builder.add_node("synthesise", synthesise)
 
-
-
-    # from node_inspect import task_discovery_node
-    # builder.add_node("task_discovery", task_discovery_node)
-    # from node_draw import react_analysis_node
-    # builder.add_node("react_analysis", react_analysis_node)
-    # from node_report import report_generation_node
-    # builder.add_node("report_generation", report_generation_node)
 
     # --- Add the edges ---
     builder.add_edge(START, "select_data")
@@ -68,12 +57,6 @@ def create_workflow():
     
     # synthesise always goes to END
     builder.add_edge("synthesise", END)
-
-
-    # builder.add_edge("data_loading", "task_discovery")
-    # builder.add_edge("task_discovery", "react_analysis")
-    # builder.add_edge("react_analysis", "report_generation")
-    # builder.add_edge("report_generation", END)
 
     # Compile the graph
     return builder.compile()
