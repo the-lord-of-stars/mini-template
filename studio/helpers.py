@@ -6,6 +6,8 @@ from langchain_openai import ChatOpenAI, AzureChatOpenAI
 from openai import OpenAI, AzureOpenAI
 import pandas as pd
 import pandasql as ps
+from state import State
+from memory import shared_memory
 
 from dotenv import load_dotenv
 
@@ -126,6 +128,46 @@ def query_by_sql(sql_query: str):
 
     return result
 
+def update_state(state: State, result: dict):
+    new_state = state.copy()
+    # Only set question if it exists in state
+    if "question" in state:
+        new_state["question"] = state["question"]
+
+    # Extract insights from result and set them directly in new_state
+    if isinstance(result, dict) and 'insights' in result:
+        new_state["insights"] = result["insights"]
+        print(f"DEBUG: Set insights in new_state: {result['insights']}")
+    else:
+        print("DEBUG: No insights found in result!")
+    
+    # Extract question from result if it exists
+    if isinstance(result, dict) and 'question' in result:
+        new_state["question"] = result["question"]
+        print(f"DEBUG: Set question in new_state: {result['question']}")
+    
+    if isinstance(result, dict) and 'facts' in result:
+        new_state["facts"] = result["facts"]
+        print("DEBUG: Set facts in new_state")
+    
+    if isinstance(result, dict) and 'visualizations' in result:
+        new_state["visualizations"] = {
+            "visualizations": result["visualizations"]
+        }
+        print("DEBUG: Set visualizations in new_state")
+    
+    new_state["iteration_history"] = state.get("iteration_history", []) + [result]
+    print(f"DEBUG: Updated iteration_history, length: {len(new_state['iteration_history'])}")
+
+    # Save state to memory
+    print("DEBUG: About to save state to memory...")
+    shared_memory.save_state(new_state)
+    print("DEBUG: State saved to memory successfully")
+
+    print("=== EXITING update_state FUNCTION SUCCESSFULLY ===")
+    return new_state
+
+    pass
 
 if __name__ == "__main__":
     sql_query = """

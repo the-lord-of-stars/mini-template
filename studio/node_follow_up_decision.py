@@ -70,7 +70,7 @@ def follow_up_decision(state: State):
         {state['insights']}
 
         Your task is to:
-        1. Generate a follow-up question based on the insights that would provide deeper understanding
+        1. Generate a follow-up question based on the insights that would provide deeper understanding OR you can also decide to ask a question that is not related to the insights but from a different perspective around the topic
         2. Decide whether the current dataset is sufficient for the follow-up question or if new data selection is needed
 
         Rules for follow-up question:

@@ -16,7 +16,7 @@ import networkx as nx
 from datetime import datetime
 import os
 from state import State, Visualization
-
+from helpers import update_state
 
 class ToolDecision(BaseModel):
     """Schema for LLM tool selection decision"""
@@ -28,6 +28,15 @@ def analyse_topics(state: State):
     """
     Analyse topics using LLM-based tool selection
     """
+    result = execute_topic_analysis(state)
+    updated_state = update_state(state, result)
+    return result
+
+
+def execute_topic_analysis(state: State):
+    """
+    Analyse topics using LLM-based tool selection
+    """
     print("=== ENTERING analyse_topics FUNCTION ===")
     current_iteration = state.get("iteration_count", 0)
     print(f"Current iteration: {current_iteration}")
@@ -36,71 +45,26 @@ def analyse_topics(state: State):
     print(f"DEBUG: analysis_plan type: {type(analysis_plan)}")
     print(f"DEBUG: analysis_plan keys: {list(analysis_plan.keys()) if isinstance(analysis_plan, dict) else 'Not a dict'}")
     
-    try:
-        # Get LLM decision on which tool to use
-        print("DEBUG: About to call get_tool_decision...")
-        tool_decision = get_tool_decision(state, analysis_plan)
-        
-        print(f"LLM selected tool: {tool_decision.tool_name}")
-        print(f"Reasoning: {tool_decision.reasoning}")
-        
-        # Execute the selected tool
-        print(f"DEBUG: About to call execute_selected_tool with tool: {tool_decision.tool_name}")
-        result = execute_selected_tool(tool_decision.tool_name, state, analysis_plan)
-        
-        print(f"DEBUG: execute_selected_tool returned type: {type(result)}")
-        print(f"DEBUG: result keys: {list(result.keys()) if isinstance(result, dict) else 'Not a dict'}")
-        if isinstance(result, dict):
-            print(f"DEBUG: result has insights: {'insights' in result}")
-            if 'insights' in result:
-                print(f"DEBUG: insights value: {result['insights']}")
-        
-        # Update state with results
-        new_state = state.copy()
-        new_state["question"] = state["question"]
-        
-        new_state["topic_analysis_result"] = result
-        
-        # Extract insights from result and set them directly in new_state
-        if isinstance(result, dict) and 'insights' in result:
-            new_state["insights"] = result["insights"]
-            print(f"DEBUG: Set insights in new_state: {result['insights']}")
-        else:
-            print("DEBUG: No insights found in result!")
-        
-        # Extract question from result if it exists
-        if isinstance(result, dict) and 'question' in result:
-            new_state["question"] = result["question"]
-            print(f"DEBUG: Set question in new_state: {result['question']}")
-        
-        if isinstance(result, dict) and 'facts' in result:
-            new_state["facts"] = result["facts"]
-            print("DEBUG: Set facts in new_state")
-        
-        if isinstance(result, dict) and 'visualizations' in result:
-            new_state["visualizations"] = {
-                "visualizations": result["visualizations"]
-            }
-            print("DEBUG: Set visualizations in new_state")
-        
-        new_state["iteration_history"] = state.get("iteration_history", []) + [result]
-        print(f"DEBUG: Updated iteration_history, length: {len(new_state['iteration_history'])}")
-
-        # Save state to memory
-        print("DEBUG: About to save state to memory...")
-        shared_memory.save_state(new_state)
-        print("DEBUG: State saved to memory successfully")
-
-        print("=== EXITING analyse_topics FUNCTION SUCCESSFULLY ===")
-        return new_state
-        
-    except Exception as e:
-        print(f"ERROR in analyse_topics: {e}")
-        print(f"ERROR type: {type(e)}")
-        import traceback
-        traceback.print_exc()
-        raise e
-
+    # try:
+    # Get LLM decision on which tool to use
+    print("DEBUG: About to call get_tool_decision...")
+    tool_decision = get_tool_decision(state, analysis_plan)
+    
+    print(f"LLM selected tool: {tool_decision.tool_name}")
+    print(f"Reasoning: {tool_decision.reasoning}")
+    
+    # Execute the selected tool
+    print(f"DEBUG: About to call execute_selected_tool with tool: {tool_decision.tool_name}")
+    result = execute_selected_tool(tool_decision.tool_name, state, analysis_plan)
+    
+    print(f"DEBUG: execute_selected_tool returned type: {type(result)}")
+    print(f"DEBUG: result keys: {list(result.keys()) if isinstance(result, dict) else 'Not a dict'}")
+    if isinstance(result, dict):
+        print(f"DEBUG: result has insights: {'insights' in result}")
+        if 'insights' in result:
+            print(f"DEBUG: insights value: {result['insights']}")
+    
+    return result
 
 def get_tool_decision(state: State, analysis_plan: dict) -> ToolDecision:
     """
@@ -194,6 +158,7 @@ def execute_top_keywords(state: State, analysis_plan: dict) -> dict:
     1. top_keywords - 统计数据集中出现频率最高的N个关键词
     """
     print("=== Executing Top Keywords Analysis ===")
+    current_iteration = state.get("iteration_count", 0)
 
     question = state["question"].get("question", "")
     
@@ -202,7 +167,7 @@ def execute_top_keywords(state: State, analysis_plan: dict) -> dict:
     
     success = True  # 初始化success变量
     figure_html = ""
-    fig_path = 'fig/top_keywords_chart.png'
+    fig_path = f'outputs/simple_iteration/{shared_memory.thread_id}/top_keywords_chart_iteration_{current_iteration}.png'
     
     try:
         # Extract keywords from AuthorKeywords column
@@ -250,10 +215,6 @@ def execute_top_keywords(state: State, analysis_plan: dict) -> dict:
             width=800,
             showlegend=False
         )
-        
-        # 确保目录存在
-        os.makedirs('fig', exist_ok=True)
-        
         # Save as HTML file
         html_path = fig_path.replace('.png', '.html')
         fig.write_html(html_path)
@@ -343,12 +304,13 @@ def execute_temporal_evolution(state: State, analysis_plan: dict) -> dict:
     2. temporal_evolution - 分析关键词随时间的频率变化
     """
     print("=== Executing Temporal Evolution Analysis ===")
+    current_iteration = state.get("iteration_count", 0)
     question = state["question"].get("question", "")
     
     df = state["dataframe"]
     success = True
     figure_html = ""
-    fig_path = 'fig/temporal_evolution_chart.png'
+    fig_path = f'outputs/simple_iteration/{shared_memory.thread_id}/temporal_evolution_chart_iteration_{current_iteration}.png'
     
     try:
         if "Year" not in df.columns:
@@ -422,9 +384,7 @@ def execute_temporal_evolution(state: State, analysis_plan: dict) -> dict:
         
         fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='lightgray')
         fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='lightgray')
-        
-        # 确保目录存在
-        os.makedirs('fig', exist_ok=True)
+
         
         # Save as HTML file
         html_path = fig_path.replace('.png', '.html')
@@ -516,13 +476,7 @@ def execute_temporal_evolution(state: State, analysis_plan: dict) -> dict:
     else:
         insights = ["No temporal evolution insights available"]
     
-    
-    # Set question field
-    # new_state["question"] = {
-    #     "question": question,
-    #     "handled": True,
-    #     "spec": ""
-    # }
+
     question = {
         "question": question,
         "handled": True,
@@ -572,12 +526,13 @@ def execute_cooccurrence_matrix(state: State, analysis_plan: dict) -> dict:
     3. cooccurrence_matrix - 计算关键词共现矩阵
     """
     print("=== Executing Co-occurrence Matrix Analysis ===")
+    current_iteration = state.get("iteration_count", 0)
     question = state["question"].get("question", "")
     
     df = state["dataframe"]
     success = True
     figure_html = ""
-    network_path = 'fig/cooccurrence_network.png'
+    network_path = f'outputs/simple_iteration/{shared_memory.thread_id}/cooccurrence_network_iteration_{current_iteration}.png'
     
     try:
         # Extract keywords

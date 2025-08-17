@@ -58,6 +58,9 @@ def create_workflow():
     from node_analyse_topics import analyse_topics
     builder.add_node("analyse_topics", analyse_topics)
 
+    from node_analyse_authors import analyse_author_network
+    builder.add_node("analyse_authors", analyse_author_network)
+
     def analysis_condition(state: State) -> str:
         # Check if analysis_plan exists and get q_type
         if 'analysis_plan' in state and hasattr(state['analysis_plan'], 'q_type'):
@@ -75,6 +78,8 @@ def create_workflow():
         
         if q_type_str == "TOPIC_ANALYSIS":
             return "analyse_topics"
+        elif q_type_str == "COLLABORATION_ANALYSIS":
+            return "analyse_authors"
         elif q_type_str == "GENERAL_ANALYSIS":
             return "facts"  # Route general analysis to facts
         else:
@@ -87,10 +92,12 @@ def create_workflow():
         analysis_condition,
         {
             "analyse_topics": "analyse_topics",
+            "analyse_authors": "analyse_authors",
             "facts": "facts"
         }
     )
     builder.add_edge("analyse_topics", "follow_up_decision")
+    builder.add_edge("analyse_authors", "follow_up_decision")
     builder.add_edge("facts", "insights")
     builder.add_edge("insights", "draw")
 

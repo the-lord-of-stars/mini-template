@@ -21,7 +21,7 @@ def question(state: State):
     questions, _ = shared_memory.export_questions_and_insights()
 
     context = ""
-    if state["iteration_count"] > 0:
+    if state["iteration_count"] > 1:
         context = f"""
         Here are the previous questions:
         {questions}
