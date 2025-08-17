@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='utf-8'>
+  <title>Interactive Vega-Lite Report</title>
+  <script src='https://cdn.jsdelivr.net/npm/vega@5'></script>
+  <script src='https://cdn.jsdelivr.net/npm/vega-lite@5'></script>
+  <script src='https://cdn.jsdelivr.net/npm/vega-embed@6'></script>
+  <style>
+    body { font-family: sans-serif; margin: 2em; }
+    h3 { margin-top: 1em; }
+    hr { margin: 1.5em 0; }
+  </style>
+</head>
+<body>
+  <h3>Executive summary & key takeaways</h3>
+  <p>Concise answer to 'What happened to research on automated visualization?' — top trends, shifts in activity, and three actionable takeaways for researchers and program chairs.</p>
+  <h3>Data, definitions and methods</h3>
+  <p>Describe the Vis publication dataset, cleaning steps, the keyword-based AutoVis filter (automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent), other metrics used (citations, downloads, awards, stamp), and planned visual encodings and reproducible code artifacts.</p>
+  <div>What is the completeness (non-missing coverage) of each dataset attribute so we can describe cleaning needs and potential biases?</div>
+  <div id='vis0'></div>
+  <script>
+    vegaEmbed('#vis0', {
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Bar chart showing non-missing (coverage) count for each attribute in the Vis publications dataset. This highlights attributes with low coverage to inform cleaning and bias assessment.",
+  "data": {
+    "url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv",
+    "format": { "type": "csv" }
+  },
+  "transform": [
+    {
+      "fold": [
+        "Conference",
+        "Year",
+        "Title",
+        "DOI",
+        "Link",
+        "FirstPage",
+        "LastPage",
+        "PaperType",
+        "Abstract",
+        "AuthorNames-Deduped",
+        "AuthorNames",
+        "AuthorAffiliation",
+        "InternalReferences",
+        "AuthorKeywords",
+        "AminerCitationCount",
+        "CitationCount_CrossRef",
+        "PubsCited_CrossRef",
+        "Downloads_Xplore",
+        "Award",
+        "GraphicsReplicabilityStamp"
+      ]
+    },
+    {
+      "filter": "datum.value !== null && datum.value !== ''"
+    },
+    {
+      "aggregate": [{ "op": "count", "as": "non_missing_count" }],
+      "groupby": ["key"]
+    }
+  ],
+  "mark": "bar",
+  "encoding": {
+    "y": {
+      "field": "key",
+      "type": "nominal",
+      "title": "Attribute",
+      "sort": { "field": "non_missing_count", "order": "descending" }
+    },
+    "x": {
+      "field": "non_missing_count",
+      "type": "quantitative",
+      "title": "Non-missing count"
+    },
+    "tooltip": [
+      { "field": "key", "type": "nominal", "title": "Attribute" },
+      { "field": "non_missing_count", "type": "quantitative", "title": "Non-missing count" }
+    ]
+  },
+  "width": 700,
+  "height": 520,
+  "title": "Dataset attribute completeness — non-missing counts (sorted)"
+})
+      .catch(console.error);
+  </script>
+  <div>How many papers are identified as 'AutoVis' by the keyword-based filter versus 'Other', and how do impact metrics (citations and downloads) compare between these groups?</div>
+  <div id='vis1'></div>
+  <script>
+    vegaEmbed('#vis1', {"$schema":"https://vega.github.io/schema/vega-lite/v5.json","description":"Comparison of AutoVis vs Other: counts and median impacts","data":{"url":"https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv"},"transform":[{"calculate":"test(/automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent/i, (datum.AuthorKeywords || '') + ' ' + (datum.Abstract || '') + ' ' + (datum.Title || '')) ? 'AutoVis' : 'Other'","as":"AutoVis_flag"},{"aggregate":[{"op":"count","as":"count"},{"op":"median","field":"AminerCitationCount","as":"median_citations"},{"op":"median","field":"Downloads_Xplore","as":"median_downloads"}],"groupby":["AutoVis_flag"]}],"hconcat":[{"title":"Paper count","mark":"bar","encoding":{"x":{"field":"AutoVis_flag","type":"nominal","sort":["AutoVis","Other"],"axis":{"labelAngle":0,"title":null}},"y":{"field":"count","type":"quantitative","axis":{"title":"Count"}},"color":{"field":"AutoVis_flag","type":"nominal","legend":null},"tooltip":[{"field":"AutoVis_flag","type":"nominal"},{"field":"count","type":"quantitative"}]},"width":200,"height":200},{"title":"Median Aminer citations","mark":"bar","encoding":{"x":{"field":"AutoVis_flag","type":"nominal","sort":["AutoVis","Other"],"axis":{"labelAngle":0,"title":null}},"y":{"field":"median_citations","type":"quantitative","axis":{"title":"Median AminerCitationCount"}},"color":{"field":"AutoVis_flag","type":"nominal","legend":null},"tooltip":[{"field":"AutoVis_flag","type":"nominal"},{"field":"median_citations","type":"quantitative"}]},"width":200,"height":200},{"title":"Median Downloads (Xplore)","mark":"bar","encoding":{"x":{"field":"AutoVis_flag","type":"nominal","sort":["AutoVis","Other"],"axis":{"labelAngle":0,"title":null}},"y":{"field":"median_downloads","type":"quantitative","axis":{"title":"Median Downloads_Xplore"}},"color":{"field":"AutoVis_flag","type":"nominal","legend":null},"tooltip":[{"field":"AutoVis_flag","type":"nominal"},{"field":"median_downloads","type":"quantitative"}]},"width":200,"height":200}],"config":{"view":{"stroke":"transparent"}}})
+      .catch(console.error);
+  </script>
+  <h3>What counts as 'automated visualization' — taxonomy and examples</h3>
+  <p>Operational taxonomy (recommendation, generation, mixed-initiative, agents, automation in pipeline) with a few exemplar papers from the dataset that match each subtype, clarifying edge cases and limitations of keyword detection.</p>
+  <div>For each automated-visualization subtype in the operational taxonomy (recommendation, generation, mixed-initiative, agents, pipeline automation), which papers from the dataset are clear exemplars? (Return a short ranked list per subtype.)</div>
+  <div id='vis2'></div>
+  <script>
+    vegaEmbed('#vis2', {
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": "Automated-visualization taxonomy: counts and top exemplars",
+  "hconcat": [
+    {
+      "data": {"url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv"},
+      "transform": [
+        {"calculate": "(datum['AuthorKeywords'] || '') + ' ' + (datum['Abstract'] || '') + ' ' + (datum['Title'] || '')", "as": "searchText"},
+        {"calculate": "test(/visualization recommendation/i, datum.searchText) ? 'recommendation' : test(/visualization generation|vis generation/i, datum.searchText) ? 'generation' : test(/mixed initiative|mixed-initiative/i, datum.searchText) ? 'mixed-initiative' : test(/automatic vis|automated vis/i, datum.searchText) ? 'automatic' : test(/agent/i, datum.searchText) ? 'agent' : test(/pipeline|automation/i, datum.searchText) ? 'pipeline automation' : 'Other'", "as": "subtype"},
+        {"filter": "datum.subtype !== 'Other'"},
+        {"aggregate": [{"op": "count", "as": "count"}], "groupby": ["subtype"]}
+      ],
+      "mark": {"type": "bar", "cornerRadius": 2},
+      "encoding": {
+        "y": {"field": "subtype", "type": "nominal", "title": "Subtype", "sort": "-x"},
+        "x": {"field": "count", "type": "quantitative", "title": "# matched papers"},
+        "color": {"field": "subtype", "type": "nominal", "legend": null}
+      },
+      "width": 320,
+      "height": 240,
+      "title": "Counts per subtype"
+    },
+    {
+      "data": {"url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv"},
+      "transform": [
+        {"calculate": "(datum['AuthorKeywords'] || '') + ' ' + (datum['Abstract'] || '') + ' ' + (datum['Title'] || '')", "as": "searchText"},
+        {"calculate": "test(/visualization recommendation/i, datum.searchText) ? 'recommendation' : test(/visualization generation|vis generation/i, datum.searchText) ? 'generation' : test(/mixed initiative|mixed-initiative/i, datum.searchText) ? 'mixed-initiative' : test(/automatic vis|automated vis/i, datum.searchText) ? 'automatic' : test(/agent/i, datum.searchText) ? 'agent' : test(/pipeline|automation/i, datum.searchText) ? 'pipeline automation' : 'Other'", "as": "subtype"},
+        {"filter": "datum.subtype !== 'Other'"},
+        {"calculate": "isNaN(toNumber(datum.CitationCount_CrossRef)) ? toNumber(datum.AminerCitationCount) : toNumber(datum.CitationCount_CrossRef)", "as": "citation"},
+        {"window": [{"op": "rank", "as": "rank"}], "groupby": ["subtype"], "sort": [{"field": "citation", "order": "descending"}]},
+        {"filter": "datum.rank <= 3"}
+      ],
+      "mark": {"type": "text", "align": "left", "baseline": "middle", "dx": 4},
+      "encoding": {
+        "x": {"field": "rank", "type": "ordinal", "title": "Top k (rank)", "axis": {"labelAngle": 0}},
+        "y": {"field": "subtype", "type": "nominal", "title": null},
+        "text": {"field": "Title", "type": "nominal"},
+        "color": {"field": "rank", "type": "ordinal", "legend": {"title": "Rank"}},
+        "tooltip": [
+          {"field": "Title", "type": "nominal"},
+          {"field": "Year", "type": "ordinal"},
+          {"field": "Conference", "type": "nominal"},
+          {"field": "citation", "type": "quantitative"},
+          {"field": "rank", "type": "ordinal"}
+        ]
+      },
+      "width": 620,
+      "height": 240,
+      "title": "Top 3 exemplars per subtype (ranked by citation)"
+    }
+  ],
+  "resolve": {"scale": {"color": "independent"}}
+})
+      .catch(console.error);
+  </script>
+  <div id='vis2-2'></div>
+  <script>
+    vegaEmbed('#vis2-2', {
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Top exemplar papers per automated-visualization subtype (ranked by CrossRef citations or Aminer citations as fallback). The data is filtered by keyword matches in Title+Abstract+AuthorKeywords and then grouped by inferred subtype.",
+  "data": { "url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv" },
+  "transform": [
+    {
+      "calculate": "(datum.Title || '') + ' ' + (datum.Abstract || '') + ' ' + (datum.AuthorKeywords || '')",
+      "as": "_search"
+    },
+    {
+      "calculate": "test(/visualization recommendation/i, datum._search) ? 'recommendation' : (test(/mixed[- ]initiative/i, datum._search) ? 'mixed-initiative' : (test(/visualization generation|vis generation|automatic vis|automated vis/i, datum._search) ? 'generation' : (test(/agent/i, datum._search) ? 'agents' : (test(/pipeline|automation/i, datum._search) ? 'pipeline automation' : 'Other'))))",
+      "as": "subtype"
+    },
+    {
+      "calculate": "isNaN(toNumber(datum.CitationCount_CrossRef)) ? (isNaN(toNumber(datum.AminerCitationCount)) ? 0 : toNumber(datum.AminerCitationCount)) : toNumber(datum.CitationCount_CrossRef)",
+      "as": "citations"
+    },
+    {
+      "window": [{ "op": "rank", "as": ["rank"] }],
+      "sort": [{ "field": "citations", "order": "descending" }],
+      "groupby": ["subtype"]
+    },
+    {
+      "filter": "datum.subtype !== 'Other' && datum.rank <= 5"
+    }
+  ],
+  "facet": {
+    "row": {
+      "field": "subtype",
+      "type": "nominal",
+      "title": "Subtype",
+      "header": { "labelFontSize": 12, "labelFontWeight": "bold" }
+    }
+  },
+  "spec": {
+    "width": 480,
+    "height": 160,
+    "layer": [
+      {
+        "mark": { "type": "bar", "tooltip": true },
+        "encoding": {
+          "x": { "field": "citations", "type": "quantitative", "title": "Citations (CrossRef primary, Aminer fallback)" },
+          "y": {
+            "field": "Title",
+            "type": "nominal",
+            "axis": { "title": "Title (top exemplars)" },
+            "sort": { "field": "citations", "order": "descending" }
+          },
+          "color": { "field": "Conference", "type": "nominal", "legend": {"title": "Conference"} },
+          "tooltip": [
+            { "field": "Title", "type": "nominal", "title": "Title" },
+            { "field": "Year", "type": "temporal", "title": "Year" },
+            { "field": "Conference", "type": "nominal", "title": "Conference" },
+            { "field": "citations", "type": "quantitative", "title": "Citations" },
+            { "field": "rank", "type": "quantitative", "title": "Rank (within subtype)" }
+          ]
+        }
+      },
+      {
+        "mark": { "type": "text", "align": "left", "dx": 3, "dy": 0, "color": "black", "baseline": "middle" },
+        "encoding": {
+          "x": { "field": "citations", "type": "quantitative" },
+          "y": { "field": "Title", "type": "nominal", "sort": { "field": "citations", "order": "descending" } },
+          "text": { "field": "citations", "type": "quantitative" }
+        }
+      }
+    ]
+  },
+  "resolve": { "scale": { "y": "independent" } }
+})
+      .catch(console.error);
+  </script>
+  <div>What is the approximate false positive and false negative behavior of the keyword-based detector? (Estimate error modes and exemplar cases to clarify limitations.)</div>
+  <div id='vis3'></div>
+  <script>
+    vegaEmbed('#vis3', {
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {"url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv", "format": {"type": "csv"}},
+  "transform": [
+    {
+      "calculate": "test(/automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent/i, (datum.AuthorKeywords || '') + ' ' + (datum.Abstract || '') + ' ' + (datum.Title || '')) ? 'Matched' : 'Unmatched'",
+      "as": "match_status"
+    }
+  ],
+  "hconcat": [
+    {
+      "width": 240,
+      "height": 200,
+      "mark": {"type": "bar", "cornerRadius": 2},
+      "encoding": {
+        "y": {"field": "match_status", "type": "nominal", "title": "Keyword detector status", "sort": ["Matched", "Unmatched"]},
+        "x": {"aggregate": "count", "title": "Count of papers"},
+        "color": {"field": "match_status", "type": "nominal", "legend": null}
+      },
+      "title": "Keyword-based matches (entire dataset)"
+    },
+    {
+      "vconcat": [
+        {
+          "width": 700,
+          "height": 260,
+          "title": "Sample of papers flagged = Matched (sample n=50)",
+          "transform": [
+            {"filter": "datum.match_status === 'Matched'"},
+            {"sample": 50},
+            {"calculate": "datum.Title + ' — ' + (datum.Year || '') + ' — ' + (datum.PaperType || '') + (datum.AuthorKeywords ? ' — ' + datum.AuthorKeywords : '')", "as": "summary"},
+            {"window": [{"op": "row_number", "as": "rownum"}]},
+            {"calculate": "datum.rownum.toString()", "as": "row_label"}
+          ],
+          "mark": {"type": "text", "align": "left", "baseline": "middle"},
+          "encoding": {
+            "y": {"field": "row_label", "type": "ordinal", "axis": null},
+            "x": {"value": 0},
+            "text": {"field": "summary", "type": "nominal"},
+            "tooltip": [
+              {"field": "Title", "type": "nominal", "title": "Title"},
+              {"field": "AuthorKeywords", "type": "nominal", "title": "AuthorKeywords"},
+              {"field": "Year", "type": "temporal", "title": "Year"},
+              {"field": "PaperType", "type": "nominal", "title": "PaperType"}
+            ]
+          }
+        },
+        {
+          "width": 700,
+          "height": 260,
+          "title": "Sample of papers flagged = Unmatched (sample n=50)",
+          "transform": [
+            {"filter": "datum.match_status === 'Unmatched'"},
+            {"sample": 50},
+            {"calculate": "datum.Title + ' — ' + (datum.Year || '') + ' — ' + (datum.PaperType || '') + (datum.AuthorKeywords ? ' — ' + datum.AuthorKeywords : '')", "as": "summary"},
+            {"window": [{"op": "row_number", "as": "rownum"}]},
+            {"calculate": "datum.rownum.toString()", "as": "row_label"}
+          ],
+          "mark": {"type": "text", "align": "left", "baseline": "middle"},
+          "encoding": {
+            "y": {"field": "row_label", "type": "ordinal", "axis": null},
+            "x": {"value": 0},
+            "text": {"field": "summary", "type": "nominal"},
+            "tooltip": [
+              {"field": "Title", "type": "nominal", "title": "Title"},
+              {"field": "AuthorKeywords", "type": "nominal", "title": "AuthorKeywords"},
+              {"field": "Year", "type": "temporal", "title": "Year"},
+              {"field": "PaperType", "type": "nominal", "title": "PaperType"}
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "config": {"view": {"stroke": "transparent"}, "axis": {"labelFontSize": 11, "titleFontSize": 12}, "title": {"fontSize": 13}}
+})
+      .catch(console.error);
+  </script>
+  <div>How to present the taxonomy and examples succinctly in a short section (single figure + short table)? (Design metrics for a compact figure.)</div>
+  <div id='vis4'></div>
+  <script>
+    vegaEmbed('#vis4', {
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Counts of papers matched to automated-visualization subtypes (by keyword) and the top 3 exemplar papers per subtype by citation.",
+  "data": { "url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv" },
+  "hconcat": [
+    {
+      "title": "Matched papers per Auto-Vis subtype",
+      "width": 300,
+      "height": 220,
+      "transform": [
+        {
+          "calculate": "(test(/visualization recommendation/i, (datum.AuthorKeywords||'')+' '+(datum.Abstract||'')+' '+(datum.Title||'')) ? 'Recommendation' : (test(/visualization generation|vis generation|automatic vis|automated vis/i, (datum.AuthorKeywords||'')+' '+(datum.Abstract||'')+' '+(datum.Title||'')) ? 'Generation' : (test(/mixed initiative|mixed-initiative/i, (datum.AuthorKeywords||'')+' '+(datum.Abstract||'')+' '+(datum.Title||'')) ? 'Mixed-initiative' : (test(/\\bagent\\b/i, (datum.AuthorKeywords||'')+' '+(datum.Abstract||'')+' '+(datum.Title||'')) ? 'Agents' : 'Other'))))",
+          "as": "subtype"
+        },
+        {
+          "calculate": "(toNumber(datum.CitationCount_CrossRef) || toNumber(datum.AminerCitationCount) || 0)",
+          "as": "citations"
+        },
+        { "filter": "datum.subtype != 'Other'" },
+        { "aggregate": [{ "op": "count", "as": "count" }], "groupby": ["subtype"] }
+      ],
+      "mark": { "type": "bar", "cornerRadiusEnd": 3 },
+      "encoding": {
+        "y": {
+          "field": "subtype",
+          "type": "nominal",
+          "title": null,
+          "axis": { "labelLimit": 160 },
+          "sort": "-x"
+        },
+        "x": { "field": "count", "type": "quantitative", "title": "Matched papers (count)" },
+        "color": { "field": "subtype", "type": "nominal", "legend": null }
+      }
+    },
+    {
+      "title": "Top exemplars (top 3 by citations per subtype)",
+      "width": 540,
+      "height": 220,
+      "transform": [
+        {
+          "calculate": "(test(/visualization recommendation/i, (datum.AuthorKeywords||'')+' '+(datum.Abstract||'')+' '+(datum.Title||'')) ? 'Recommendation' : (test(/visualization generation|vis generation|automatic vis|automated vis/i, (datum.AuthorKeywords||'')+' '+(datum.Abstract||'')+' '+(datum.Title||'')) ? 'Generation' : (test(/mixed initiative|mixed-initiative/i, (datum.AuthorKeywords||'')+' '+(datum.Abstract||'')+' '+(datum.Title||'')) ? 'Mixed-initiative' : (test(/\\bagent\\b/i, (datum.AuthorKeywords||'')+' '+(datum.Abstract||'')+' '+(datum.Title||'')) ? 'Agents' : 'Other'))))",
+          "as": "subtype"
+        },
+        {
+          "calculate": "(toNumber(datum.CitationCount_CrossRef) || toNumber(datum.AminerCitationCount) || 0)",
+          "as": "citations"
+        },
+        {
+          "calculate": "(datum.Title || '') + (datum.Year ? ' (' + datum.Year + ')' : '')",
+          "as": "label"
+        },
+        { "filter": "datum.subtype != 'Other'" },
+        {
+          "window": [
+            { "op": "rank", "as": "rank", "sort": [{ "field": "citations", "order": "descending" }] }
+          ],
+          "groupby": ["subtype"]
+        },
+        { "filter": "datum.rank <= 3" }
+      ],
+      "mark": { "type": "text", "align": "left", "baseline": "middle" },
+      "encoding": {
+        "y": {
+          "field": "subtype",
+          "type": "nominal",
+          "title": null,
+          "axis": { "labels": true, "labelLimit": 160 }
+        },
+        "x": {
+          "field": "rank",
+          "type": "ordinal",
+          "title": "rank",
+          "axis": { "domain": false, "ticks": false, "labels": false }
+        },
+        "text": { "field": "label", "type": "nominal" },
+        "tooltip": [
+          { "field": "label", "type": "nominal", "title": "Title (Year)" },
+          { "field": "citations", "type": "quantitative", "title": "Citations (CrossRef/Aminer)" },
+          { "field": "rank", "type": "quantitative", "title": "Rank" }
+        ]
+      }
+    }
+  ],
+  "config": {
+    "axis": { "labelFontSize": 12, "titleFontSize": 13 },
+    "view": { "stroke": "transparent" }
+  }
+})
+      .catch(console.error);
+  </script>
+  <h3>Temporal trends and venue distribution</h3>
+  <p>Year-by-year counts and share of AutoVis vs Other papers (line/area charts), breakdown by conference (InfoVis, VAST, SciVis etc.), burst detection (where activity peaks/declines), and a short timeline of milestone papers. Visuals: stacked area, small multiples, annotated peaks.</p>
+  <div>How has the yearly count and share of AutoVis vs Other papers changed over time, and where are the largest activity peaks or bursts?</div>
+  <div id='vis5'></div>
+  <script>
+    vegaEmbed('#vis5', {
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Yearly counts (stacked area) of AutoVis vs Other papers, with AutoVis share (line) and burst points highlighted. AutoVis is detected by keyword matching in Title/Abstract/AuthorKeywords.",
+  "data": { "url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv" },
+  "transform": [
+    {
+      "calculate": "test(/automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent/i, (datum.AuthorKeywords || '') + ' ' + (datum.Abstract || '') + ' ' + (datum.Title || '')) ? 'AutoVis' : 'Other'",
+      "as": "Category"
+    },
+    {
+      "aggregate": [{ "op": "count", "as": "Count" }],
+      "groupby": ["Year", "Category"]
+    },
+    {
+      "joinaggregate": [{ "op": "sum", "field": "Count", "as": "Total" }],
+      "groupby": ["Year"]
+    },
+    {
+      "window": [{ "op": "lag", "field": "Count", "as": "PrevCount" }],
+      "groupby": ["Category"],
+      "sort": [{ "field": "Year", "order": "ascending" }]
+    },
+    { "calculate": "datum.Count / datum.Total", "as": "Share" },
+    { "calculate": "datum.PrevCount == null ? null : (datum.Count - datum.PrevCount) / datum.PrevCount", "as": "YoYGrowth" },
+    { "calculate": "datum.PrevCount == null ? false : ((datum.YoYGrowth > 0.5) || ((datum.Count - datum.PrevCount) >= 5))", "as": "Burst" }
+  ],
+  "width": 750,
+  "height": 360,
+  "layer": [
+    {
+      "mark": { "type": "area", "opacity": 0.65, "interpolate": "monotone" },
+      "encoding": {
+        "x": { "timeUnit": "year", "field": "Year", "type": "temporal", "axis": { "title": "Year" } },
+        "y": { "field": "Count", "type": "quantitative", "axis": { "title": "Papers per year" } },
+        "color": { "field": "Category", "type": "nominal", "legend": { "title": "Category" }, "scale": { "scheme": "category10" } },
+        "tooltip": [
+          { "timeUnit": "year", "field": "Year", "type": "temporal", "title": "Year" },
+          { "field": "Category", "type": "nominal", "title": "Category" },
+          { "field": "Count", "type": "quantitative", "title": "Count" },
+          { "field": "Total", "type": "quantitative", "title": "Total (all categories)" }
+        ]
+      }
+    },
+    {
+      "transform": [{ "filter": "datum.Category === 'AutoVis'" }],
+      "mark": { "type": "line", "color": "#000000", "strokeWidth": 2, "interpolate": "monotone" },
+      "encoding": {
+        "x": { "timeUnit": "year", "field": "Year", "type": "temporal" },
+        "y": { "field": "Share", "type": "quantitative", "axis": { "title": "AutoVis share", "format": "%" }, "scale": { "domain": [0, 1] } },
+        "tooltip": [
+          { "timeUnit": "year", "field": "Year", "type": "temporal", "title": "Year" },
+          { "field": "Count", "type": "quantitative", "title": "AutoVis count" },
+          { "field": "Share", "type": "quantitative", "title": "AutoVis share", "format": ".2%" },
+          { "field": "YoYGrowth", "type": "quantitative", "title": "YoY growth", "format": ".2%" }
+        ]
+      }
+    },
+    {
+      "transform": [
+        { "filter": "datum.Category === 'AutoVis' && datum.Burst === true" }
+      ],
+      "mark": { "type": "point", "filled": true, "size": 120, "color": "#d62728" },
+      "encoding": {
+        "x": { "timeUnit": "year", "field": "Year", "type": "temporal" },
+        "y": { "field": "Share", "type": "quantitative" },
+        "tooltip": [
+          { "timeUnit": "year", "field": "Year", "type": "temporal", "title": "Year" },
+          { "field": "Count", "type": "quantitative", "title": "AutoVis count" },
+          { "field": "PrevCount", "type": "quantitative", "title": "Previous year count" },
+          { "field": "Share", "type": "quantitative", "title": "AutoVis share", "format": ".2%" },
+          { "field": "YoYGrowth", "type": "quantitative", "title": "YoY growth", "format": ".2%" }
+        ]
+      }
+    }
+  ],
+  "resolve": { "scale": { "y": "independent" } },
+  "title": "AutoVis vs Other: Yearly counts and AutoVis share (bursts highlighted)"
+})
+      .catch(console.error);
+  </script>
+  <div>How do temporal trends of AutoVis (counts and share) differ across major venues (conferences)?</div>
+  <div id='vis6'></div>
+  <script>
+    vegaEmbed('#vis6', {
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Small multiples per selected conferences showing yearly counts (stacked area of AutoVis vs Other) and AutoVis share (line) to compare temporal trends across venues.",
+  "data": {
+    "url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv",
+    "format": { "type": "csv" }
+  },
+  "transform": [
+    {
+      "calculate": "test(/automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent/i, (datum['AuthorKeywords'] || '') + ' ' + (datum['Abstract'] || '') + ' ' + (datum['Title'] || '')) ? 'AutoVis' : 'Other'",
+      "as": "Category"
+    },
+    {
+      "filter": "indexof(['InfoVis','VAST','SciVis','EuroVis','PacificVis','CHI'], datum.Conference) >= 0"
+    },
+    {
+      "aggregate": [
+        { "op": "count", "as": "count" }
+      ],
+      "groupby": ["Year", "Conference", "Category"]
+    },
+    {
+      "joinaggregate": [
+        { "op": "sum", "field": "count", "as": "year_conf_total" }
+      ],
+      "groupby": ["Year", "Conference"]
+    },
+    {
+      "calculate": "datum.count / datum.year_conf_total",
+      "as": "share"
+    }
+  ],
+  "vconcat": [
+    {
+      "title": "Counts per year (stacked AutoVis vs Other)",
+      "height": 160,
+      "width": 320,
+      "facet": { "field": "Conference", "type": "nominal", "columns": 2 },
+      "spec": {
+        "mark": { "type": "area", "interpolate": "monotone", "opacity": 0.7 },
+        "encoding": {
+          "x": {
+            "timeUnit": "year",
+            "field": "Year",
+            "type": "temporal",
+            "axis": { "title": "Year" }
+          },
+          "y": {
+            "field": "count",
+            "type": "quantitative",
+            "axis": { "title": "Papers (count)" }
+          },
+          "color": {
+            "field": "Category",
+            "type": "nominal",
+            "legend": { "title": "Category" }
+          },
+          "tooltip": [
+            { "field": "Conference", "type": "nominal" },
+            { "timeUnit": "year", "field": "Year", "type": "temporal", "title": "Year" },
+            { "field": "Category", "type": "nominal" },
+            { "field": "count", "type": "quantitative", "title": "Papers" }
+          ]
+        }
+      }
+    },
+    {
+      "title": "AutoVis share per year",
+      "height": 120,
+      "width": 320,
+      "facet": { "field": "Conference", "type": "nominal", "columns": 2 },
+      "spec": {
+        "transform": [ { "filter": "datum.Category === 'AutoVis'" } ],
+        "mark": { "type": "line", "point": true, "interpolate": "monotone", "color": "#333" },
+        "encoding": {
+          "x": {
+            "timeUnit": "year",
+            "field": "Year",
+            "type": "temporal",
+            "axis": { "title": "Year" }
+          },
+          "y": {
+            "field": "share",
+            "type": "quantitative",
+            "axis": { "title": "AutoVis share", "format": "%" }
+          },
+          "tooltip": [
+            { "field": "Conference", "type": "nominal" },
+            { "timeUnit": "year", "field": "Year", "type": "temporal", "title": "Year" },
+            { "field": "share", "type": "quantitative", "title": "AutoVis share", "format": ".1%" },
+            { "field": "count", "type": "quantitative", "title": "AutoVis papers" }
+          ]
+        }
+      }
+    }
+  ],
+  "config": {
+    "axis": { "labelFontSize": 11, "titleFontSize": 12 },
+    "legend": { "labelFontSize": 11, "titleFontSize": 12 }
+  }
+})
+      .catch(console.error);
+  </script>
+  <h3>Topic evolution and content analysis</h3>
+  <p>Keyword and abstract-based topic analysis to show how research themes within AutoVis shifted over time (e.g., rule-based recommendation → ML-driven generation → mixed-initiative agents). Visuals: evolving word clouds, topic timelines, representative abstracts for each period.</p>
+  <div>How did the prevalence of predefined AutoVis themes (rule-based recommendation, ML-driven generation, mixed-initiative agents, visualization toolkits, and evaluation/narrative) change over time (yearly or multi-year periods)?</div>
+  <div id='vis7'></div>
+  <script>
+    vegaEmbed('#vis7', {
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Trends of predefined AutoVis themes over time (counts per year). Papers may belong to multiple themes and are counted for each matched theme.",
+  "data": {
+    "url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv"
+  },
+  "transform": [
+    {
+      "calculate": "test(/automatic vis|automated vis|visualization recommendation|visualization generation|vis generation/i, ((datum.Title||'') + ' ' + (datum.Abstract||'') + ' ' + (datum.AuthorKeywords||''))) ? 1 : 0",
+      "as": "reco_flag"
+    },
+    {
+      "calculate": "test(/machine learning|deep learning|neural|ml-driven|ml driven|neural network|transformer/i, ((datum.Title||'') + ' ' + (datum.Abstract||'') + ' ' + (datum.AuthorKeywords||''))) ? 1 : 0",
+      "as": "ml_flag"
+    },
+    {
+      "calculate": "test(/mixed initiative|mixed-initiative|agent/i, ((datum.Title||'') + ' ' + (datum.Abstract||'') + ' ' + (datum.AuthorKeywords||''))) ? 1 : 0",
+      "as": "mixed_flag"
+    },
+    {
+      "calculate": "test(/toolkit|library|\bd3\b|d3.js|d3\./i, ((datum.Title||'') + ' ' + (datum.Abstract||'') + ' ' + (datum.AuthorKeywords||''))) ? 1 : 0",
+      "as": "toolkit_flag"
+    },
+    {
+      "calculate": "test(/narrative|evaluation|user study|user studies|study|experiment|empirical|case study/i, ((datum.Title||'') + ' ' + (datum.Abstract||'') + ' ' + (datum.AuthorKeywords||''))) ? 1 : 0",
+      "as": "eval_flag"
+    },
+    {
+      "fold": ["reco_flag", "ml_flag", "mixed_flag", "toolkit_flag", "eval_flag"],
+      "as": ["theme", "flag"]
+    },
+    {
+      "filter": "datum.flag == 1"
+    },
+    {
+      "aggregate": [{ "op": "count", "as": "count" }],
+      "groupby": ["Year", "theme"]
+    },
+    {
+      "calculate": "datum.theme === 'reco_flag' ? 'recommendation/generation' : (datum.theme === 'ml_flag' ? 'ML-driven' : (datum.theme === 'mixed_flag' ? 'mixed-initiative' : (datum.theme === 'toolkit_flag' ? 'toolkit' : (datum.theme === 'eval_flag' ? 'evaluation/narrative' : datum.theme))))",
+      "as": "Theme"
+    }
+  ],
+  "width": 760,
+  "height": 360,
+  "mark": {
+    "type": "area",
+    "interpolate": "monotone",
+    "opacity": 0.8
+  },
+  "encoding": {
+    "x": {
+      "field": "Year",
+      "type": "temporal",
+      "timeUnit": "year",
+      "title": "Year",
+      "axis": { "format": "%Y", "labelAngle": 0 }
+    },
+    "y": {
+      "field": "count",
+      "type": "quantitative",
+      "stack": "zero",
+      "title": "Number of papers (count)"
+    },
+    "color": {
+      "field": "Theme",
+      "type": "nominal",
+      "title": "Theme",
+      "scale": { "scheme": "tableau10" }
+    },
+    "tooltip": [
+      { "field": "Theme", "type": "nominal", "title": "Theme" },
+      { "field": "count", "type": "quantitative", "title": "Papers (count)" },
+      { "field": "Year", "type": "temporal", "timeUnit": "year", "title": "Year" }
+    ]
+  },
+  "config": {
+    "axis": { "labelFontSize": 12, "titleFontSize": 13 },
+    "legend": { "labelFontSize": 12, "titleFontSize": 13 }
+  }
+})
+      .catch(console.error);
+  </script>
+  <div>What latent topics emerge from abstracts (via topic modeling) and how do their relative proportions evolve over time?</div>
+  <div id='vis8'></div>
+  <script>
+    vegaEmbed('#vis8', {
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Trend of thematic (pseudo-topic) proportions over time based on rule-based keyword matching on Title + Abstract + AuthorKeywords. This approximates topic trajectories (rule-based, ML-driven, mixed-initiative, toolkit, evaluation/narrative).",
+  "data": {"url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv", "format": {"type": "csv"}},
+  "transform": [
+    {"calculate": "(datum.Title || '') + ' ' + (datum.Abstract || '') + ' ' + (datum.AuthorKeywords || '')", "as": "text"},
+
+    {"calculate": "test(/visualization recommendation|automatic vis|automated vis|visualization generation|vis generation/i, datum.text) ? 1 : 0", "as": "rule"},
+    {"calculate": "test(/machine learning|deep learning|neural|neural network|reinforcement learning|cnn|rnn|transformer/i, datum.text) ? 1 : 0", "as": "ml"},
+    {"calculate": "test(/mixed initiative|mixed-initiative|agent|agents|assistant/i, datum.text) ? 1 : 0", "as": "mixed"},
+    {"calculate": "test(/toolkit|library|d3\b|d3.js|framework|api|toolkit/i, datum.text) ? 1 : 0", "as": "toolkit"},
+    {"calculate": "test(/narrative|evaluation|user study|user-study|empirical|usability|user evaluation|user-evaluation/i, datum.text) ? 1 : 0", "as": "evaluation"},
+
+    {"fold": ["rule", "ml", "mixed", "toolkit", "evaluation"], "as": ["theme", "value"]},
+    {"filter": "datum.value == 1"},
+
+    {"aggregate": [{"op": "count", "as": "count"}], "groupby": ["Year", "theme"]},
+    {"joinaggregate": [{"op": "sum", "field": "count", "as": "year_total"}], "groupby": ["Year"]},
+    {"calculate": "datum.count / (datum.year_total || 1)", "as": "proportion"},
+    {"calculate": "parseInt(datum.Year)", "as": "Year_num"}
+  ],
+
+  "width": 700,
+  "height": 360,
+
+  "mark": {"type": "line", "point": true, "interpolate": "monotone"},
+
+  "encoding": {
+    "x": {
+      "field": "Year_num",
+      "type": "quantitative",
+      "title": "Year",
+      "axis": {"format": "d"}
+    },
+    "y": {
+      "field": "proportion",
+      "type": "quantitative",
+      "title": "Proportion of matched papers",
+      "axis": {"format": ".0%"}
+    },
+    "color": {"field": "theme", "type": "nominal", "title": "Theme"},
+
+    "tooltip": [
+      {"field": "Year", "type": "ordinal", "title": "Year"},
+      {"field": "theme", "type": "nominal", "title": "Theme"},
+      {"field": "count", "type": "quantitative", "title": "Count"},
+      {"field": "proportion", "type": "quantitative", "title": "Proportion", "format": ".2%"}
+    ]
+  },
+
+  "resolve": {"legend": {"title": "Theme"}}
+}
+)
+      .catch(console.error);
+  </script>
+  <h3>Impact and community structure</h3>
+  <p>Citation and usage analysis (Aminer / CrossRef / Xplore), award and replicability-stamp signals, plus social structure: co-author network, institution contributions, and diffusion of ideas across subcommunities. Visuals: citation histograms, network graphs, choropleth or affiliation bar charts.</p>
+  <div>What is the citation / usage distribution of papers in the dataset and which papers are clear outliers (high-impact)?</div>
+  <div id='vis9'></div>
+  <script>
+    vegaEmbed('#vis9', {"$schema":"https://vega.github.io/schema/vega-lite/v5.json","data":{"url":"https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv"},"transform":[{"filter":"isFinite(datum.AminerCitationCount)"},{"calculate":"log10((datum.AminerCitationCount || 0) + 1)","as":"log_cite"}],"width":700,"height":320,"mark":{"type":"bar","opacity":0.85},"encoding":{"x":{"field":"log_cite","type":"quantitative","bin":{"maxbins":40},"axis":{"title":"log10(AminerCitationCount + 1)","labelAngle":0}},"y":{"aggregate":"count","type":"quantitative","axis":{"title":"Number of papers"}},"color":{"field":"Conference","type":"nominal","legend":{"title":"Conference"},"scale":{"scheme":"category10"}},"tooltip":[{"aggregate":"count","type":"quantitative","title":"Papers"},{"field":"log_cite","type":"quantitative","title":"log10(AminerCitationCount + 1) (binned)"},{"field":"Year","type":"temporal","title":"Year (example)"}]} ,"title":"Distribution of paper citations (AminerCitationCount) on log10 scale (40 bins)"})
+      .catch(console.error);
+  </script>
+  <div>What is the co-author social structure: who are the most central authors and what subcommunities (clusters) exist?</div>
+  <div id='vis10'></div>
+  <script>
+    vegaEmbed('#vis10', {
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Top authors by estimated coauthorship links (sum of coauthors per paper). This approximates centrality: for each paper we count (num_authors - 1) links for each author and sum across their papers. Tooltip shows paper count and total Aminer citations.",
+  "data": {"url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv"},
+  "transform": [
+    {"calculate": "split(datum['AuthorNames-Deduped'] || '', ';')", "as": "author_list"},
+    {"calculate": "length(datum.author_list)", "as": "numAuthors"},
+    {"calculate": "(datum.numAuthors ? datum.numAuthors - 1 : 0)", "as": "coauthor_links"},
+    {"flatten": ["author_list"], "as": ["author"]},
+    {"calculate": "trim(datum.author)", "as": "author_trim"},
+    {"filter": "datum.author_trim != null && datum.author_trim !== ''"},
+    {"aggregate": [
+      {"op": "sum", "field": "coauthor_links", "as": "coauthor_links"},
+      {"op": "count", "as": "papers"},
+      {"op": "sum", "field": "AminerCitationCount", "as": "citations"}
+    ], "groupby": ["author_trim"]},
+    {"calculate": "datum.citations ? (datum.citations / datum.papers) : 0", "as": "avg_citation"},
+    {"window": [{"op": "rank", "as": "rank"}], "sort": [{"field": "coauthor_links", "order": "descending"}]},
+    {"filter": "datum.rank <= 30"}
+  ],
+  "mark": {"type": "bar", "tooltip": true},
+  "encoding": {
+    "x": {
+      "field": "coauthor_links",
+      "type": "quantitative",
+      "title": "Estimated coauthor links (sum of num_authors - 1)",
+      "axis": {"grid": true}
+    },
+    "y": {
+      "field": "author_trim",
+      "type": "nominal",
+      "title": "Author",
+      "sort": {"field": "coauthor_links", "op": "sum", "order": "descending"}
+    },
+    "color": {
+      "field": "avg_citation",
+      "type": "quantitative",
+      "title": "Avg Aminer citations per paper",
+      "scale": {"scheme": "blues"}
+    },
+    "tooltip": [
+      {"field": "author_trim", "type": "nominal", "title": "Author"},
+      {"field": "coauthor_links", "type": "quantitative", "title": "Estimated coauthor links"},
+      {"field": "papers", "type": "quantitative", "title": "Paper count"},
+      {"field": "citations", "type": "quantitative", "title": "Total Aminer citations"},
+      {"field": "avg_citation", "type": "quantitative", "title": "Avg citations / paper", "format": ".2f"}
+    ]
+  },
+  "width": 800,
+  "height": 600,
+  "title": "Top 30 Authors by Estimated Coauthorship Links (proxy for centrality)"
+})
+      .catch(console.error);
+  </script>
+  <div>Which institutions (and countries) contribute the most papers and citations, and how is contribution distributed geographically?</div>
+  <div id='vis11'></div>
+  <script>
+    vegaEmbed('#vis11', {
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Top 20 countries by number of papers (based on first listed affiliation) with citation sums shown by color.",
+  "data": { "url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv" },
+  "width": 800,
+  "height": 500,
+  "transform": [
+    {
+      "calculate": "datum.AuthorAffiliation ? replace(split(datum.AuthorAffiliation, ';')[0], '.*,\\s*([^,;]+)\\s*$', '$1') : 'Unknown'",
+      "as": "country"
+    },
+    {
+      "aggregate": [
+        { "op": "count", "as": "papers" },
+        { "op": "sum", "field": "AminerCitationCount", "as": "citations" }
+      ],
+      "groupby": ["country"]
+    },
+    {
+      "window": [{ "op": "rank", "as": "rank" }],
+      "sort": [{ "field": "papers", "order": "descending" }]
+    },
+    { "filter": "datum.rank <= 20" }
+  ],
+  "mark": { "type": "bar", "cornerRadius": 3 },
+  "encoding": {
+    "y": {
+      "field": "country",
+      "type": "nominal",
+      "title": "Country (from first listed affiliation)",
+      "sort": "-x"
+    },
+    "x": {
+      "field": "papers",
+      "type": "quantitative",
+      "title": "Number of papers"
+    },
+    "color": {
+      "field": "citations",
+      "type": "quantitative",
+      "title": "Sum of AminerCitationCount",
+      "scale": { "scheme": "blues" }
+    },
+    "tooltip": [
+      { "field": "country", "type": "nominal", "title": "Country" },
+      { "field": "papers", "type": "quantitative", "title": "Papers" },
+      { "field": "citations", "type": "quantitative", "title": "Sum Citations (Aminer)" }
+    ]
+  },
+  "title": "Top 20 Countries by Paper Count (first listed affiliation) — citations colored"
+})
+      .catch(console.error);
+  </script>
+  <h3>Case studies and narratives</h3>
+  <p>Deep dives into 3–4 influential/representative works (methods, reception, downstream influence) illustrating how approaches matured or stalled, and how tooling/community shaped follow-up research.</p>
+  <div>Which 3–4 papers in the dataset that match the 'automated visualization' keyword set are the most influential and representative candidates for case studies? (Use combined influence metrics to rank candidates.)</div>
+  <div id='vis12'></div>
+  <script>
+    vegaEmbed('#vis12', {  
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Top 4 candidate 'automated visualization' papers ranked by a combined normalized influence score (CrossRef citations, Aminer citations, downloads). Filters dataset for automated-visualization keywords in Title/Abstract/AuthorKeywords.",
+  "data": {
+    "url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv",
+    "format": { "type": "csv" }
+  },
+  "transform": [
+    {
+      "calculate": "test(/automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent/i, (datum.AuthorKeywords || '') + ' ' + (datum.Abstract || '') + ' ' + (datum.Title || '')) ? 'AutoVis' : 'Other'",
+      "as": "textSearch"
+    },
+    { "filter": "datum.textSearch === 'AutoVis'" },
+    {
+      "window": [
+        { "op": "min", "field": "CitationCount_CrossRef", "as": "minCit" },
+        { "op": "max", "field": "CitationCount_CrossRef", "as": "maxCit" },
+        { "op": "min", "field": "AminerCitationCount", "as": "minAmin" },
+        { "op": "max", "field": "AminerCitationCount", "as": "maxAmin" },
+        { "op": "min", "field": "Downloads_Xplore", "as": "minDl" },
+        { "op": "max", "field": "Downloads_Xplore", "as": "maxDl" }
+      ],
+      "frame": [ null, null ]
+    },
+    {
+      "calculate": "(toNumber(datum.CitationCount_CrossRef) - datum.minCit) / (datum.maxCit - datum.minCit + 1e-6)",
+      "as": "normCrossRef"
+    },
+    {
+      "calculate": "(toNumber(datum.AminerCitationCount) - datum.minAmin) / (datum.maxAmin - datum.minAmin + 1e-6)",
+      "as": "normAminer"
+    },
+    {
+      "calculate": "(toNumber(datum.Downloads_Xplore) - datum.minDl) / (datum.maxDl - datum.minDl + 1e-6)",
+      "as": "normDownloads"
+    },
+    {
+      "calculate": "0.45 * datum.normCrossRef + 0.45 * datum.normAminer + 0.10 * datum.normDownloads",
+      "as": "combinedScore"
+    },
+    {
+      "window": [ { "op": "rank", "as": "rank" } ],
+      "sort": [ { "field": "combinedScore", "order": "descending" } ]
+    },
+    { "filter": "datum.rank <= 4" },
+    {
+      "calculate": "(datum.Award && datum.Award !== '') ? datum.Award : 'None'",
+      "as": "awardLabel"
+    }
+  ],
+  "mark": { "type": "bar", "tooltip": true, "cornerRadius": 2 },
+  "encoding": {
+    "y": {
+      "field": "Title",
+      "type": "nominal",
+      "title": "Paper Title",
+      "sort": { "field": "combinedScore", "order": "descending" }
+    },
+    "x": {
+      "field": "combinedScore",
+      "type": "quantitative",
+      "title": "Combined influence score (normalized)",
+      "axis": { "format": ".2f" }
+    },
+    "color": {
+      "field": "awardLabel",
+      "type": "nominal",
+      "title": "Award",
+      "scale": { "scheme": "category10" }
+    },
+    "tooltip": [
+      { "field": "Title", "type": "nominal", "title": "Title" },
+      { "field": "Year", "type": "ordinal", "title": "Year" },
+      { "field": "CitationCount_CrossRef", "type": "quantitative", "title": "CrossRef citations" },
+      { "field": "AminerCitationCount", "type": "quantitative", "title": "Aminer citations" },
+      { "field": "Downloads_Xplore", "type": "quantitative", "title": "Downloads (Xplore)" },
+      { "field": "combinedScore", "type": "quantitative", "title": "Combined score", "format": ".3f" },
+      { "field": "awardLabel", "type": "nominal", "title": "Award" },
+      { "field": "AuthorKeywords", "type": "nominal", "title": "AuthorKeywords" }
+    ]
+  },
+  "width": 700,
+  "height": 240,
+  "title": "Top 4 Automated-visualization candidate papers by combined influence score"
+})
+      .catch(console.error);
+  </script>
+  <div>For each selected candidate paper, what is its downstream influence within this dataset over time as measured by internal citations (occurrences of its DOI in other papers' InternalReferences) and how does that compare to its general citation counts?</div>
+  <div id='vis13'></div>
+  <script>
+    vegaEmbed('#vis13', {
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {
+    "url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv",
+    "format": { "type": "csv" }
+  },
+  "transform": [
+    {
+      "filter": "test(/automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent/i, (datum.AuthorKeywords || '') + ' ' + (datum.Abstract || '') + ' ' + (datum.Title || ''))"
+    },
+    {
+      "calculate": "(datum.InternalReferences && datum.InternalReferences != '') ? length(split(datum.InternalReferences, ';')) : 0",
+      "as": "num_internal_refs"
+    },
+    {
+      "aggregate": [
+        { "op": "sum", "field": "num_internal_refs", "as": "total_internal_refs" },
+        { "op": "mean", "field": "CitationCount_CrossRef", "as": "avg_citation_crossref" },
+        { "op": "mean", "field": "AminerCitationCount", "as": "avg_aminer" },
+        { "op": "count", "field": "Title", "as": "paper_count" }
+      ],
+      "groupby": ["Year"]
+    }
+  ],
+  "resolve": { "scale": { "y": "independent" } },
+  "layer": [
+    {
+      "mark": { "type": "bar", "opacity": 0.75 },
+      "encoding": {
+        "x": { "field": "Year", "type": "ordinal", "axis": { "title": "Year" } },
+        "y": { "field": "total_internal_refs", "type": "quantitative", "axis": { "title": "Total internal references (count)" } },
+        "color": { "value": "#4c78a8" },
+        "tooltip": [
+          { "field": "Year", "type": "ordinal" },
+          { "field": "total_internal_refs", "type": "quantitative", "title": "Total internal refs" },
+          { "field": "paper_count", "type": "quantitative", "title": "# AutoVis papers" }
+        ]
+      }
+    },
+    {
+      "mark": { "type": "line", "point": true, "strokeWidth": 2 },
+      "encoding": {
+        "x": { "field": "Year", "type": "ordinal" },
+        "y": { "field": "avg_citation_crossref", "type": "quantitative", "axis": { "title": "Avg CitationCount_CrossRef" } },
+        "color": { "value": "#f58518" },
+        "tooltip": [
+          { "field": "Year", "type": "ordinal" },
+          { "field": "avg_citation_crossref", "type": "quantitative", "title": "Avg CitationCount_CrossRef" },
+          { "field": "avg_aminer", "type": "quantitative", "title": "Avg AminerCitationCount" }
+        ]
+      }
+    }
+  ],
+  "title": "AutoVis-related papers: internal references made per year (bars) vs average external citation counts (line)",
+  "width": 700,
+  "height": 320
+})
+      .catch(console.error);
+  </script>
+  <h3>Conclusions, limitations and recommendations</h3>
+  <p>Synthesize findings, highlight dataset and method limitations (keyword false positives/negatives, venue coverage), and propose concrete next steps for the research community (evaluation benchmarks, shared datasets, replications, program committee suggestions).</p>
+</body>
+</html>
