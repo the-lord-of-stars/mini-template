@@ -58,6 +58,8 @@ def select_data(state: State):
 
     new_state["dataframe"] = dataset
 
+    new_state["iteration_count"] = new_state.get("iteration_count", 0) + 1
+
     # Save the state to memory
     shared_memory.save_state(new_state)
     print(f"state saved to memory for thread {shared_memory.thread_id}")

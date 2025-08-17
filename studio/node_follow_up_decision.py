@@ -19,6 +19,16 @@ def follow_up_decision(state: State):
     Decide on follow-up question and whether to re-select data based on insights
     """
 
+    print(f"DEBUG: follow_up_decision received state keys: {list(state.keys())}")
+    print(f"DEBUG: Does state have 'insights'? {'insights' in state}")
+    print(f"DEBUG: Does state have 'topic_analysis_result'? {'topic_analysis_result' in state}")
+    print(f"DEBUG: Does state have 'question'? {'question' in state}")
+    if 'question' in state:
+        print(f"DEBUG: question value: {state['question']}")
+    if 'topic_analysis_result' in state:
+        print(f"DEBUG: topic_analysis_result keys: {list(state['topic_analysis_result'].keys())}")
+        print(f"DEBUG: topic_analysis_result has insights: {'insights' in state['topic_analysis_result']}")
+
     # Get current iteration info
     current_iteration = state.get("iteration_count", 0)
     max_iterations = state.get("max_iterations", 3)
@@ -109,14 +119,23 @@ def follow_up_decision(state: State):
     new_state["should_continue"] = should_continue
     print(f"Iteration {current_iteration}/{max_iterations}, continuing: {should_continue}")
 
-    # Increment iteration count after completing this iteration
-    new_state["iteration_count"] = current_iteration + 1
+    
 
-    # Save the state to memory
+    if should_continue and current_iteration < max_iterations:
+        # Increment iteration count after completing this iteration
+        new_state["iteration_count"] = current_iteration + 1
+        new_state["should_continue"] = True  # 明确设置为继续
+    else:
+        # Stop iterations
+        new_state["should_continue"] = False  # 明确设置为停止
+        print("No more iterations needed")
+
+    # 统一保存状态
     shared_memory.save_state(new_state)
     print(f"state saved to memory for thread {shared_memory.thread_id}")
     print(f"Follow-up question: {response.follow_up_question}")
     print(f"Should re-select data: {response.should_reselect_data}")
     print(f"Reasoning: {response.reasoning}")
+    print(f"Iteration {new_state['iteration_count']}/{max_iterations}, continuing: {new_state['should_continue']}")
 
     return new_state

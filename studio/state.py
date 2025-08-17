@@ -18,6 +18,17 @@ class Question(TypedDict):
     handled: bool
     spec: str  # Vega-Lite specification
 
+class AnalysisPlan(TypedDict):
+    question_text: str
+    q_type: str
+    primary_attributes: list[str]
+    secondary_attributes: list[str]
+    transformation: str
+    expected_insights: list[str]
+    parameters: dict
+    visualization_types: list[str]
+    analysis_focus: str
+
 class Facts(TypedDict):
     code: str
     stdout: str
@@ -58,6 +69,7 @@ class State(InputState, TypedDict):
 
     select_data_state: SelectDataState #{description, sql_query, dataset_path}
     question: Question #{question, handled or not, spec}
+    analysis_plan: AnalysisPlan #{question_text, q_type, primary_attributes, secondary_attributes, transformation, expected_insights, parameters, visualization_types, analysis_focus}
     facts: Facts #{code, stdout, stderr, exit_code}
     insights: list[str]
 

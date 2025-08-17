@@ -256,7 +256,8 @@ def draw(state: State) -> State:
     """
     New drawing node: Use function calling to intelligently select visualization tools and generate charts
     """
-    # current_iteration = state.get("iteration_count", 0)
+    current_iteration = state.get("iteration_count", 0)
+    print(f"Current iteration: {current_iteration}")
     # max_iterations = state.get("max_iterations", 3)
     # current_insights = state.get("insights", [])
     try:

@@ -21,10 +21,10 @@ class Agent:
         """
 
         state = {
-            "topic": "evolution of visualization for sensemaking",
-            # "topic": "evolution of research on automated data visualization",
+            "topic": "evolution of sensemaking research based on publication trends and major topics",
+            # "topic": "top topics in this field and how they evolve over time",
             "iteration_count": 0,  # Initialize iteration counter
-            "max_iterations": 1,  # Set maximum iterations (adjust as needed) - counting starts from "iteration_count"
+            "max_iterations": 2,  # Set maximum iterations (adjust as needed) - counting starts from "iteration_count"+1
             "should_continue": True,  # Initialize to continue
             "iteration_history": []  # yuhan: this is not used
         }
@@ -53,8 +53,13 @@ class Agent:
         try:
             output_state = self.workflow.invoke(input_state, config={"configurable": {"thread_id": thread_id}})
         except Exception as e:
-            # output_state = self.workflow.get_latest_state()
-            output_state = shared_memory.get_state()
+            print(f"Workflow error: {e}")
+            # Get the latest state from memory history
+            history = shared_memory.get_history()
+            if history:
+                output_state = history[-1]
+            else:
+                output_state = input_state
         
         # Save the final state to memory
         shared_memory.save_state(output_state)

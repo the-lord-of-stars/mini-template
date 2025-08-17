@@ -2,4 +2,6 @@
 # LangGraph API
 .langgraph_api
 tool_author_network/
-outputs/
+outputs/simple_iteration/
+fig/
+test_elementary/

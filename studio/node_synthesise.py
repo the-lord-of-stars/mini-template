@@ -1076,8 +1076,8 @@ def add_findings_section(html_lines: List[str], summary: ReportSummary, iteratio
 
         print(f"adding iteration {iteration_idx} visualization ...")
         
-        if iteration_idx-1 < len(iteration_history) and "visualization" in iteration_history[iteration_idx-1]:
-            add_modern_visualization_to_html(html_lines, iteration_history[iteration_idx-1], iteration_idx)
+        if iteration_idx < len(iteration_history) and "visualization" in iteration_history[iteration_idx]:
+            add_modern_visualization_to_html(html_lines, iteration_history[iteration_idx], iteration_idx)
             print("added visualization")
         
         html_lines.extend([

@@ -29,7 +29,7 @@ def initialize_state(self) -> dict:
 | Parameter | Description | Recommended Values |
 |-----------|-------------|-------------------|
 | `topic` | Research topic for analysis | Customize based on your research interest |
-| `max_iterations` | Maximum analysis iterations | default for 3 iterations (avoid over-analysis) |
+| `max_iterations` | Maximum analysis iterations | default for 2 iterations (avoid over-analysis) |
 | `iteration_count` | Starting iteration count | Keep as 0 |
 | `should_continue` | Analysis continuation flag | Keep as True |
 | `iteration_history` | Historical records | Keep as empty list |
