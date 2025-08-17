@@ -1,0 +1,46 @@
+{
+    "report_sections": [
+        {
+            "section_number": 1,
+            "section_name": "Executive summary",
+            "section_size": "short",
+            "section_description": "One-page snapshot of the report: main questions (Did automated visualization research grow, shrink, or change focus?), headline findings we will demonstrate, and the key visuals to inspect. Designed for readers to grasp the answer quickly and decide which sections to read next."
+        },
+        {
+            "section_number": 2,
+            "section_name": "Data, definitions, and methods",
+            "section_size": "medium",
+            "section_description": "Clear, concise description of the VIS dataset fields we use (Year, Title, Abstract, AuthorKeywords, AuthorNames, AuthorAffiliation, Citation and download counts, InternalReferences, GraphicsReplicabilityStamp, etc.), how we define 'automated visualization' (keyword list + NLP topic signals), preprocessing steps (deduplication, author name disambiguation), and analytic methods: keyword time-series, topic modeling (temporal LDA or dynamic topic models), trend detection, citation trajectory analysis, co-authorship network construction, and reproducibility/code-availability checks. Also short note on limitations and biases (venue coverage, keyword sensitivity)."
+        },
+        {
+            "section_number": 3,
+            "section_name": "Temporal patterns: how much and when",
+            "section_size": "medium",
+            "section_description": "Visual timeline of papers matching 'automation' signals by year: absolute counts, share of conference, and 3-year moving average. Stacked-area or streamgraph breaking counts into subthemes (chart recommendation, layout automation, automated exploration, auto-annotation, ML-driven generation). Burst detection highlights years with notable increases/decreases. This section answers whether automated visualization research grew, plateaued, or shifted over time."
+        },
+        {
+            "section_number": 4,
+            "section_name": "What changed: methods, goals, and problem framing",
+            "section_size": "medium",
+            "section_description": "Topic-evolution analysis (temporal topic modeling and keyword co-occurrence) showing shifts in methodological emphasis (heuristic/rule-based \u2192 user studies \u2192 machine learning/generative models) and in application goals (exploration, recommendation, storytelling, dashboards). Visuals: Sankey or chord diagrams for topic transitions across time windows and small multiples of topic word clouds and representative abstracts."
+        },
+        {
+            "section_number": 5,
+            "section_name": "Community: who did the work and how collaboration shifted",
+            "section_size": "medium",
+            "section_description": "Co-authorship and affiliation analysis: networks of authors working on automated visualization, central actors and emerging groups, institution contributions, and author career trajectories (who moved into/out of this topic). Visuals: force-directed co-author graph with node color by dominant topic, timeline plots for top authors showing topic engagement across years, and institution participation maps."
+        },
+        {
+            "section_number": 6,
+            "section_name": "Impact, adoption, and reproducibility",
+            "section_size": "medium",
+            "section_description": "Measure scholarly and practical impact: citation trajectories (Aminer and CrossRef counts), Downloads_Xplore as adoption proxy, Awards and high-impact papers, and availability indicators (GraphicsReplicabilityStamp, Links/DOIs). Visuals: citation rank-vs-age plots, cohort comparison (automated-visualization vs rest of VIS), and a table/list of high-impact reproducible artifacts (tools/demos)."
+        },
+        {
+            "section_number": 7,
+            "section_name": "Synthesis, implications, and recommendations for researchers",
+            "section_size": "short",
+            "section_description": "Concise synthesis of what the analyses imply for the field (e.g., maturation areas, gaps, reproducibility issues, disciplinary crossovers), practical recommendations for researchers (promote reproducibility, benchmark datasets, hybrid human+ML approaches), and suggestions for future measurements. Includes pointers to the dataset and reproducible notebooks so readers can reproduce and extend the analyses."
+        }
+    ]
+}
