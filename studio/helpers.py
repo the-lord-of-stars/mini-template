@@ -156,7 +156,8 @@ def update_state(state: State, result: dict):
         }
         print("DEBUG: Set visualizations in new_state")
     
-    new_state["iteration_history"] = state.get("iteration_history", []) + [result]
+    # iteration_history = state["iteration_history"] if "iteration_history" in state and state["iteration_history"] is not None else []
+    new_state["iteration_history"] = state["iteration_history"] + [result]
     print(f"DEBUG: Updated iteration_history, length: {len(new_state['iteration_history'])}")
 
     # Save state to memory

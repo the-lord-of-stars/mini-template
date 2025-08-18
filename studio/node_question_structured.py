@@ -11,38 +11,91 @@ from pydantic import Field
 # class ResponseFormatter(BaseModel):
 #     question: str
 
-class AnalysisPlan(BaseModel):
-    """Structured analysis plan schema"""
-    question_text: str = Field(..., description="The original user question")
-    q_type: QuestionType = Field(..., description="Type of question/analysis")
-    primary_attributes: List[PrimaryAttribute] = Field(..., description="Primary data column to analyze")
-    secondary_attributes: List[SecondaryAttribute] = Field(..., description="Secondary columns to analyze")
-    transformation: TransformationType = Field(..., description="Data transformation method")
-    expected_insights: List[InsightType] = Field(..., description="Types of insights expected")
-    parameters: AnalysisParameters = Field(default_factory=AnalysisParameters, description="Analysis parameters")
-    visualization_types: List[VisualizationType] = Field(..., description="Types of visualizations to create")
-    analysis_focus: Optional[str] = Field(default="general", description="Focus area of the analysis")
-    reasoning: Optional[str] = Field(default="", description="Reasoning for this analysis plan")
+class AnalysisDecision(BaseModel):
+    """Analysis decision with analysis module selection"""
+    question_text: str = Field(..., description="A specific analytical question based on the user question")
+    analysis_text: str = Field(..., description="A short description of the analysis to do based on the question")
+    analysis_type: str = Field(..., description="The type of analysis to do based on the question")
+    suggested_module: str = Field(..., description="Suggested analysis tool: node_analyse_authors, node_analyse_topics, or node_analysis_basics")
+    primary_attributes: List[str] = Field(..., description="Primary data columns to analyze")
+    secondary_attributes: List[str] = Field(..., description="Secondary columns to analyze")
+    suggested_chart_type: str = Field(..., description="Suggested type of chart to create")
+    start_year: int = Field(..., description="Start year for analysis")
+    end_year: int = Field(..., description="End year for analysis")
+    reasoning: str = Field(..., description="Reasoning for tool selection")
 
 
 def question(state: State):
     """
     Generate a question based on the topic and selected dataset
     """
+    current_iteration = state["iteration_count"]
+    print(f"PROCESS - Question Generation - at iteration: {current_iteration} - START")
 
     selected_dataset_path = state["select_data_state"]["dataset_path"]
     dataset_info = get_dataset_info(selected_dataset_path)
 
+    author_analysis = {
+        "analysis_type": ["author_collaboration_networks"],
+        "chart_type": ["network_graph"]
+    }
+
+    topic_analysis = {
+        "analysis_type": ["top keywords", "topic temporal evolution", "keyword cooccurrence"],
+        "chart_type": ["topic_evolution_plot","top_keywords_plot", "cooccurrence_matrix"]
+    }
+
+    basic_analysis = {
+        "analysis_type": ["publication_trends", "citation_analysis", "download_patterns", "conference_comparisons", "time_series_analysis"],
+        "chart_type": ["line_chart", "bar_chart", "scatter_plot", "box_plot", "histogram", "heatmap"]
+    }
+
     questions, _ = shared_memory.export_questions_and_insights()
+
+    # Get analysis history for module diversity guidance
+    analysis_history_info = ""
+    if "analysis_history" in state and state["analysis_history"]:
+        history = state["analysis_history"]
+        analysis_history_info = f"""
+        ANALYSIS HISTORY (module usage count):
+        - Basic analysis module: {history.get('Basic', 0)} times
+        - Topic analysis module: {history.get('Topic', 0)} times  
+        - Author analysis module: {history.get('Author', 0)} times
+        
+        MODULE DIVERSITY GUIDANCE:
+        - Consider using modules that have been used less frequently
+        - If one module has been used significantly more than others, consider exploring other modules
+        - Aim for a balanced exploration across different analysis types
+        """
 
     context = ""
     if state["iteration_count"] > 1:
+        # Check if we have follow_up_decision information
+        follow_up_info = ""
+        if "follow_up_decision" in state:
+            follow_up_decision = state["follow_up_decision"]
+            if "llm_suggested_stop" in follow_up_decision and follow_up_decision["llm_suggested_stop"]:
+                follow_up_info = f"""
+        IMPORTANT: The previous analysis suggested stopping, but we're continuing to explore new directions.
+        Suggested analysis direction: {follow_up_decision.get('analysis_direction', 'explore_new_perspective')}
+        Reasoning: {follow_up_decision.get('reasoning', '')}
+        
+        Please generate a question that explores a DIFFERENT aspect or perspective to avoid repetition.
+        """
+            else:
+                follow_up_info = f"""
+        Suggested analysis direction: {follow_up_decision.get('analysis_direction', 'continue_same_direction')}
+        Reasoning: {follow_up_decision.get('reasoning', '')}
+        """
+        
         context = f"""
         Here are the previous questions:
         {questions}
 
         Here are the insights generated in the last iteration:
         {state["insights"]}
+        {follow_up_info}
+        {analysis_history_info}
 
         Please pick a follow-up question based on the previous questions and insights.
         The follow-up question should be focused and operationalizable with not very complex code.
@@ -50,81 +103,110 @@ def question(state: State):
     """
 
     sys_prompt = f"""
-        You are a helpful assistant that generate analysis questions to explore the dataset.
+        You are a talented assistant (MBTI: ISTJ). Your task is to generate analysis questions and suggest the appropriate analysis modules
 
-        In previous analysis, the dataset has been selected based on the topic of {state["topic"]}.
+        The dataset has been selected based on the topic of {state["topic"]}.
         The query to select the dataset is to {state['select_data_state']['description']}.
 
         Here are the information of the selected dataset:
         {dataset_info}
 
-        Please generate one atomic question that is the most relevant to start explore the dataset.
+        Please generate ONLY ONE atomic question based on the interests of the user, you and the available analysis modules, and select the most appropriate analysis module.
 
-        IMPORTANT: You must choose between only TWO types of analysis:
+        IMPORTANT: You must choose between THREE analysis modules:
 
-        1. TOPIC_ANALYSIS: Use this when the question are primarily using publication or research keywords
-           - What topics are most common/popular
-           - How topics relate to each other
-           - Topic evolution over time
-           - Examples: "What are the most common research topics?", "How have topics evolved?"
+        1. author_analysis_module: Specialized in author-centric analysis
+           - CAPABILITIES: Author networks, collaboration patterns, author influence ranking, co-authorship analysis
+           - DATA FIELDS: AuthorNames, AuthorNames-Deduped, AuthorAffiliation
+           - ANALYSIS TYPES: {", ".join(author_analysis["analysis_type"])}
+           - AVAILABLE CHART TYPES: {", ".join(author_analysis["chart_type"])}
+           - EXAMPLES: "Who are the most influential authors?", "How do researchers collaborate?", "Which authors have the strongest networks?"
 
-        2. GENERAL_ANALYSIS: Use this when the question focuses on:
-           - Publication trends, citation trends, collaboration patterns
-           - Statistical overviews, productivity patterns
-           - Non-topic, non-author related analysis
-           - Examples: "What are the publication trends?", "How do citations vary?"
+        2. topic_analysis_module: Specialized in content and theme analysis
+           - CAPABILITIES: Topic modeling, keyword analysis, theme evolution, text mining, semantic analysis
+           - DATA FIELDS: Abstract, Title, AuthorKeywords, AuthorNames-Deduped
+           - ANALYSIS TYPES: {", ".join(topic_analysis["analysis_type"])}
+           - AVAILABLE CHART TYPES: {", ".join(topic_analysis["chart_type"])}
+           - EXAMPLES: "What are the main research themes?", "How have topics evolved over time?", "Which keywords are most connected?"
 
-        Rules:
-        1. the question should be focused and relevant
-        2. the question should be one task that is operationalizable
-        3. Choose the appropriate analysis type based on the question content
+        3. basic_analysis_module: Specialized in statistical and trend analysis on the publication metrics
+           - CAPABILITIES: Publication trends, citation analysis, download patterns, conference comparisons, time series analysis
+           - DATA FIELDS: Year, Conference, Downloads_Xplore, CitationCount_CrossRef, PaperType
+           - ANALYSIS TYPES: {", ".join(basic_analysis["analysis_type"])}
+           - AVAILABLE CHART TYPES: {", ".join(basic_analysis["chart_type"])}
+           - EXAMPLES: "What are the publication trends?", "How do citations vary by conference?", "Do awarded papers get more downloads?"
+
+        SELECTION RULES:
+        1. Choose author_analysis_module when the question focuses on PEOPLE (authors, researchers, collaboration)
+        2. Choose topic_analysis_module when the question focuses on CONTENT (topics, themes, keywords, text)
+        3. Choose basic_analysis_module when the question focuses on METRICS (trends, statistics, comparisons, patterns)
+        4. The question should be focused and operationalizable
+        5. Suggest appropriate chart_type based on the analysis type
+        6. Consider module diversity - prefer modules that have been used less frequently
+        7. If one module has been heavily used, consider exploring other analysis perspectives
 
         {context}
     """
 
     human_prompt = f"Please generate the question."
 
-    llm = get_llm(temperature=0, max_tokens=4096)
+    llm = get_llm(temperature=0.8, max_tokens=4096)
 
-    response = llm.with_structured_output(AnalysisPlan).invoke(
-        [SystemMessage(content=sys_prompt), HumanMessage(content=human_prompt)]
-    )
+    for i in range(5):
+
+        response = llm.with_structured_output(AnalysisDecision).invoke(
+            [SystemMessage(content=sys_prompt), HumanMessage(content=human_prompt)]
+        )
+        valid_modules = ["author_analysis_module", "topic_analysis_module", "basic_analysis_module"]
+        if response.suggested_module in valid_modules:
+            break
+        else:
+            print(f"Invalid module: {response.suggested_module}, expected one of: {valid_modules}")
+            print(f"Retrying... {i+1}/3")
 
     new_state = state.copy()
 
-    new_state["analysis_plan"] = {
+    new_state["analysis_decision"] = {
         "question_text": response.question_text,
-        "q_type": response.q_type,
+        "analysis_text": response.analysis_text,
+        "analysis_type": response.analysis_type,
+        "suggested_module": response.suggested_module,
         "primary_attributes": response.primary_attributes,
         "secondary_attributes": response.secondary_attributes,
-        "transformation": response.transformation,
-        "expected_insights": response.expected_insights,
-        "parameters": response.parameters,
-        "visualization_types": response.visualization_types,
-        "analysis_focus": response.analysis_focus,
+        "suggested_chart_type": response.suggested_chart_type,
+        "time_range": {"start_year": response.start_year, "end_year": response.end_year},
         "reasoning": response.reasoning
     }
 
     new_state["question"] = {
         "question": response.question_text,
         "handled": False,
-        "spec": ""
+        "spec": response.suggested_module
     }
+
+    print(f"Question generated: {response.question_text}")
+    print(f"Analysis text: {response.analysis_text}")
+    print(f"Suggested module: {response.suggested_module}")
+    print(f"Suggested chart type: {response.suggested_chart_type}")
+    print(f"Start year: {response.start_year}")
+    print(f"End year: {response.end_year}")
+    print(f"Reasoning: {response.reasoning}")
 
     # save the state to memory
     shared_memory.save_state(new_state)
     print(f"state saved to memory for thread {shared_memory.thread_id}")
+    print(f"PROCESS - Question Generation - at iteration: {current_iteration} - DONE")
 
     return new_state
 
 
-def test_analysis_plan():
+def test_question_structured():
     """
-    Simple test function to print the analysis_plan from new_state and route to appropriate analysis
+    Test function for node_question_structured with a hypothetical user query topic
     """
-    # Create a mock state for testing
+    # Create a mock state with a hypothetical user query topic
     mock_state = {
-        "topic": "major topics in sensemaking research",
+        "topic": "evolution in sensemaking research",
         "select_data_state": {
             "dataset_path": "dataset.csv",
             "description": "The dataset contains information about the IEEE VIS publication record from 1990 to 2024."
@@ -133,126 +215,32 @@ def test_analysis_plan():
         "insights": []
     }
     
-    # Call the question function
-    result_state = question(mock_state)
+    print("=== Testing node_question_structured ===")
+    print(f"User Topic: {mock_state['topic']}")
+    print(f"Dataset: {mock_state['select_data_state']['description']}")
+    print("=" * 50)
+
     
-    # Print the analysis_plan
-    if "analysis_plan" in result_state:
-        print("=== Analysis Plan ===")
-        print(f"Question Text: {result_state['analysis_plan']['question_text']}")
-        print(f"Question Type: {result_state['analysis_plan']['q_type']}")
-        print(f"Primary Attributes: {result_state['analysis_plan']['primary_attributes']}")
-        print(f"Secondary Attributes: {result_state['analysis_plan']['secondary_attributes']}")
-        print(f"Transformation: {result_state['analysis_plan']['transformation']}")
-        print(f"Expected Insights: {result_state['analysis_plan']['expected_insights']}")
-        print(f"Parameters: {result_state['analysis_plan']['parameters']}")
-        print(f"Visualization Types: {result_state['analysis_plan']['visualization_types']}")
-        print(f"Analysis Focus: {result_state['analysis_plan']['analysis_focus']}")
-        print(f"Reasoning: {result_state['analysis_plan']['reasoning']}")
-        print("===================")
+    try:
+        # Call the question function
+        result_state = question(mock_state)
         
-        # Route based on question type
-        q_type = result_state['analysis_plan']['q_type']
-        print(f"\n=== Routing Decision ===")
-        print(f"Question type: {q_type}")
-        
-        # Simple routing logic based on question type
-        if q_type == "topic_analysis":
-            print("✅ Routing to node_analyse_topics")
-            # Import and call the topic analysis function
-            from node_analyse_topics import analyse_topics
-            import pandas as pd
-            
-            # Prepare state for topic analysis
-            analysis_state = result_state.copy()
-            analysis_state["dataframe"] = pd.read_csv("dataset.csv")
-            
-            # Call topic analysis
-            topic_result = analyse_topics(analysis_state)
-            print("✅ Topic analysis completed!")
-            
-            # Update result_state with topic analysis results
-            result_state.update(topic_result)
-            
-        elif q_type == "author_ranking":
-            print("📋 Would route to author_ranking analysis (not implemented yet)")
-            # TODO: Implement author_ranking analysis
-            # from node_analyse_authors import analyse_authors
-            # author_result = analyse_authors(result_state)
-            # result_state.update(author_result)
-            
-        elif q_type == "collaboration_analysis":
-            print("📋 Would route to collaboration_analysis (not implemented yet)")
-            # TODO: Implement collaboration analysis
-            
-        elif q_type == "statistical_overview":
-            print("📋 Would route to statistical_overview (not implemented yet)")
-            # TODO: Implement statistical overview
-            
-        elif q_type == "network_structure":
-            print("📋 Would route to network_structure (not implemented yet)")
-            # TODO: Implement network structure analysis
-            
-        elif q_type == "trend_analysis":
-            print("📋 Would route to trend_analysis (not implemented yet)")
-            # TODO: Implement trend analysis
-            
-        elif q_type == "comparative_analysis":
-            print("📋 Would route to comparative_analysis (not implemented yet)")
-            # TODO: Implement comparative analysis
-            
+        # Print the analysis decision
+        if "analysis_decision" in result_state:
+            decision = result_state["analysis_decision"]
+                
         else:
-            print(f"❌ Unknown question type: {q_type}")
-            print(f"Available types: topic_analysis, author_ranking, collaboration_analysis, statistical_overview, network_structure, trend_analysis, comparative_analysis")
+            print("❌ No analysis_decision found in result_state")
             
-    else:
-        print("No analysis_plan found in result_state")
-    
-    return result_state
-
-
-def test_workflow_node():
-    """
-    Test the workflow node function
-    """
-    # Create a mock state for testing
-    mock_state = {
-        "topic": "major topics in sensemaking research",
-        "select_data_state": {
-            "dataset_path": "dataset.csv",
-            "description": "The dataset contains information about the IEEE VIS publication record from 1990 to 2024."
-        },
-        "iteration_count": 0,
-        "insights": []
-    }
-    
-    print("=== Testing Workflow Node ===")
-    print("Input state keys:", list(mock_state.keys()))
-    
-    # Call the workflow node function
-    result_state = question_structured(mock_state)
-    
-    print(f"\n=== Workflow Node Result ===")
-    print("Output state keys:", list(result_state.keys()))
-    
-    if "analysis_plan" in result_state:
-        print(f"✅ Analysis plan generated: {result_state['analysis_plan']['question_text']}")
-    
-    if "topic_analysis_result" in result_state:
-        print("✅ Topic analysis results included")
-    
-    if "visualizations" in result_state:
-        print("✅ Visualizations included")
-    
-    if "facts" in result_state:
-        print("✅ Facts included")
-    
-    if "insights" in result_state:
-        print("✅ Insights included")
+    except Exception as e:
+        print(f"❌ Error during testing: {e}")
+        import traceback
+        traceback.print_exc()
     
     return result_state
 
 
 if __name__ == "__main__":
-    # test_analysis_plan()  # Original test
-    test_workflow_node()    # New workflow node test
+    test_question_structured()
+
+

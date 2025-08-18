@@ -17,23 +17,45 @@ from datetime import datetime
 import os
 from state import State, Visualization
 from helpers import update_state
+from schema_new import BaseAnalysisParameters
 
 class ToolDecision(BaseModel):
     """Schema for LLM tool selection decision"""
     tool_name: str = Field(..., description="Name of the tool to execute: top_keywords, temporal_evolution, or cooccurrence_matrix")
     reasoning: str = Field(..., description="Explanation for why this tool was selected")
 
+class TopicAnalysisParameters(BaseAnalysisParameters):
+    """Topic analysis specific parameters"""
+    top_n: int = Field(default=10, description="Number of top keywords to analyze")
+    time_range: str = Field(default="all", description="Time range for analysis")
+    min_frequency: int = Field(default=1, description="Minimum frequency for keywords")
+    min_cooccurrence: int = Field(default=1, description="Minimum co-occurrence for keywords")
+    min_year: int = Field(default=None, description="Minimum year for analysis")
 
-def analyse_topics(state: State):
+def analyse_topics(state: State, analysis_params: TopicAnalysisParameters = None):
     """
     Analyse topics using LLM-based tool selection
     """
-    result = execute_topic_analysis(state)
+    if analysis_params is None:
+        analysis_plan = state.get("analysis_plan", {})
+        analysis_params = TopicAnalysisParameters(
+            analysis_type="topic_analysis",
+            question_text=analysis_plan.get("question_text", ""),
+            primary_attributes=analysis_plan.get("primary_attributes", []),
+            secondary_attributes=analysis_plan.get("secondary_attributes", []),
+            top_n=analysis_plan.get("parameters", {}).get("top_n", 10),
+            time_range=analysis_plan.get("parameters", {}).get("time_range", "all"),
+            min_frequency=analysis_plan.get("parameters", {}).get("min_frequency", 1),
+            min_cooccurrence=analysis_plan.get("parameters", {}).get("min_cooccurrence", 1),
+            min_year=analysis_plan.get("parameters", {}).get("min_year", None)
+        )
+    print(f"DEBUG: analysis_params: {analysis_params}")
+    result = execute_topic_analysis(state, analysis_params)
     updated_state = update_state(state, result)
     return result
 
 
-def execute_topic_analysis(state: State):
+def execute_topic_analysis(state: State, analysis_params: TopicAnalysisParameters = None):
     """
     Analyse topics using LLM-based tool selection
     """
@@ -41,11 +63,27 @@ def execute_topic_analysis(state: State):
     current_iteration = state.get("iteration_count", 0)
     print(f"Current iteration: {current_iteration}")
     
-    analysis_plan = state.get("analysis_plan", {})
-    print(f"DEBUG: analysis_plan type: {type(analysis_plan)}")
-    print(f"DEBUG: analysis_plan keys: {list(analysis_plan.keys()) if isinstance(analysis_plan, dict) else 'Not a dict'}")
+    # Use provided parameters or extract from state
+    if analysis_params is None:
+        analysis_plan = state.get("analysis_plan", {})
+        print(f"DEBUG: analysis_plan type: {type(analysis_plan)}")
+        print(f"DEBUG: analysis_plan keys: {list(analysis_plan.keys()) if isinstance(analysis_plan, dict) else 'Not a dict'}")
+    else:
+        print(f"Using provided analysis parameters: {analysis_params}")
+        # Convert parameters back to analysis_plan format for compatibility
+        analysis_plan = {
+            "question_text": analysis_params.question_text,
+            "primary_attributes": analysis_params.primary_attributes,
+            "secondary_attributes": analysis_params.secondary_attributes,
+            "parameters": {
+                "top_n": analysis_params.top_n,
+                "time_range": analysis_params.time_range,
+                "min_frequency": analysis_params.min_frequency,
+                "min_cooccurrence": analysis_params.min_cooccurrence,
+                "min_year": analysis_params.min_year
+            }
+        }
     
-    # try:
     # Get LLM decision on which tool to use
     print("DEBUG: About to call get_tool_decision...")
     tool_decision = get_tool_decision(state, analysis_plan)
@@ -55,7 +93,7 @@ def execute_topic_analysis(state: State):
     
     # Execute the selected tool
     print(f"DEBUG: About to call execute_selected_tool with tool: {tool_decision.tool_name}")
-    result = execute_selected_tool(tool_decision.tool_name, state, analysis_plan)
+    result = execute_selected_tool(tool_decision.tool_name, state, analysis_plan, analysis_params)
     
     print(f"DEBUG: execute_selected_tool returned type: {type(result)}")
     print(f"DEBUG: result keys: {list(result.keys()) if isinstance(result, dict) else 'Not a dict'}")
@@ -88,7 +126,7 @@ def get_tool_decision(state: State, analysis_plan: dict) -> ToolDecision:
     3. cooccurrence_matrix - Analyzes relationships between keywords
        - Use when: Need to understand topic relationships, find related themes
        - Outputs: Co-occurrence network, correlation analysis
-    
+
     Decision criteria:
     - If the question focuses on "most common", "frequent", "dominant" topics → choose top_keywords
     - If the question focuses on "evolution", "trends", "over time", "emerging" → choose temporal_evolution  
@@ -138,22 +176,22 @@ def prepare_decision_context(state: State, analysis_plan: dict) -> str:
     return context
 
 
-def execute_selected_tool(tool_name: str, state: State, analysis_plan: dict) -> dict:
+def execute_selected_tool(tool_name: str, state: State, analysis_plan: dict, analysis_params: TopicAnalysisParameters = None) -> dict:
     """
     Execute the selected analysis tool
     """
     if tool_name == "top_keywords":
-        return execute_top_keywords(state, analysis_plan)
+        return execute_top_keywords(state, analysis_plan, analysis_params)
     elif tool_name == "temporal_evolution":
-        return execute_temporal_evolution(state, analysis_plan)
+        return execute_temporal_evolution(state, analysis_plan, analysis_params)
     elif tool_name == "cooccurrence_matrix":
-        return execute_cooccurrence_matrix(state, analysis_plan)
+        return execute_cooccurrence_matrix(state, analysis_plan, analysis_params)
     else:
         print(f"Unknown tool: {tool_name}")
         return {"error": f"Unknown tool: {tool_name}"}
 
 
-def execute_top_keywords(state: State, analysis_plan: dict) -> dict:
+def execute_top_keywords(state: State, analysis_plan: dict, analysis_params: TopicAnalysisParameters = None) -> dict:
     """
     1. top_keywords - 统计数据集中出现频率最高的N个关键词
     """
@@ -163,11 +201,20 @@ def execute_top_keywords(state: State, analysis_plan: dict) -> dict:
     question = state["question"].get("question", "")
     
     df = state["dataframe"]
-    top_n = analysis_plan.top_n if hasattr(analysis_plan, 'top_n') else 10
+    
+    # Use analysis_params if provided, otherwise fall back to analysis_plan
+    if analysis_params:
+        top_n = analysis_params.top_n
+        min_frequency = analysis_params.min_frequency
+    else:
+        top_n = analysis_plan.get("parameters", {}).get("top_n", 10)
+        min_frequency = analysis_plan.get("parameters", {}).get("min_frequency", 1)
     
     success = True  # 初始化success变量
     figure_html = ""
-    fig_path = f'outputs/simple_iteration/{shared_memory.thread_id}/top_keywords_chart_iteration_{current_iteration}.png'
+    # 确保thread_id存在，如果不存在则使用默认值
+    thread_id = shared_memory.thread_id if shared_memory.thread_id else "default_thread"
+    fig_path = f'outputs/simple_iteration/{thread_id}/top_keywords_chart_iteration_{current_iteration}.png'
     
     try:
         # Extract keywords from AuthorKeywords column
@@ -299,7 +346,7 @@ def execute_top_keywords(state: State, analysis_plan: dict) -> dict:
     
 
 
-def execute_temporal_evolution(state: State, analysis_plan: dict) -> dict:
+def execute_temporal_evolution(state: State, analysis_plan: dict, analysis_params: TopicAnalysisParameters = None) -> dict:
     """
     2. temporal_evolution - 分析关键词随时间的频率变化
     """
@@ -310,7 +357,9 @@ def execute_temporal_evolution(state: State, analysis_plan: dict) -> dict:
     df = state["dataframe"]
     success = True
     figure_html = ""
-    fig_path = f'outputs/simple_iteration/{shared_memory.thread_id}/temporal_evolution_chart_iteration_{current_iteration}.png'
+    # 确保thread_id存在，如果不存在则使用默认值
+    thread_id = shared_memory.thread_id if shared_memory.thread_id else "default_thread"
+    fig_path = f'outputs/simple_iteration/{thread_id}/temporal_evolution_chart_iteration_{current_iteration}.png'
     
     try:
         if "Year" not in df.columns:
@@ -521,7 +570,7 @@ def analyze_temporal_trends(pivot_data: pd.DataFrame) -> dict:
     return trends
 
 
-def execute_cooccurrence_matrix(state: State, analysis_plan: dict) -> dict:
+def execute_cooccurrence_matrix(state: State, analysis_plan: dict, analysis_params: TopicAnalysisParameters = None) -> dict:
     """
     3. cooccurrence_matrix - 计算关键词共现矩阵
     """
@@ -532,7 +581,9 @@ def execute_cooccurrence_matrix(state: State, analysis_plan: dict) -> dict:
     df = state["dataframe"]
     success = True
     figure_html = ""
-    network_path = f'outputs/simple_iteration/{shared_memory.thread_id}/cooccurrence_network_iteration_{current_iteration}.png'
+    # 确保thread_id存在，如果不存在则使用默认值
+    thread_id = shared_memory.thread_id if shared_memory.thread_id else "default_thread"
+    network_path = f'outputs/simple_iteration/{thread_id}/cooccurrence_network_iteration_{current_iteration}.png'
     
     try:
         # Extract keywords
@@ -743,7 +794,7 @@ def create_cooccurrence_network_plotly(keywords: List[str], cooccurrence_matrix:
     fig = go.Figure(data=edge_traces + [node_trace],
                    layout=go.Layout(
                        title='Keyword Co-occurrence Network',
-                       titlefont_size=16,
+                       title_font_size=16,
                        showlegend=False,
                        hovermode='closest',
                        margin=dict(b=20,l=5,r=5,t=40),

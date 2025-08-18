@@ -29,6 +29,33 @@ class AnalysisPlan(TypedDict):
     visualization_types: list[str]
     analysis_focus: str
 
+class AnalysisDecision(TypedDict):
+    question_text: str
+    analysis_text: str
+    suggested_module: str
+    primary_attributes: list[str]
+    secondary_attributes: list[str]
+    suggested_chart_type: str
+    time_range: dict
+    reasoning: str
+
+class ExecutionPlan(TypedDict):
+    analysis_text: str
+    analysis_type: str
+    chart_type: str
+    start_year: int
+    end_year: int
+    reasoning: str
+    target_function: str
+    function_params: dict
+    module_name: str
+    expected_outputs: list[str]
+    validation_rules: list[str]
+
+class AnalysisHistory(TypedDict):
+    module_counts: dict[str, int]  # Count of each module usage
+    recent_analyses: list[dict[str, Any]]  # Recent analysis records
+
 class Facts(TypedDict):
     code: str
     stdout: str
@@ -70,6 +97,8 @@ class State(InputState, TypedDict):
     select_data_state: SelectDataState #{description, sql_query, dataset_path}
     question: Question #{question, handled or not, spec}
     analysis_plan: AnalysisPlan #{question_text, q_type, primary_attributes, secondary_attributes, transformation, expected_insights, parameters, visualization_types, analysis_focus}
+    analysis_decision: AnalysisDecision  # Analysis decision from node_question_structured
+    execution_plan: ExecutionPlan  # Execution plan from node_analysis_planner
     facts: Facts #{code, stdout, stderr, exit_code}
     insights: list[str]
 
@@ -79,6 +108,7 @@ class State(InputState, TypedDict):
 
     dataframe: Optional[pd.DataFrame]
     iteration_history: Optional[List[Dict[str, Any]]] # a list of {question, facts, insights}
+    analysis_history: Optional[AnalysisHistory]  # Analysis history tracking
 
 class OutputState(TypedDict):
     analysis_tasks: List[Dict[str, Any]]

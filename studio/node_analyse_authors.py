@@ -1,5 +1,3 @@
-# TODO: add the network analysis code here
-
 #!/usr/bin/env python3
 """
 Construct author collaboration network using networkx.
@@ -16,6 +14,13 @@ from state import State, Visualization
 from memory import shared_memory
 import json
 from helpers import update_state
+from schema_new import BaseAnalysisParameters
+
+class AuthorAnalysisParameters(BaseAnalysisParameters):
+    """Author analysis specific parameters"""
+    collaboration_type: str = Field(default="network", description="Type of collaboration analysis")
+    min_collaborations: int = Field(default=2, description="Minimum number of collaborations")
+    time_range: str = Field(default="all", description="Time range for analysis")
 
 # from helpers import get_llm, get_dataset_info
 if __name__ == "__main__":
@@ -342,7 +347,7 @@ def graph_container(container_id: str, network_json: dict, width: int = 800, hei
     {script}
     """
 
-def execute_author_network_analysis(state: State):
+def execute_author_network_analysis(state: State, analysis_params: AuthorAnalysisParameters = None):
     """
     Author network analysis
     """
@@ -351,11 +356,26 @@ def execute_author_network_analysis(state: State):
     success = False
     print(f"Current iteration: {current_iteration}")
 
-    analysis_plan = state.get("analysis_plan", {})
-    print(f"DEBUG: analysis_plan type: {type(analysis_plan)}")
+    # Use provided parameters or extract from state
+    if analysis_params is None:
+        analysis_plan = state.get("analysis_plan", {})
+        print(f"DEBUG: analysis_plan type: {type(analysis_plan)}")
+        
+        # Create parameters from analysis_plan
+        analysis_params = AuthorAnalysisParameters(
+            analysis_type="author_collaboration",
+            question_text=analysis_plan.get("question_text", ""),
+            primary_attributes=analysis_plan.get("primary_attributes", []),
+            secondary_attributes=analysis_plan.get("secondary_attributes", []),
+            collaboration_type=analysis_plan.get("parameters", {}).get("collaboration_type", "network"),
+            min_collaborations=analysis_plan.get("parameters", {}).get("min_collaborations", 2),
+            time_range=analysis_plan.get("parameters", {}).get("time_range", "all")
+        )
+    
+    print(f"DEBUG: analysis_params: {analysis_params}")
 
     file_path = state["select_data_state"]["dataset_path"]
-    task = analysis_plan["question_text"]
+    task = analysis_params.question_text
     response = llm_filter_validation(task, file_path, max_iterations=3)
     filters = response.filters
     print('filters: ', filters)
@@ -548,11 +568,11 @@ def generate_network_insights(network_facts, task):
    
    return cleaned_insights # Limit to 4 insights
 
-def analyse_author_network(state: State):
+def analyse_author_network(state: State, analysis_params: AuthorAnalysisParameters = None):
     """
     Author network analysis
     """
-    result = execute_author_network_analysis(state)
+    result = execute_author_network_analysis(state, analysis_params)
     updated_state = update_state(state, result)
     return updated_state
 

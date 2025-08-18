@@ -1076,7 +1076,30 @@ def add_findings_section(html_lines: List[str], summary: ReportSummary, iteratio
 
         print(f"adding iteration {iteration_idx} visualization ...")
         
-        if iteration_idx < len(iteration_history) and "visualization" in iteration_history[iteration_idx]:
+        # 调试信息
+        if iteration_idx < len(iteration_history):
+            iteration_data = iteration_history[iteration_idx]
+            print(f"🔍 Iteration {iteration_idx} keys: {list(iteration_data.keys())}")
+            if "visualizations" in iteration_data:
+                viz_data = iteration_data["visualizations"]
+                print(f"🔍 Iteration {iteration_idx} visualizations type: {type(viz_data)}")
+                print(f"🔍 Iteration {iteration_idx} visualizations length: {len(viz_data) if isinstance(viz_data, list) else 'Not a list'}")
+                if isinstance(viz_data, list) and len(viz_data) > 0:
+                    first_viz = viz_data[0]
+                    print(f"🔍 Iteration {iteration_idx} first viz keys: {list(first_viz.keys()) if isinstance(first_viz, dict) else 'Not a dict'}")
+                    if isinstance(first_viz, dict) and "figure_object" in first_viz:
+                        print(f"🔍 Iteration {iteration_idx} figure_object exists: {bool(first_viz['figure_object'])}")
+        
+        # 检查是否有可视化数据（支持两种格式）
+        has_visualization = False
+        if iteration_idx < len(iteration_history):
+            iteration_data = iteration_history[iteration_idx]
+            if "visualizations" in iteration_data:
+                has_visualization = True
+            elif "visualization" in iteration_data:
+                has_visualization = True
+        
+        if has_visualization:
             add_modern_visualization_to_html(html_lines, iteration_history[iteration_idx], iteration_idx)
             print("added visualization")
         
@@ -1105,11 +1128,22 @@ def get_iteration_title(iteration_num: int, summary: ReportSummary) -> str:
 
 def add_modern_visualization_to_html(html_lines: List[str], iteration: Dict, iteration_num: int) -> None:
     """Add visualization with modern styling"""
-    if "visualization" not in iteration:
-        return
-        
-    viz = iteration["visualization"]
-    if not viz:  # 移除 success 检查
+    # 支持两种格式：visualizations（复数）和visualization（单数）
+    viz = None
+    
+    if "visualizations" in iteration:
+        visualizations = iteration["visualizations"]
+        if isinstance(visualizations, list) and len(visualizations) > 0:
+            viz = visualizations[0]
+        elif isinstance(visualizations, dict) and "visualizations" in visualizations:
+            viz_list = visualizations["visualizations"]
+            if isinstance(viz_list, list) and len(viz_list) > 0:
+                viz = viz_list[0]
+    
+    elif "visualization" in iteration:
+        viz = iteration["visualization"]
+    
+    if viz is None:
         return
     
     html_lines.extend([

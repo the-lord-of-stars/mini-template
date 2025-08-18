@@ -33,6 +33,11 @@ def select_data(state: State):
         2. Use standard SQL syntax compatible with pandasql
         3. Make sure column names match exactly with the dataset headers
         4. Use double quotes for column names that contain special characters
+        5. IMPORTANT: Always include these essential columns in your SELECT statement:
+           - Conference, Year, Title, Abstract, AuthorKeywords
+           - These columns are required for topic analysis and visualization
+        6. Add WHERE conditions to filter data based on the topic
+        7. Use ORDER BY Year ASC to sort by year
     """
 
     human_prompt = f"I would like to explore the dataset about the topic of {state['topic']}. Please generate a SQL query to select the data."
@@ -58,7 +63,8 @@ def select_data(state: State):
 
     new_state["dataframe"] = dataset
 
-    new_state["iteration_count"] = new_state.get("iteration_count", 0) + 1
+    iteration_count = new_state["iteration_count"] if "iteration_count" in new_state else 0
+    new_state["iteration_count"] = iteration_count + 1
 
     # Save the state to memory
     shared_memory.save_state(new_state)

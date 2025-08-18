@@ -19,8 +19,8 @@ def get_insights(state: State):
     """
 
     # Get current iteration info (don't increment here)
-    current_iteration = state.get("iteration_count", 0)
-    max_iterations = state.get("max_iterations", 3)
+    current_iteration = state["iteration_count"] if "iteration_count" in state else 0
+    max_iterations = state["max_iterations"] if "max_iterations" in state else 3
 
     # Get path of the main program being executed
     dataset_info = get_dataset_info(state['select_data_state']['dataset_path'])

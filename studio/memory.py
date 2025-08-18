@@ -86,10 +86,12 @@ class SimpleMemory:
 
             # Extract insights
             if 'insights' in state and state['insights']:
-                for insight in state['insights']:
-                    if isinstance(insight, str) and insight.strip() and insight not in insights_seen:
-                        insights_seen.add(insight)
-                        unique_insights.append(insight)
+                insights = state['insights']
+                if insights is not None:  # Handle None case
+                    for insight in insights:
+                        if isinstance(insight, str) and insight.strip() and insight not in insights_seen:
+                            insights_seen.add(insight)
+                            unique_insights.append(insight)
 
         return unique_questions, unique_insights
 

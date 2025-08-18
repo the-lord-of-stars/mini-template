@@ -21,8 +21,8 @@ class Agent:
         """
 
         state = {
-            "topic": "evolution of sensemaking research",
-            # "topic": "top topics in this field and how they evolve over time",
+            # "topic": "who are the researchers in sensemaking research",
+            "topic": "general trends in this field from various aspects",
             "iteration_count": 0,  # Initialize iteration counter
             "max_iterations": 3,  # Set maximum iterations (adjust as needed) - counting starts from "iteration_count"+1
             "should_continue": True,  # Initialize to continue
