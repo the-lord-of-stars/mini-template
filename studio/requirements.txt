@@ -70,3 +70,4 @@ urllib3==2.5.0
 wordcloud==1.9.4
 xxhash==3.5.0
 zstandard==0.23.0
+networkx==2.8.3
