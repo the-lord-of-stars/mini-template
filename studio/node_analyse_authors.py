@@ -253,44 +253,43 @@ def filter_network(G: nx.Graph, df: pd.DataFrame, filters: List[dict]) -> nx.Gra
     return filtered_G, filtered_df
 
 
-def construct_network(filepath: str = 'dataset.csv') -> nx.Graph:
-    """
-    Construct author collaboration network from dataset.
-    
-    Args:
-        filepath: Path to the dataset CSV file
-        
-    Returns:
-        NetworkX Graph object representing author collaborations
-    """
-    # Load dataset
+def construct_network(filepath: str = 'dataset.csv', top_n: int = 300) -> nx.Graph:
     df = pd.read_csv(filepath)
-    
-    # Create graph
-    G = nx.Graph()
-    
-    # Process each paper
+
+    # citation sum
+    author_citations = {}
     for _, row in df.iterrows():
         if pd.isna(row['AuthorNames-Deduped']) or row['AuthorNames-Deduped'].strip() == '':
             continue
-            
-        # Get authors for this paper
-        authors = [author.strip() for author in row['AuthorNames-Deduped'].split(';') if author.strip()]
-        
-        # Add edges between all pairs of authors (collaborations)
+        authors = [a.strip() for a in row['AuthorNames-Deduped'].split(';') if a.strip()]
+        citations = row.get('PaperCitations', 0)
+        for a in authors:
+            author_citations[a] = author_citations.get(a, 0) + citations
+
+    # pick top_n
+    top_authors = set(sorted(author_citations, key=author_citations.get, reverse=True)[:top_n])
+
+    # only retain rows with top_n authors
+    filtered_df = df[df['AuthorNames-Deduped'].apply(
+        lambda x: any(a.strip() in top_authors for a in str(x).split(';'))
+    )]
+
+    # make graph
+    G = nx.Graph()
+    for _, row in filtered_df.iterrows():
+        authors = [a.strip() for a in str(row['AuthorNames-Deduped']).split(';') if a.strip()]
+        authors = [a for a in authors if a in top_authors]
+
         for i in range(len(authors)):
             for j in range(i + 1, len(authors)):
-                author1, author2 = authors[i], authors[j]
-                
-                # Add edge (collaboration)
-                if G.has_edge(author1, author2):
-                    # Increment weight if collaboration already exists
-                    G[author1][author2]['weight'] += 1
+                a1, a2 = authors[i], authors[j]
+                if G.has_edge(a1, a2):
+                    G[a1][a2]['weight'] += 1
                 else:
-                    # Create new collaboration
-                    G.add_edge(author1, author2, weight=1)
-    
-    return G, df
+                    G.add_edge(a1, a2, weight=1)
+
+    return G, filtered_df
+
 
 
 def get_antv_script(container_id: str, network_json: dict) -> str:
