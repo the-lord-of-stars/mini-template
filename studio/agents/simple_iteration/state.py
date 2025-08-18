@@ -1,4 +1,4 @@
-from typing_extensions import TypedDict
+from typing_extensions import TypedDict, List
 
 class SelectDataState(TypedDict):
     description: str
@@ -19,10 +19,10 @@ class Facts(TypedDict):
 class Visualization(TypedDict):
     insight: str
     chart_type: str
-    altair_code: str
     description: str
     is_appropriate: bool
     image_path: str
+    spec: str  # Vega-Lite specification
 
 class Visualizations(TypedDict):
     visualizations: list[Visualization]
@@ -33,6 +33,15 @@ class ListQuestionsState(TypedDict):
 class FollowUpDecision(TypedDict):
     should_reselect_data: bool
     reasoning: str
+
+class StoryNode(TypedDict):
+    description: str
+    insights: List[str]  # List of insights related to this story node
+    visualizations: List[Visualization]  # Visualizations for this story node
+
+class Storyline(TypedDict):
+    theme: str
+    nodes: List[StoryNode]
 
 class State(TypedDict):
     # message: str
@@ -46,4 +55,5 @@ class State(TypedDict):
     max_iterations: int   # Add this field to set max iterations
     should_continue: bool # Add this field to control the loop
     follow_up_decision: FollowUpDecision  # Add this field for follow-up decisions
-    # visualizations: Visualizations
+    visualizations: list[Visualization]  # Add this field to store generated visualizations
+    storyline: Storyline  # Add this field for storyline

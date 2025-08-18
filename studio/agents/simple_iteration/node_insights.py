@@ -82,7 +82,11 @@ def get_insights(state: State):
     )
 
     # Decide whether to continue based on iteration count and insights
-    should_continue = current_iteration < max_iterations and len(response.insights) > 0
+    # If this is the last iteration, always set should_continue to False to trigger storyline generation
+    if current_iteration >= max_iterations:
+        should_continue = False
+    else:
+        should_continue = response.should_continue and len(response.insights) > 0
 
     new_state = state.copy()
     new_state["insights"] = response.insights

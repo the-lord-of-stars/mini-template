@@ -2,51 +2,51 @@
     "report_sections": [
         {
             "section_number": 1,
-            "section_name": "Executive summary & key takeaways",
+            "section_name": "Executive summary and key takeaways",
             "section_size": "short",
-            "section_description": "Concise answer to 'What happened to research on automated visualization?' \u2014 top trends, shifts in activity, and three actionable takeaways for researchers and program chairs."
+            "section_description": "One-page synthesis of the findings: how automated-visualization (AutoVis) research rose, plateaued or shifted; who the main actors are; what the dominant subtopics and methods are; and three actionable takeaways for researchers. Include a single visual: a one-row sparkline timeline and three bullet metrics (peak year, share of Vis papers, top-cited AutoVis paper)."
         },
         {
             "section_number": 2,
-            "section_name": "Data, definitions and methods",
+            "section_name": "Data and methods (how we identify AutoVis papers)",
             "section_size": "medium",
-            "section_description": "Describe the Vis publication dataset, cleaning steps, the keyword-based AutoVis filter (automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent), other metrics used (citations, downloads, awards, stamp), and planned visual encodings and reproducible code artifacts."
+            "section_description": "Concise description of the dataset, key fields used (Year, Title, Abstract, AuthorKeywords, Citation counts, Downloads, Awards), data cleaning (author de-duplication, affiliation normalization), and the exact AutoVis identification filter/regex (automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent, case-insensitive applied to Title+Abstract+Keywords). Also list derived metrics (normalized citation per year, relative downloads) and planned visual forms. This section ensures reproducibility and lets readers judge the identification approach."
         },
         {
             "section_number": 3,
-            "section_name": "What counts as 'automated visualization' \u2014 taxonomy and examples",
-            "section_size": "short",
-            "section_description": "Operational taxonomy (recommendation, generation, mixed-initiative, agents, automation in pipeline) with a few exemplar papers from the dataset that match each subtype, clarifying edge cases and limitations of keyword detection."
+            "section_name": "Temporal trends: rise, fall, and plateaus",
+            "section_size": "long",
+            "section_description": "Quantitative timeline of AutoVis research: annual counts and proportion of conference/Journal papers labeled AutoVis; cumulative citations over time; burst detection of topic emergence. Visuals: stacked area or line charts showing AutoVis vs other topics, bar chart of first appearance and peak years, and small-multiples for different paper types (J vs C). Include short interpretation of causes for trend changes (tooling, community interest, external drivers)."
         },
         {
             "section_number": 4,
-            "section_name": "Temporal trends and venue distribution",
+            "section_name": "Topic landscape and evolution",
             "section_size": "long",
-            "section_description": "Year-by-year counts and share of AutoVis vs Other papers (line/area charts), breakdown by conference (InfoVis, VAST, SciVis etc.), burst detection (where activity peaks/declines), and a short timeline of milestone papers. Visuals: stacked area, small multiples, annotated peaks."
+            "section_description": "Map the conceptual space of AutoVis using keyword co-occurrence, author keywords clustering, and short-term topic drift from Title+Abstract (e.g., recommendation, mixed-initiative, generation, agents). Visuals: network/cluster diagram of keywords, Sankey or alluvial showing how subtopics shift across time windows, and a small heatmap of topic intensity by year. Summarize dominant subtopics, newly-emerging themes, and waning areas."
         },
         {
             "section_number": 5,
-            "section_name": "Topic evolution and content analysis",
+            "section_name": "Influential works, authors and venues",
             "section_size": "medium",
-            "section_description": "Keyword and abstract-based topic analysis to show how research themes within AutoVis shifted over time (e.g., rule-based recommendation \u2192 ML-driven generation \u2192 mixed-initiative agents). Visuals: evolving word clouds, topic timelines, representative abstracts for each period."
+            "section_description": "Identify the AutoVis papers with highest impact (normalized citation, downloads, awards), key authors and their influence (hubs by citations and by collaborative reach), and the venues that published most AutoVis work. Visuals: ranked bar charts for top papers/authors, and a table-like badge for award-winning or highly-downloaded AutoVis papers. Provide short narrations linking influential papers to methodological trends."
         },
         {
             "section_number": 6,
-            "section_name": "Impact and community structure",
-            "section_size": "long",
-            "section_description": "Citation and usage analysis (Aminer / CrossRef / Xplore), award and replicability-stamp signals, plus social structure: co-author network, institution contributions, and diffusion of ideas across subcommunities. Visuals: citation histograms, network graphs, choropleth or affiliation bar charts."
+            "section_name": "Community structure and collaboration patterns",
+            "section_size": "medium",
+            "section_description": "Analyze co-authorship and institutional collaboration to show how social structure shaped AutoVis research. Visuals: coauthor network with community detection (color clusters), institution collaboration chord or matrix, and timeline of emerging groups. Discuss whether research is concentrated in a few labs or widely distributed, and note cross-disciplinary partnerships."
         },
         {
             "section_number": 7,
-            "section_name": "Case studies and narratives",
+            "section_name": "Representative case studies and research trajectories",
             "section_size": "medium",
-            "section_description": "Deep dives into 3\u20134 influential/representative works (methods, reception, downstream influence) illustrating how approaches matured or stalled, and how tooling/community shaped follow-up research."
+            "section_description": "Deep dives (2\u20134 short case studies) of representative AutoVis trajectories: a seminal system/paper, a line of follow-up work, and a contrasting mixed-initiative or agent-driven approach. For each case show timeline of citations, major derivatives (internal references), and role in shifting or stabilizing the field. Use small annotated timelines and citation trees to tell the stories."
         },
         {
             "section_number": 8,
-            "section_name": "Conclusions, limitations and recommendations",
+            "section_name": "Conclusions, open questions and recommendations",
             "section_size": "short",
-            "section_description": "Synthesize findings, highlight dataset and method limitations (keyword false positives/negatives, venue coverage), and propose concrete next steps for the research community (evaluation benchmarks, shared datasets, replications, program committee suggestions)."
+            "section_description": "Concise synthesis of what happened to AutoVis research, current gaps (evaluation standards, reproducibility, human-centered studies), and concrete recommendations for researchers (datasets, benchmarks, cross-community collaborations). End with pointers to reproducible artifacts: filter code, analysis notebooks, and an interactive dashboard for exploring the dataset."
         }
     ]
 }

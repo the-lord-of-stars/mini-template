@@ -33,7 +33,9 @@ def evaluate_agent(agent: Any) -> None:
 
 def main():
     # agent_path = "agent.py"
-    agent_path = "agents/simple_iteration/agent.py"
+    # agent_path = "agents/simple_iteration/agent.py"
+    # agent_path = "agents/simple_story/agent.py"
+    agent_path = "agents/simple_vis/agent.py"
     agent = load_agent(agent_path)
     evaluate_agent(agent)
 

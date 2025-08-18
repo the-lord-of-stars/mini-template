@@ -48,7 +48,7 @@ def initiate(topic: str, dataset: str = "dataset.csv", domain_knowledge: str = "
 
     Requirements:
     1. You will only have a limited amount of time to finish the report, so the report should be concise and to the point.
-    2. Target audience is researchers in the visualization community, they might be interested in both topic evolution and how people in the field interact and shape the research.
+    2. Target audience is researchers in the visualization community, they might be interested in both topic evolution and how people in the field shape the research （such as their interactions and key players).
     3. The report should be interesting, coherent, insightful, and visually compelling.
     4. You can decide the number of sections, but no more than 8.
 
@@ -93,16 +93,29 @@ def simple_action_plan(section: ReportSection, dataset: str = "dataset.csv", dom
     dataset_info = get_dataset_info(dataset)
     llm = get_llm()
 
-    class InformationNeeded(TypedDict):
+    class InformationNeededPresent(TypedDict):
         question_text: str # your exploration or analysis question
         primary_attributes: List[str] # primary attributes to use for the analysis
         secondary_attributes: List[str] # secondary attributes to use for the analysis
         transformation: List[str] # possible transformations to apply to the data
         expected_insight_types: List[str] # expected insight types from the analysis, such as top, trend, distribution, outlier, etc.
+    
+    class InformationNeededExplore(TypedDict):
+        question_text: str # your exploration or analysis question
+        key_uncertainty: Optional[str] = None
+        expected_outputs: List[str] # expected outputs from the exploration to resolve uncertainty
+
+    # class InformationNeeded(TypedDict):
+    #     question_text: str # your exploration or analysis question
+    #     key_uncertainty: Optional[str] = None
+    #     primary_attributes: List[str] # primary attributes to use for the analysis
+    #     secondary_attributes: List[str] # secondary attributes to use for the analysis
+    #     transformation: List[str] # possible transformations to apply to the data
+    #     expected_insight_types: List[str] # expected insight types from the analysis, such as top, trend, distribution, outlier, etc.
 
     class ResponseFormatter(BaseModel):
         action: Literal["pend", "present", "explore"]
-        information_needed: Optional[List[InformationNeeded]] = None
+        information_needed: Optional[Union[InformationNeededPresent, InformationNeededExplore]] = None
 
     system_message = SystemMessage(content=f"""
     You are an expert in data analysis and visualization.
@@ -117,7 +130,7 @@ def simple_action_plan(section: ReportSection, dataset: str = "dataset.csv", dom
     Overall outline:
     {';'.join([f"{section['section_number']}. {section['section_name']}" for section in report_plan["report_sections"]])}
 
-    Dataset information:
+    The information of the dataset that you will analyse is as follows:
     {dataset_info}
 
     Your steps to take (see detailed instructions below):
@@ -148,16 +161,28 @@ def simple_action_plan(section: ReportSection, dataset: str = "dataset.csv", dom
     - For 'explore', you need to specify the information need (what you expect through the exploration and analysis)
         - You can specify multiple information needs, but usually no more than 3.
         - You are encouraged to re-formulate the need as you perform the exploration. Therefore, you can start with simple need if you are not very sure.
+        - Example situations that need exploration:
+            - You are not sure about which filter or transformation to apply to the data.
+            - Certain attributes need to be derived from the data (which can not be easily derived through vega-lite).
+            - When you decide to present subset or examples but you are not sure about which subset or examples to use.
+            - Others...
         - Similarly, focus on the most important parts.
 
-
-    Form the information need as follows:
+    Form the information need for 'present' as follows:
     - question_text: the question you want to answer through the exploration and analysis. The question should be focused (just one specifc point).
     - primary_attributes: the primary attributes to use for visual encoding (visual channels), usually no more than 2.
     - secondary_attributes: the secondary attributes to use for visual encoding, usually no more than 2.
     - transformation: the transformation to apply to the data, can be none, usually no more than 3.
     - expected_insight_types: the expected insight types from the analysis, such as top, trend, distribution, outlier, etc.
     - parameters: the parameters for the analysis, such as the number of top items, the threshold for the trend, the threshold for the distribution, the threshold for the outlier, etc.
+
+    Form the information need for 'explore' as follows:
+    - question_text: the question you want to answer through the exploration and analysis. The question should be focused (just one specifc point).
+    - key_uncertainty: if you choose 'explore', specify the key uncertainty you have about the data, which reflects the main goal of the exploration.
+    - expected_outputs: the expected outputs from the exploration to resolve uncertainty.
+        - Should be practical, such as parameter values for filtering, transformation; or important insights that help you decide the next step.
+        - Consider the limit of tools that you can use: you may use pandas and simple networkx, but time-consuming tasks or machine learning tasks are not recommended.
+        - Usually no more than 3.
 
     Please make the information need as simple and focused as possible.
 

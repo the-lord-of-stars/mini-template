@@ -2,395 +2,189 @@
     "report_sections": [
         {
             "section_number": 1,
-            "section_name": "Executive summary & key takeaways",
+            "section_name": "Executive summary and key takeaways",
             "section_size": "short",
-            "section_description": "Concise answer to 'What happened to research on automated visualization?' \u2014 top trends, shifts in activity, and three actionable takeaways for researchers and program chairs.",
+            "section_description": "One-page synthesis of the findings: how automated-visualization (AutoVis) research rose, plateaued or shifted; who the main actors are; what the dominant subtopics and methods are; and three actionable takeaways for researchers. Include a single visual: a one-row sparkline timeline and three bullet metrics (peak year, share of Vis papers, top-cited AutoVis paper).",
             "action": {
-                "action": "pend",
-                "information_needed": null
+                "action": "present",
+                "information_needed": {
+                    "question_text": "What is the yearly count trend of AutoVis papers (one-row sparkline) and the three headline metrics: (1) peak year (year with maximum AutoVis papers), (2) overall share of AutoVis papers among all Vis papers, and (3) the top-cited AutoVis paper (title, authors, citation count)?",
+                    "primary_attributes": [
+                        "Year",
+                        "AutoVisFlag"
+                    ],
+                    "secondary_attributes": [
+                        "CitationCount_CrossRef",
+                        "Title"
+                    ],
+                    "transformation": [
+                        "Label papers as 'AutoVis' using regex on (Title + Abstract + AuthorKeywords) with keywords: automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent (case-insensitive)",
+                        "Aggregate counts per Year: count(AutoVis) and count(All Vis papers)",
+                        "Compute share_per_year and overall_share = sum(AutoVis_count)/sum(All Vis papers)"
+                    ],
+                    "expected_insight_types": [
+                        "trend",
+                        "peak (year)",
+                        "proportion/share",
+                        "top (most-cited paper)"
+                    ]
+                }
             }
         },
         {
             "section_number": 2,
-            "section_name": "Data, definitions and methods",
+            "section_name": "Data and methods (how we identify AutoVis papers)",
             "section_size": "medium",
-            "section_description": "Describe the Vis publication dataset, cleaning steps, the keyword-based AutoVis filter (automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent), other metrics used (citations, downloads, awards, stamp), and planned visual encodings and reproducible code artifacts.",
+            "section_description": "Concise description of the dataset, key fields used (Year, Title, Abstract, AuthorKeywords, Citation counts, Downloads, Awards), data cleaning (author de-duplication, affiliation normalization), and the exact AutoVis identification filter/regex (automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent, case-insensitive applied to Title+Abstract+Keywords). Also list derived metrics (normalized citation per year, relative downloads) and planned visual forms. This section ensures reproducibility and lets readers judge the identification approach.",
             "action": {
                 "action": "present",
-                "information_needed": [
-                    {
-                        "question_text": "What is the completeness (non-missing coverage) of each dataset attribute so we can describe cleaning needs and potential biases?",
-                        "primary_attributes": [
-                            "attribute_name"
-                        ],
-                        "secondary_attributes": [
-                            "completeness_rate"
-                        ],
-                        "transformation": [
-                            "compute non-missing count per attribute",
-                            "compute completeness_rate = non-missing / total_rows",
-                            "sort attributes by completeness_rate descending"
-                        ],
-                        "expected_insight_types": [
-                            "distribution",
-                            "outliers (attributes with low completeness)",
-                            "ranked list of attributes by coverage"
-                        ]
-                    },
-                    {
-                        "question_text": "How many papers are identified as 'AutoVis' by the keyword-based filter versus 'Other', and how do impact metrics (citations and downloads) compare between these groups?",
-                        "primary_attributes": [
-                            "AutoVis_flag"
-                        ],
-                        "secondary_attributes": [
-                            "count",
-                            "median(AminerCitationCount)",
-                            "median(Downloads_Xplore)"
-                        ],
-                        "transformation": [
-                            "derive AutoVis_flag using regex test(/automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent/i) against Title+Abstract+AuthorKeywords",
-                            "group by AutoVis_flag",
-                            "aggregate count, median citation, median downloads"
-                        ],
-                        "expected_insight_types": [
-                            "comparison (AutoVis vs Other counts)",
-                            "central tendency (median citations/downloads)",
-                            "outliers (groups with unusually high impact)"
-                        ]
-                    }
-                ]
+                "information_needed": {
+                    "question_text": "How many papers are identified as AutoVis by the specified regex, and how does their count and share evolve over time (per Year)?",
+                    "primary_attributes": [
+                        "Year",
+                        "AutoVis_flag (label produced by regex on Title+Abstract+AuthorKeywords)"
+                    ],
+                    "secondary_attributes": [
+                        "normalized_citations_per_year (CitationCount_CrossRef / (CurrentYear - Year + 1))",
+                        "Downloads_Xplore (relative or raw)"
+                    ],
+                    "transformation": [
+                        "Apply case-insensitive regex: /automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent/ to (Title + ' ' + Abstract + ' ' + AuthorKeywords) to produce AutoVis_flag ('AutoVis' / 'Other')",
+                        "Group by Year and AutoVis_flag to compute counts and proportions",
+                        "Compute normalized_citations_per_year = CitationCount_CrossRef / (CurrentYear - Year + 1) and relative_downloads = Downloads_Xplore / max(Downloads_Xplore)"
+                    ],
+                    "expected_insight_types": [
+                        "trend (AutoVis count and share over time)",
+                        "distribution (normalized citations and downloads for AutoVis vs Other)",
+                        "top (years with highest AutoVis counts)",
+                        "outliers (AutoVis papers with unusually high normalized citations or downloads)"
+                    ]
+                }
             }
         },
         {
             "section_number": 3,
-            "section_name": "What counts as 'automated visualization' \u2014 taxonomy and examples",
-            "section_size": "short",
-            "section_description": "Operational taxonomy (recommendation, generation, mixed-initiative, agents, automation in pipeline) with a few exemplar papers from the dataset that match each subtype, clarifying edge cases and limitations of keyword detection.",
+            "section_name": "Temporal trends: rise, fall, and plateaus",
+            "section_size": "long",
+            "section_description": "Quantitative timeline of AutoVis research: annual counts and proportion of conference/Journal papers labeled AutoVis; cumulative citations over time; burst detection of topic emergence. Visuals: stacked area or line charts showing AutoVis vs other topics, bar chart of first appearance and peak years, and small-multiples for different paper types (J vs C). Include short interpretation of causes for trend changes (tooling, community interest, external drivers).",
             "action": {
-                "action": "explore",
-                "information_needed": [
-                    {
-                        "question_text": "For each automated-visualization subtype in the operational taxonomy (recommendation, generation, mixed-initiative, agents, pipeline automation), which papers from the dataset are clear exemplars? (Return a short ranked list per subtype.)",
-                        "primary_attributes": [
-                            "Title",
-                            "Abstract"
-                        ],
-                        "secondary_attributes": [
-                            "Year",
-                            "Conference"
-                        ],
-                        "transformation": [
-                            "filter by keyword regex (automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent) applied to Title+Abstract+AuthorKeywords",
-                            "group by subtype label inferred from which keyword matched",
-                            "rank within each subtype by CitationCount_CrossRef or AminerCitationCount"
-                        ],
-                        "expected_insight_types": [
-                            "top (representative examples per subtype)",
-                            "distribution (how many exemplars found per subtype)",
-                            "outlier (papers that match multiple subtypes) "
-                        ]
-                    },
-                    {
-                        "question_text": "What is the approximate false positive and false negative behavior of the keyword-based detector? (Estimate error modes and exemplar cases to clarify limitations.)",
-                        "primary_attributes": [
-                            "AuthorKeywords",
-                            "Abstract"
-                        ],
-                        "secondary_attributes": [
-                            "Title",
-                            "PaperType"
-                        ],
-                        "transformation": [
-                            "take random sample of matched papers (e.g., n=50) and random sample of unmatched papers that look semantically related (n=50)",
-                            "manual / rule-based adjudication to label true positive/false positive/false negative"
-                        ],
-                        "expected_insight_types": [
-                            "distribution (estimated false-positive and false-negative rates)",
-                            "outliers (typical misleading phrases causing errors)",
-                            "examples (concrete paper titles illustrating each error mode) ",
-                            "parameters: sample_size_matched=50, sample_size_unmatched=50"
-                        ]
-                    },
-                    {
-                        "question_text": "How to present the taxonomy and examples succinctly in a short section (single figure + short table)? (Design metrics for a compact figure.)",
-                        "primary_attributes": [
-                            "subtype_label"
-                        ],
-                        "secondary_attributes": [
-                            "count_of_matched_papers",
-                            "top_example_title"
-                        ],
-                        "transformation": [
-                            "aggregate counts per subtype from keyword matches",
-                            "select top 1\u20133 exemplars per subtype by citation count"
-                        ],
-                        "expected_insight_types": [
-                            "distribution (counts per subtype)",
-                            "top (1\u20133 exemplar titles per subtype)",
-                            "edge cases noted in captions ",
-                            "parameters: top_examples_per_subtype=3"
-                        ]
-                    }
-                ]
+                "action": "present",
+                "information_needed": {
+                    "question_text": "How have AutoVis papers trended over time (annual counts and proportion of all papers), how do their cumulative citations evolve, and how do trends differ between Conference and Journal papers?",
+                    "primary_attributes": [
+                        "Year",
+                        "AutoVis label (AutoVis vs Other)"
+                    ],
+                    "secondary_attributes": [
+                        "PaperType (Conference vs Journal)",
+                        "CitationCount_CrossRef (or AminerCitationCount)"
+                    ],
+                    "transformation": [
+                        "Classify papers as 'AutoVis' using the provided keyword regex against Title+Abstract+AuthorKeywords",
+                        "Aggregate counts per Year \u00d7 AutoVis label \u00d7 PaperType and compute proportion of AutoVis per year",
+                        "Compute cumulative sum of citation counts per year for AutoVis and Other (window transform)"
+                    ],
+                    "expected_insight_types": [
+                        "trend (rise/fall/plateau of annual counts)",
+                        "proportion change over time (share of AutoVis)",
+                        "comparative trends by PaperType (J vs C)",
+                        "cumulative citation growth indicating impact over time",
+                        "identify first-appearance and peak year(s) from the annual counts"
+                    ]
+                }
             }
         },
         {
             "section_number": 4,
-            "section_name": "Temporal trends and venue distribution",
+            "section_name": "Topic landscape and evolution",
             "section_size": "long",
-            "section_description": "Year-by-year counts and share of AutoVis vs Other papers (line/area charts), breakdown by conference (InfoVis, VAST, SciVis etc.), burst detection (where activity peaks/declines), and a short timeline of milestone papers. Visuals: stacked area, small multiples, annotated peaks.",
+            "section_description": "Map the conceptual space of AutoVis using keyword co-occurrence, author keywords clustering, and short-term topic drift from Title+Abstract (e.g., recommendation, mixed-initiative, generation, agents). Visuals: network/cluster diagram of keywords, Sankey or alluvial showing how subtopics shift across time windows, and a small heatmap of topic intensity by year. Summarize dominant subtopics, newly-emerging themes, and waning areas.",
             "action": {
-                "action": "present",
-                "information_needed": [
-                    {
-                        "question_text": "How has the yearly count and share of AutoVis vs Other papers changed over time, and where are the largest activity peaks or bursts?",
-                        "primary_attributes": [
-                            "Year",
-                            "Category (AutoVis vs Other)"
-                        ],
-                        "secondary_attributes": [
-                            "Count / Share"
-                        ],
-                        "transformation": [
-                            "Classify each paper as 'AutoVis' or 'Other' using the keyword filter: test(/automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent/i, (datum.AuthorKeywords || '') + ' ' + (datum.Abstract || '') + ' ' + (datum.Title || '')) ? 'AutoVis' : 'Other'",
-                            "Aggregate: count papers per Year \u00d7 Category",
-                            "Compute share per year (AutoVis count / total count) and year-over-year growth rates",
-                            "Detect bursts where year-over-year growth > 50% OR absolute increase >= 5 papers (parameterizable)"
-                        ],
-                        "expected_insight_types": [
-                            "trend",
-                            "share over time",
-                            "peaks/bursts",
-                            "relative growth/decline",
-                            "timing of major shifts or inflection points of AutoVis activity."
-                        ]
-                    },
-                    {
-                        "question_text": "How do temporal trends of AutoVis (counts and share) differ across major venues (conferences)?",
-                        "primary_attributes": [
-                            "Year",
-                            "Conference"
-                        ],
-                        "secondary_attributes": [
-                            "Category (AutoVis vs Other)",
-                            "Count or Share"
-                        ],
-                        "transformation": [
-                            "Select top N conferences by total paper count (parameter N = 5) to keep small multiples readable (e.g., InfoVis, VAST, SciVis, EuroVis, PacificVis/CHI if present)",
-                            "For each selected conference, aggregate counts per Year \u00d7 Category and compute yearly share of AutoVis",
-                            "Optionally apply a 3-year rolling average to smooth noisy year-to-year variation",
-                            "Flag and annotate conference-specific bursts using same burst rule as above"
-                        ],
-                        "expected_insight_types": [
-                            "trend (per-venue)",
-                            "comparison between venues",
-                            "identification of venue-specific peaks or declines",
-                            "outlier years where a conference shows unusually high AutoVis activity."
-                        ]
-                    }
-                ]
+                "action": "explore",
+                "information_needed": {
+                    "question_text": "How do subtopics within Automated Visualization (AutoVis) cluster and evolve over time? In particular, which keyword-based clusters dominate, which subtopics are newly emerging or waning across time windows, and what is the topic intensity per year?",
+                    "key_uncertainty": "(1) Whether to rely only on AuthorKeywords or augment them with keywords extracted from Title+Abstract (and how to extract reliably, e.g., unigrams vs. bigrams). (2) What co-occurrence threshold and time-window size produce stable, interpretable clusters and flows for the network/alluvial visualizations. (3) Which number of clusters/topics (k) or community-detection resolution to use for clear labeling.",
+                    "expected_outputs": [
+                        "A cleaned keyword inventory: deduplicated AuthorKeywords augmented with extracted n-grams (Title+Abstract), stopword- and domain-noise-filtered, with yearly frequencies and the top 30 keywords overall. This will show whether AuthorKeywords suffice or augmentation is needed.",
+                        "A co-occurrence edge list (keyword pairs with counts), and a recommended edge-threshold (e.g., edges with count >= 3) plus community-detection assignments (cluster IDs) computed with networkx. Deliverable: suggested set of clusters (labels based on top keywords per cluster) and the parameters used (threshold, algorithm).",
+                        "A term-by-time-window matrix using chosen time windows (recommend trying 3-year and 5-year bins). Output: per-cluster/topic counts per window to support an alluvial/Sankey and a year-by-topic heatmap; also a short recommendation of which 6\u20138 topics to visualize (those with highest variance or recent growth) and the preferred window size."
+                    ]
+                }
             }
         },
         {
             "section_number": 5,
-            "section_name": "Topic evolution and content analysis",
+            "section_name": "Influential works, authors and venues",
             "section_size": "medium",
-            "section_description": "Keyword and abstract-based topic analysis to show how research themes within AutoVis shifted over time (e.g., rule-based recommendation \u2192 ML-driven generation \u2192 mixed-initiative agents). Visuals: evolving word clouds, topic timelines, representative abstracts for each period.",
+            "section_description": "Identify the AutoVis papers with highest impact (normalized citation, downloads, awards), key authors and their influence (hubs by citations and by collaborative reach), and the venues that published most AutoVis work. Visuals: ranked bar charts for top papers/authors, and a table-like badge for award-winning or highly-downloaded AutoVis papers. Provide short narrations linking influential papers to methodological trends.",
             "action": {
-                "action": "explore",
-                "information_needed": [
-                    {
-                        "question_text": "How did the prevalence of predefined AutoVis themes (rule-based recommendation, ML-driven generation, mixed-initiative agents, visualization toolkits, and evaluation/narrative) change over time (yearly or multi-year periods)?",
-                        "primary_attributes": [
-                            "Year"
-                        ],
-                        "secondary_attributes": [
-                            "Theme (rule-based, ML-driven, mixed-initiative, toolkit, evaluation/narrative)"
-                        ],
-                        "transformation": [
-                            "Text normalization (lowercase, remove punctuation, stopwords) on Title+Abstract+AuthorKeywords",
-                            "Rule-based keyword matching using domain keywords to assign papers to one or more themes (e.g., 'visualization recommendation', 'automatic vis', 'automated vis', 'visualization generation', 'vis generation' \u2192 recommendation/generation; 'machine learning', 'deep learning', 'neural' \u2192 ML-driven; 'mixed initiative', 'mixed-initiative', 'agent' \u2192 mixed-initiative; 'toolkit', 'library', 'D3' \u2192 toolkit; 'narrative', 'evaluation', 'user study' \u2192 evaluation/narrative)",
-                            "Aggregate counts/proportions of papers per theme by Year or by multi-year bins (e.g., 3-year windows)"
-                        ],
-                        "expected_insight_types": [
-                            "trend (increase/decrease of themes over time)",
-                            "top (which themes dominate particular periods)",
-                            "shift (emergence or decline of themes)",
-                            "co-occurrence patterns across themes over time (multi-theme papers) "
-                        ]
-                    },
-                    {
-                        "question_text": "What latent topics emerge from abstracts (via topic modeling) and how do their relative proportions evolve over time?",
-                        "primary_attributes": [
-                            "Year"
-                        ],
-                        "secondary_attributes": [
-                            "Topic (latent)",
-                            "Topic prevalence per paper"
-                        ],
-                        "transformation": [
-                            "Preprocess abstracts (tokenize, lemmatize, remove stopwords and rare/high-frequency terms)",
-                            "Fit LDA/NMF with K topics (discover latent topics)",
-                            "Label topics by top terms and map each paper to topic distribution",
-                            "Aggregate average topic proportions per Year or per multi-year bins"
-                        ],
-                        "expected_insight_types": [
-                            "trend (topic proportion trajectories)",
-                            "top (most prominent topics overall and per period)",
-                            "change points (when a topic gains/loses prominence)",
-                            "representative examples (top-scoring abstracts per topic and period)",
-                            "outlier topics that spike briefly]",
-                            "parameters\":{\"K_topics\":6,\"time_bin\":\"year or 3-year\",\"top_terms_per_topic\":10,\"representative_per_topic_per_period\":3}}]} (Note: the second item's expected_insight_types field intentionally includes multiple insight types and the parameters object for the topic-modeling plan.)}unctuation-free-json-invalid-summary-fixed{",
-                            "information_needed_signature_end}",
-                            "description_end"
-                        ]
-                    }
-                ]
+                "action": "present",
+                "information_needed": {
+                    "question_text": "Which AutoVis papers, authors, and venues have the highest impact after accounting for publication age, downloads, and awards?",
+                    "primary_attributes": [
+                        "paper: normalized_citations (citation count / age in years)",
+                        "author: aggregated_citations (sum of paper citations)"
+                    ],
+                    "secondary_attributes": [
+                        "paper: Downloads_Xplore",
+                        "paper: Award / Year / Conference",
+                        "author: unique_coauthor_count (collaborative reach)"
+                    ],
+                    "transformation": [
+                        "Filter dataset to AutoVis subset using regex on Title, Abstract, and AuthorKeywords (automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent)",
+                        "Compute paper_normalized_citations = max(AminerCitationCount, CitationCount_CrossRef) / (current_year - Year + 1)",
+                        "Explode AuthorNames-Deduped to author-level rows; aggregate per author: sum(paper citations) and count(distinct coauthors) to get collaborative reach",
+                        "Aggregate per venue (Conference): count(papers) and sum(normalized_citations)"
+                    ],
+                    "expected_insight_types": [
+                        "Top (ranked lists of top papers, top authors, top venues)",
+                        "Outliers (papers with unusually high downloads vs. low citations, or award-winning papers with lower citation rates)",
+                        "Comparative patterns (authors who are hubs by citations vs. by collaborative reach)"
+                    ]
+                }
             }
         },
         {
             "section_number": 6,
-            "section_name": "Impact and community structure",
-            "section_size": "long",
-            "section_description": "Citation and usage analysis (Aminer / CrossRef / Xplore), award and replicability-stamp signals, plus social structure: co-author network, institution contributions, and diffusion of ideas across subcommunities. Visuals: citation histograms, network graphs, choropleth or affiliation bar charts.",
+            "section_name": "Community structure and collaboration patterns",
+            "section_size": "medium",
+            "section_description": "Analyze co-authorship and institutional collaboration to show how social structure shaped AutoVis research. Visuals: coauthor network with community detection (color clusters), institution collaboration chord or matrix, and timeline of emerging groups. Discuss whether research is concentrated in a few labs or widely distributed, and note cross-disciplinary partnerships.",
             "action": {
                 "action": "explore",
-                "information_needed": [
-                    {
-                        "question_text": "What is the citation / usage distribution of papers in the dataset and which papers are clear outliers (high-impact)?",
-                        "primary_attributes": [
-                            "AminerCitationCount"
-                        ],
-                        "secondary_attributes": [
-                            "Year",
-                            "Conference"
-                        ],
-                        "transformation": [
-                            "log10(AminerCitationCount + 1)",
-                            "filter by Year range (optional)",
-                            "bin for histogram (e.g., 40 bins)"
-                        ],
-                        "expected_insight_types": [
-                            "distribution",
-                            "outlier",
-                            "top items",
-                            "trend by year (if Year used)",
-                            "venue differences (if Conference used)"
-                        ]
-                    },
-                    {
-                        "question_text": "What is the co-author social structure: who are the most central authors and what subcommunities (clusters) exist?",
-                        "primary_attributes": [
-                            "AuthorNames-Deduped (as node id)"
-                        ],
-                        "secondary_attributes": [
-                            "Year (for temporal slices)",
-                            "Conference or PaperType (to color/label clusters)"
-                        ],
-                        "transformation": [
-                            "explode AuthorNames-Deduped into author list per paper",
-                            "generate all undirected coauthor pairs per paper",
-                            "aggregate edge weights (co-authorship counts)",
-                            "filter to top N authors by degree or edge-weight (e.g., top 100)",
-                            "run community detection / compute degree and betweenness centrality"
-                        ],
-                        "expected_insight_types": [
-                            "network structure",
-                            "top (most central) authors",
-                            "clusters / communities",
-                            "temporal changes (if Year used)",
-                            "bridge authors connecting communities"
-                        ]
-                    },
-                    {
-                        "question_text": "Which institutions (and countries) contribute the most papers and citations, and how is contribution distributed geographically?",
-                        "primary_attributes": [
-                            "AuthorAffiliation (parsed to institution / country)"
-                        ],
-                        "secondary_attributes": [
-                            "AminerCitationCount or CitationCount_CrossRef (to weight impact)",
-                            "Year"
-                        ],
-                        "transformation": [
-                            "parse AuthorAffiliation to extract institution and country",
-                            "explode affiliations per paper and assign fractional paper credit per author (optional)",
-                            "aggregate counts and sum citation metrics by institution/country",
-                            "rank and take top K (e.g., top 20)"
-                        ],
-                        "expected_insight_types": [
-                            "top institutions/countries",
-                            "distribution of contributions",
-                            "impact-weighted ranking (citations per institution)",
-                            "trends over time (if Year used)"
-                        ]
-                    }
-                ]
+                "information_needed": {
+                    "question_text": "What are the main co-authorship communities and institution-level collaboration patterns in the AutoVis subset, and how have these communities emerged and changed over time?",
+                    "key_uncertainty": "Author name disambiguation and affiliation parsing/normalization (can we reliably map strings to unique authors and canonical institutions); appropriate thresholds for pruning the co\u2011author graph (min publications or min edge weight) so visualizations are readable; which community-detection algorithm and resolution parameter best captures meaningful groups for this dataset.",
+                    "expected_outputs": [
+                        "A cleaned, deduplicated author list and a normalized institution mapping (rules, examples, and the fraction of records affected). This will resolve whether we can treat AuthorNames-Deduped as sufficient or need additional name disambiguation.",
+                        "A co-authorship graph (nodes=authors, weighted edges=coauthorship counts) with chosen pruning parameters (e.g., minimum author degree or top-N authors), plus community-detection output (e.g., Louvain/Leiden clusters), and key graph statistics (nodes, edges, modularity) to guide the network visualization.",
+                        "An institution collaboration matrix (institution \u00d7 institution weighted by coauthored papers) and a per-community timeline (yearly counts of publications per detected community). Deliverables: the matrix for a chord/matrix visual, and the yearly series for a stacked/area timeline; include recommended thresholds for institutions to include (e.g., top 20 by collaborations)."
+                    ]
+                }
             }
         },
         {
             "section_number": 7,
-            "section_name": "Case studies and narratives",
+            "section_name": "Representative case studies and research trajectories",
             "section_size": "medium",
-            "section_description": "Deep dives into 3\u20134 influential/representative works (methods, reception, downstream influence) illustrating how approaches matured or stalled, and how tooling/community shaped follow-up research.",
+            "section_description": "Deep dives (2\u20134 short case studies) of representative AutoVis trajectories: a seminal system/paper, a line of follow-up work, and a contrasting mixed-initiative or agent-driven approach. For each case show timeline of citations, major derivatives (internal references), and role in shifting or stabilizing the field. Use small annotated timelines and citation trees to tell the stories.",
             "action": {
                 "action": "explore",
-                "information_needed": [
-                    {
-                        "question_text": "Which 3\u20134 papers in the dataset that match the 'automated visualization' keyword set are the most influential and representative candidates for case studies? (Use combined influence metrics to rank candidates.)",
-                        "primary_attributes": [
-                            "Title",
-                            "Year",
-                            "CitationCount_CrossRef",
-                            "AminerCitationCount"
-                        ],
-                        "secondary_attributes": [
-                            "Downloads_Xplore",
-                            "Award",
-                            "AuthorKeywords"
-                        ],
-                        "transformation": [
-                            "filter rows matching automated-visualization keywords in Title/Abstract/AuthorKeywords using regex",
-                            "normalize citation and download metrics and compute a combined influence score",
-                            "rank papers by combined score and select top_n"
-                        ],
-                        "expected_insight_types": [
-                            "top",
-                            "outlier",
-                            "distribution across years and venues (to check representativeness)",
-                            "presence of awards or reproducibility stamps as qualifiers for selection."
-                        ]
-                    },
-                    {
-                        "question_text": "For each selected candidate paper, what is its downstream influence within this dataset over time as measured by internal citations (occurrences of its DOI in other papers' InternalReferences) and how does that compare to its general citation counts?",
-                        "primary_attributes": [
-                            "Year",
-                            "count_internal_references_per_year"
-                        ],
-                        "secondary_attributes": [
-                            "CitationCount_CrossRef",
-                            "AminerCitationCount",
-                            "Title"
-                        ],
-                        "transformation": [
-                            "explode InternalReferences to one DOI per row",
-                            "match target paper DOI and aggregate counts by citing paper Year",
-                            "merge with target paper's yearly citation totals if available (or use overall citation counts)"
-                        ],
-                        "expected_insight_types": [
-                            "trend",
-                            "growth",
-                            "lag (time from publication to peak citations)",
-                            "comparison between internal-network influence and external citation counts."
-                        ]
-                    }
-                ]
+                "information_needed": {
+                    "question_text": "Which 2\u20134 representative AutoVis research trajectories should we profile for case studies? Specifically, identify seminal AutoVis papers, their lines of follow-up work (internal derivatives), and at least one contrasting mixed-initiative or agent-driven approach to include.",
+                    "key_uncertainty": "I don\u2019t yet know which papers in the dataset match the AutoVis keyword set, which of those have sufficient internal follow-ups (internal references) and citation histories to form a clear trajectory, and what thresholds to use to pick 2\u20134 representative cases.",
+                    "expected_outputs": [
+                        "A filtered set of papers labeled AutoVis (using the provided keyword regex) with counts: total citations (CitationCount_CrossRef and AminerCitationCount), number of internal citations (times cited by other dataset records via InternalReferences), and number of internal references (how many other dataset records they cite).",
+                        "A ranked list of candidate seminal papers (top 10) by a combined score (e.g., weighted Citations + internal-derivative count) and suggested selection of 2\u20134 final case studies meeting criteria (seminal + follow-up depth + diversity: e.g., system-driven vs mixed-initiative/agent).",
+                        "For each shortlisted candidate (2\u20134): (a) yearly citation timeline (citations per year derived from CitationCount history if available, or approximated from dataset years of citing papers), (b) an internal citation tree (edges among dataset papers using InternalReferences) showing immediate derivatives and second-level descendants, and (c) short rationale for inclusion."
+                    ]
+                }
             }
         },
         {
             "section_number": 8,
-            "section_name": "Conclusions, limitations and recommendations",
+            "section_name": "Conclusions, open questions and recommendations",
             "section_size": "short",
-            "section_description": "Synthesize findings, highlight dataset and method limitations (keyword false positives/negatives, venue coverage), and propose concrete next steps for the research community (evaluation benchmarks, shared datasets, replications, program committee suggestions).",
+            "section_description": "Concise synthesis of what happened to AutoVis research, current gaps (evaluation standards, reproducibility, human-centered studies), and concrete recommendations for researchers (datasets, benchmarks, cross-community collaborations). End with pointers to reproducible artifacts: filter code, analysis notebooks, and an interactive dashboard for exploring the dataset.",
             "action": {
                 "action": "pend",
                 "information_needed": null

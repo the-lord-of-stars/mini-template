@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Author Collaboration Network - Visualization Research</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .control-group input, .control-group select {
+            padding: 8px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .control-group input:focus, .control-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .stats {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+            min-width: 80px;
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+            display: block;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.75em;
+            color: #6c757d;
+            margin-top: 2px;
+        }
+
+        .visualization {
+            padding: 20px 30px 30px 30px;
+            position: relative;
+        }
+
+        #network-container {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            background: #fafbfc;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .zoom-controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        .zoom-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 2px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .zoom-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .zoom-btn:active {
+            transform: scale(0.95);
+        }
+
+        .node {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .node:hover {
+            stroke-width: 3px;
+            stroke: #667eea;
+        }
+
+        .node.selected {
+            stroke: #e74c3c;
+            stroke-width: 3px;
+        }
+
+        .link {
+            stroke: #999;
+            stroke-opacity: 0.6;
+            transition: all 0.3s ease;
+        }
+
+        .link:hover {
+            stroke-opacity: 1;
+            stroke-width: 3px;
+        }
+
+        .node-label {
+            font-size: 10px;
+            font-weight: 500;
+            text-anchor: middle;
+            pointer-events: none;
+            fill: #333;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 1000;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            font-size: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            color: #667eea;
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #495057;
+            min-width: 80px;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.secondary {
+            background: #6c757d;
+        }
+
+        .btn.secondary:hover {
+            background: #5a6268;
+        }
+
+        .info-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .info-panel h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+
+        .info-panel p {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        .zoom-instructions {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .zoom-instructions h4 {
+            margin: 0 0 10px 0;
+            color: #1976d2;
+        }
+
+        .zoom-instructions ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .zoom-instructions li {
+            margin: 5px 0;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .control-group {
+                justify-content: space-between;
+            }
+            
+            .stats {
+                justify-content: center;
+            }
+            
+            .visualization {
+                padding: 15px;
+            }
+            
+            #network-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Author Collaboration Network</h1>
+            <p>Visualization Research Papers (2015-2024)</p>
+        </div>
+
+        <div class="controls">
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Min Papers:</label>
+                    <input type="number" id="minPapers" value="1" min="1" max="50">
+                </div>
+                <div class="filter-group">
+                    <label>Min Citations:</label>
+                    <input type="number" id="minCitations" value="0" min="0" max="1000">
+                </div>
+                <div class="filter-group">
+                    <label>Year Range:</label>
+                    <input type="number" id="startYear" value="2015" min="2015" max="2024">
+                    <span>-</span>
+                    <input type="number" id="endYear" value="2024" min="2015" max="2024">
+                </div>
+                <div class="filter-group">
+                    <label>Conference:</label>
+                    <select id="conferenceFilter">
+                        <option value="">All Conferences</option>
+                        <option value="InfoVis">InfoVis</option>
+                        <option value="VAST">VAST</option>
+                        <option value="Vis">Vis</option>
+                        <option value="SciVis">SciVis</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <button class="btn" onclick="applyFilters()">Apply Filters</button>
+                <button class="btn secondary" onclick="resetFilters()">Reset</button>
+                <button class="btn secondary" onclick="exportData()">Export Data</button>
+            </div>
+        </div>
+
+        <div class="visualization">
+            <div class="stats" id="stats">
+                <div class="stat-card">
+                    <span class="stat-number" id="nodeCount">0</span>
+                    <div class="stat-label">Authors</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="linkCount">0</span>
+                    <div class="stat-label">Links</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="paperCount">0</span>
+                    <div class="stat-label">Papers</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="avgDegree">0</span>
+                    <div class="stat-label">Avg Degree</div>
+                </div>
+            </div>
+
+            <div id="network-container">
+                <div class="loading">Loading collaboration network...</div>
+                <div class="zoom-controls">
+                    <button class="zoom-btn" onclick="zoomIn()">+</button>
+                    <button class="zoom-btn" onclick="zoomOut()">−</button>
+                    <button class="zoom-btn" onclick="resetZoom()">⌂</button>
+                </div>
+            </div>
+
+            <div class="legend" id="legend">
+                <h4>Citation Impact Legend</h4>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #d73027;"></div>
+                    <span>High Impact (≥${Math.round(globalMaxCitations * 0.5)} citations)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #fc8d59;"></div>
+                    <span>Medium-High Impact (${Math.round(globalMaxCitations * 0.2)}-${Math.round(globalMaxCitations * 0.49)} citations)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #fee08b;"></div>
+                    <span>Medium Impact (${Math.round(globalMaxCitations * 0.1)}-${Math.round(globalMaxCitations * 0.19)} citations)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #e6f598;"></div>
+                    <span>Low Impact (<${Math.round(globalMaxCitations * 0.1)} citations)</span>
+                </div>
+                <div style="margin-top: 10px; font-size: 11px; color: #666;">
+                    Based on global max: ${globalMaxCitations} citations
+                </div>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <h3>About This Visualization</h3>
+            <p>This network visualization shows collaboration relationships between authors in visualization research papers. Each node represents an author, and each link represents a collaboration on a paper. Node size indicates the number of papers authored, node color indicates citation impact (red=high, green=low), and link thickness shows the number of collaborations between authors.</p>
+            
+            <div class="zoom-instructions">
+                <h4>🔍 Zoom & Navigation Controls</h4>
+                <ul>
+                    <li><strong>Mouse wheel:</strong> Zoom in/out</li>
+                    <li><strong>Drag on empty space:</strong> Pan the view</li>
+                    <li><strong>Zoom buttons:</strong> Use +/− buttons or ⌂ to reset</li>
+                    <li><strong>Double-click:</strong> Zoom to fit all nodes</li>
+                </ul>
+            </div>
+            
+            <p><strong>Interactions:</strong> Drag nodes to reposition them, hover over nodes/links for details, click nodes to highlight their connections, and use the filters above to explore different subsets of the data.</p>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let data = null;
+        let filteredData = null;
+        let simulation = null;
+        let svg = null;
+        let nodes = null;
+        let links = null;
+        let nodeLabels = null;
+        let zoom = null;
+
+        // Color scheme based on author metrics
+        const colorScale = d3.scaleSequential()
+            .domain([0, 100]) // Assuming max citations around 100
+            .interpolator(d3.interpolateViridis);
+        
+        // Dynamic color scheme based on citation ranges
+        function getAuthorColor(author, maxCitations = 100) {
+            const normalizedCitations = author.totalCitations / maxCitations;
+            
+            // Use a sequential color scheme from green (low) to red (high)
+            if (normalizedCitations >= 0.5) return '#d73027'; // High impact - red
+            else if (normalizedCitations >= 0.2) return '#fc8d59'; // Medium-high impact - orange
+            else if (normalizedCitations >= 0.1) return '#fee08b'; // Medium impact - yellow
+            else return '#e6f598'; // Low impact - light green
+        }
+        
+        // Global variable to store the global max citations
+        let globalMaxCitations = 100;
+        
+        // Function to calculate max citations from all data (not filtered)
+        function calculateGlobalMaxCitations(allNodes) {
+            if (!allNodes || allNodes.length === 0) return 100;
+            return Math.max(...allNodes.map(d => d.totalCitations));
+        }
+
+        // Initialize the visualization
+        async function init() {
+            try {
+                console.log('Loading data...');
+                data = await loadData();
+                console.log('Data loaded:', data);
+                
+                // Calculate global max citations from all data
+                globalMaxCitations = calculateGlobalMaxCitations(data.nodes);
+                console.log('Global max citations:', globalMaxCitations);
+                
+                filteredData = data;
+                createVisualization();
+                updateStats();
+                updateLegend();
+                
+                // Add event listeners for filters
+                document.getElementById('minPapers').addEventListener('change', applyFilters);
+                document.getElementById('minCitations').addEventListener('change', applyFilters);
+                document.getElementById('startYear').addEventListener('change', applyFilters);
+                document.getElementById('endYear').addEventListener('change', applyFilters);
+                document.getElementById('conferenceFilter').addEventListener('change', applyFilters);
+                
+            } catch (error) {
+                console.error('Error initializing visualization:', error);
+                document.querySelector('.loading').textContent = 'Error loading data. Please check the console.';
+            }
+        }
+
+        // Load and process the CSV data
+        async function loadData() {
+            const response = await fetch('filtered_dataset.csv');
+            const csvText = await response.text();
+            
+            // Parse CSV
+            const rows = csvText.split('\n').slice(1); // Skip header
+            const papers = [];
+            
+            for (const row of rows) {
+                if (!row.trim()) continue;
+                
+                const columns = parseCSVRow(row);
+                if (columns.length < 15) continue;
+                
+                const paper = {
+                    conference: columns[0],
+                    year: parseInt(columns[1]),
+                    title: columns[2],
+                    doi: columns[3],
+                    authors: columns[9].split(';').map(a => a.trim()).filter(a => a),
+                    citations: parseInt(columns[14]) || 0,
+                    keywords: columns[12] || ''
+                };
+                
+                papers.push(paper);
+            }
+            
+            // Build collaboration network
+            return buildCollaborationNetwork(papers);
+        }
+
+        // Parse CSV row handling quoted fields
+        function parseCSVRow(row) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < row.length; i++) {
+                const char = row[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            
+            result.push(current);
+            return result;
+        }
+
+        // Build collaboration network from papers
+        function buildCollaborationNetwork(papers) {
+            const authorMap = new Map();
+            const collaborations = new Map();
+            
+            // Process each paper
+            papers.forEach(paper => {
+                const authors = paper.authors;
+                
+                // Add authors to map
+                authors.forEach(author => {
+                    if (!authorMap.has(author)) {
+                        authorMap.set(author, {
+                            id: author,
+                            name: author,
+                            papers: [],
+                            totalCitations: 0,
+                            conferences: new Set(),
+                            collaborators: new Set()
+                        });
+                    }
+                    
+                    const authorData = authorMap.get(author);
+                    authorData.papers.push(paper);
+                    authorData.totalCitations += paper.citations;
+                    authorData.conferences.add(paper.conference);
+                });
+                
+                // Create collaboration pairs
+                for (let i = 0; i < authors.length; i++) {
+                    for (let j = i + 1; j < authors.length; j++) {
+                        const author1 = authors[i];
+                        const author2 = authors[j];
+                        const key = [author1, author2].sort().join('|');
+                        
+                        if (!collaborations.has(key)) {
+                            collaborations.set(key, {
+                                source: author1,
+                                target: author2,
+                                papers: [],
+                                weight: 0
+                            });
+                        }
+                        
+                        const collab = collaborations.get(key);
+                        collab.papers.push(paper);
+                        collab.weight++;
+                    }
+                }
+            });
+            
+            // Convert to arrays
+            const nodes = Array.from(authorMap.values()).map(author => ({
+                ...author,
+                conferences: Array.from(author.conferences),
+                collaboratorCount: author.collaborators.size,
+                paperCount: author.papers.length,
+                primaryConference: getPrimaryConference(author.conferences)
+            }));
+            
+            const links = Array.from(collaborations.values());
+            
+            return { nodes, links, papers };
+        }
+
+        // Get primary conference for an author
+        function getPrimaryConference(conferences) {
+            const conferenceCounts = {};
+            conferences.forEach(conf => {
+                conferenceCounts[conf] = (conferenceCounts[conf] || 0) + 1;
+            });
+            
+            return Object.entries(conferenceCounts)
+                .sort((a, b) => b[1] - a[1])[0][0];
+        }
+
+        // Create the D3 visualization
+        function createVisualization() {
+            const container = document.getElementById('network-container');
+            container.innerHTML = '';
+            
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            
+            // Create SVG with zoom support
+            svg = d3.select(container)
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+            
+            // Create zoom behavior
+            zoom = d3.zoom()
+                .scaleExtent([0.1, 10]) // Min and max zoom levels
+                .on('zoom', (event) => {
+                    // Apply zoom transform to the main group
+                    svg.select('g.zoom-group').attr('transform', event.transform);
+                });
+            
+            // Apply zoom to SVG
+            svg.call(zoom);
+            
+            // Add double-click to reset zoom
+            svg.on('dblclick', () => {
+                resetZoom();
+            });
+            
+            // Create main group for zoom
+            const mainGroup = svg.append('g')
+                .attr('class', 'zoom-group');
+            
+            // Create force simulation with stronger centering and compact layout
+            simulation = d3.forceSimulation()
+                .force('link', d3.forceLink().id(d => d.id).distance(25)) // Very compact link distance
+                .force('charge', d3.forceManyBody().strength(-50)) // Very low repulsion for tight clustering
+                .force('center', d3.forceCenter(width / 2, height / 2).strength(0.7)) // Very strong centering
+                .force('collision', d3.forceCollide().radius(12)); // Very small collision radius
+            
+            // Create links
+            links = mainGroup.append('g')
+                .selectAll('line')
+                .data(filteredData.links)
+                .enter().append('line')
+                .attr('class', 'link')
+                .attr('stroke-width', d => Math.min(d.weight * 2, 8));
+            
+            // Create nodes using global max citations for consistent color scaling
+            nodes = mainGroup.append('g')
+                .selectAll('circle')
+                .data(filteredData.nodes)
+                .enter().append('circle')
+                .attr('class', 'node')
+                .attr('r', d => Math.min(6 + d.paperCount * 1.5, 20))
+                .attr('fill', d => getAuthorColor(d, globalMaxCitations))
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 2)
+                .on('click', onNodeClick)
+                .on('mouseover', onNodeHover)
+                .on('mouseout', onNodeOut);
+            
+            // Create node labels
+            nodeLabels = mainGroup.append('g')
+                .selectAll('text')
+                .data(filteredData.nodes)
+                .enter().append('text')
+                .attr('class', 'node-label')
+                .text(d => d.name.length > 15 ? d.name.substring(0, 15) + '...' : d.name)
+                .attr('dy', '.35em');
+            
+            // Update simulation
+            simulation
+                .nodes(filteredData.nodes)
+                .on('tick', ticked);
+            
+            simulation.force('link')
+                .links(filteredData.links);
+            
+            simulation.alpha(1).restart();
+        }
+
+        // Tick function for simulation
+        function ticked() {
+            links
+                .attr('x1', d => d.source.x)
+                .attr('y1', d => d.source.y)
+                .attr('x2', d => d.target.x)
+                .attr('y2', d => d.target.y);
+            
+            nodes
+                .attr('cx', d => d.x)
+                .attr('cy', d => d.y);
+            
+            nodeLabels
+                .attr('x', d => d.x)
+                .attr('y', d => d.y + 15);
+        }
+
+        // Node click handler
+        function onNodeClick(event, d) {
+            // Toggle selection
+            const isSelected = d3.select(this).classed('selected');
+            
+            // Clear all selections
+            nodes.classed('selected', false);
+            links.classed('highlighted', false);
+            
+            if (!isSelected) {
+                // Select this node
+                d3.select(this).classed('selected', true);
+                
+                // Highlight connected links
+                links.classed('highlighted', link => 
+                    link.source.id === d.id || link.target.id === d.id
+                );
+            }
+        }
+
+        // Node hover handler
+        function onNodeHover(event, d) {
+            // Show tooltip
+            const tooltip = d3.select('body').append('div')
+                .attr('class', 'tooltip')
+                .style('opacity', 0);
+            
+            tooltip.transition()
+                .duration(200)
+                .style('opacity', .9);
+            
+            tooltip.html(`
+                <strong>${d.name}</strong><br/>
+                Papers: ${d.paperCount}<br/>
+                Total Citations: ${d.totalCitations}<br/>
+                Avg Citations/Paper: ${(d.totalCitations / d.paperCount).toFixed(1)}<br/>
+                Collaborators: ${d.collaboratorCount}<br/>
+                Conferences: ${d.conferences.join(', ')}
+            `)
+                .style('left', (event.pageX + 10) + 'px')
+                .style('top', (event.pageY - 28) + 'px');
+        }
+
+        // Node out handler
+        function onNodeOut(event, d) {
+            d3.selectAll('.tooltip').remove();
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const minPapers = parseInt(document.getElementById('minPapers').value);
+            const minCitations = parseInt(document.getElementById('minCitations').value);
+            const startYear = parseInt(document.getElementById('startYear').value);
+            const endYear = parseInt(document.getElementById('endYear').value);
+            const conference = document.getElementById('conferenceFilter').value;
+            
+            // Filter papers
+            const filteredPapers = data.papers.filter(paper => {
+                return paper.year >= startYear && 
+                       paper.year <= endYear &&
+                       (!conference || paper.conference === conference);
+            });
+            
+            // Rebuild network with filtered papers
+            filteredData = buildCollaborationNetwork(filteredPapers);
+            
+            // Apply additional filters
+            filteredData.nodes = filteredData.nodes.filter(node => 
+                node.paperCount >= minPapers && node.totalCitations >= minCitations
+            );
+            
+            // Keep only links between remaining nodes
+            const nodeIds = new Set(filteredData.nodes.map(n => n.id));
+            filteredData.links = filteredData.links.filter(link => 
+                nodeIds.has(link.source.id || link.source) && 
+                nodeIds.has(link.target.id || link.target)
+            );
+            
+            // Recreate visualization
+            createVisualization();
+            updateStats();
+            
+            // Update legend with current global max citations
+            updateLegend();
+        }
+
+        // Update legend with current global max citations
+        function updateLegend() {
+            const legend = document.getElementById('legend');
+            if (legend) {
+                legend.innerHTML = `
+                    <h4>Citation Impact Legend</h4>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #d73027;"></div>
+                        <span>High Impact (≥${Math.round(globalMaxCitations * 0.5)} citations)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #fc8d59;"></div>
+                        <span>Medium-High Impact (${Math.round(globalMaxCitations * 0.2)}-${Math.round(globalMaxCitations * 0.49)} citations)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #fee08b;"></div>
+                        <span>Medium Impact (${Math.round(globalMaxCitations * 0.1)}-${Math.round(globalMaxCitations * 0.19)} citations)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #e6f598;"></div>
+                        <span>Low Impact (<${Math.round(globalMaxCitations * 0.1)} citations)</span>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 11px; color: #666;">
+                        Based on global max: ${globalMaxCitations} citations
+                    </div>
+                `;
+            }
+        }
+
+        // Reset filters
+        function resetFilters() {
+            document.getElementById('minPapers').value = 1;
+            document.getElementById('minCitations').value = 0;
+            document.getElementById('startYear').value = 2015;
+            document.getElementById('endYear').value = 2024;
+            document.getElementById('conferenceFilter').value = '';
+            
+            filteredData = data;
+            createVisualization();
+            updateStats();
+            updateLegend();
+        }
+
+        // Update statistics
+        function updateStats() {
+            document.getElementById('nodeCount').textContent = filteredData.nodes.length;
+            document.getElementById('linkCount').textContent = filteredData.links.length;
+            document.getElementById('paperCount').textContent = filteredData.papers.length;
+            
+            const avgDegree = filteredData.nodes.length > 0 ? 
+                (filteredData.links.length * 2 / filteredData.nodes.length).toFixed(1) : 0;
+            document.getElementById('avgDegree').textContent = avgDegree;
+        }
+
+        // Export data
+        function exportData() {
+            const exportData = {
+                nodes: filteredData.nodes,
+                links: filteredData.links,
+                metadata: {
+                    totalNodes: filteredData.nodes.length,
+                    totalLinks: filteredData.links.length,
+                    totalPapers: filteredData.papers.length,
+                    exportDate: new Date().toISOString()
+                }
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = 'collaboration_network.json';
+            link.click();
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (svg) {
+                const container = document.getElementById('network-container');
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                
+                svg.attr('width', width).attr('height', height);
+                simulation.force('center', d3.forceCenter(width / 2, height / 2));
+                simulation.alpha(1).restart();
+            }
+        });
+
+        // Zoom control functions
+        function zoomIn() {
+            if (svg && zoom) {
+                svg.transition().duration(300).call(zoom.scaleBy, 1.5);
+            }
+        }
+
+        function zoomOut() {
+            if (svg && zoom) {
+                svg.transition().duration(300).call(zoom.scaleBy, 0.75);
+            }
+        }
+
+        function resetZoom() {
+            if (svg && zoom) {
+                svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity);
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

@@ -111,6 +111,9 @@ def generate_html_report(output_state: dict, output_path: str, shared_memory=Non
         "<head>",
         "  <meta charset='utf-8'>",
         "  <title>Insights Report</title>",
+        "  <script src='https://cdn.jsdelivr.net/npm/vega@5'></script>",
+        "  <script src='https://cdn.jsdelivr.net/npm/vega-lite@5'></script>",
+        "  <script src='https://cdn.jsdelivr.net/npm/vega-embed@6'></script>",
         "  <style>",
         "    body { font-family: sans-serif; margin: 2em; line-height: 1.6; }",
         "    h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }",
@@ -238,10 +241,11 @@ def generate_html_report(output_state: dict, output_path: str, shared_memory=Non
                     html_lines.append(f"    </div>")
                     html_lines.append(f"  </div>")
             
-            # Display insights
+            # Display insights (without visualizations in iteration history)
             if "insights" in iteration and iteration["insights"]:
                 html_lines.append(f"  <div class='insights'>")
                 html_lines.append(f"    <div class='section-title'>💡 Key Insights:</div>")
+                
                 for j, insight in enumerate(iteration["insights"], 1):
                     html_lines.append(f"    <div class='insight'>")
                     html_lines.append(f"      <div class='insight-number'>Insight {j}</div>")
@@ -252,19 +256,123 @@ def generate_html_report(output_state: dict, output_path: str, shared_memory=Non
             html_lines.append("</div>")
             html_lines.append("<hr/>")
     
+    # Display storyline if available
+    if "storyline" in output_state and output_state["storyline"] and output_state["storyline"].get("nodes"):
+        storyline = output_state["storyline"]
+        html_lines.append("<h2>📖 Data Exploration Storyline</h2>")
+        html_lines.append(f"<div style='margin-bottom: 1em; padding: 1em; background-color: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;'>")
+        html_lines.append(f"  <strong>Theme:</strong> {storyline.get('theme', 'Data Exploration')}")
+        html_lines.append("</div>")
+        
+        for i, story_node in enumerate(storyline["nodes"], 1):
+            html_lines.append(f"<div class='iteration' style='margin-bottom: 2em;'>")
+            html_lines.append(f"  <h3>📚 Story Node {i}: {story_node.get('description', '')}</h3>")
+            
+            # Display insights for this story node if available
+            node_insights = story_node.get("insights", [])
+            if node_insights:
+                html_lines.append(f"  <div class='insights'>")
+                html_lines.append(f"    <div class='section-title'>💡 Related Insights:</div>")
+                for j, insight in enumerate(node_insights, 1):
+                    html_lines.append(f"    <div class='insight'>")
+                    html_lines.append(f"      <div class='insight-number'>Insight {j}</div>")
+                    html_lines.append(f"      <div>{insight}</div>")
+                    html_lines.append(f"    </div>")
+                html_lines.append(f"  </div>")
+            
+            # Display visualizations for this story node
+            node_visualizations = story_node.get("visualizations", [])
+            if node_visualizations:
+                html_lines.append(f"  <div class='insights'>")
+                html_lines.append(f"    <div class='section-title'>📊 Visualizations:</div>")
+                
+                for j, visualization in enumerate(node_visualizations, 1):
+                    if visualization.get("is_appropriate", False):
+                        html_lines.append(f"    <div class='insight-visualization' style='margin-top: 1em; padding: 1em; background-color: #f0f8ff; border-radius: 5px; border-left: 3px solid #3498db;'>")
+                        html_lines.append(f"      <div style='font-weight: bold; color: #3498db; margin-bottom: 0.5em;'>📊 {visualization.get('chart_type', 'Chart')}</div>")
+                        html_lines.append(f"      <div style='font-style: italic; margin-bottom: 1em;'>{visualization.get('description', '')}</div>")
+                        
+                        # Add visualization container
+                        div_id = f"story-node-{i}-vis-{j}"
+                        html_lines.append(f"      <div id='{div_id}' style='margin: 0.5em 0;'></div>")
+                        
+                        # Add Vega-Lite visualization
+                        try:
+                            spec_str = visualization.get('spec', '')
+                            if spec_str:
+                                vega_spec = json.loads(spec_str)
+                                spec_json = json.dumps(vega_spec)
+                                html_lines.extend([
+                                    "      <script>",
+                                    f"        vegaEmbed('#{div_id}', {spec_json})",
+                                    "          .catch(console.error);",
+                                    "      </script>",
+                                ])
+                        except Exception as e:
+                            html_lines.append(f"      <p style='color: #e74c3c; font-size: 0.9em;'><em>Error loading visualization: {str(e)}</em></p>")
+                        
+                        html_lines.append(f"    </div>")
+                
+                html_lines.append(f"  </div>")
+            
+            html_lines.append("</div>")
+            html_lines.append("<hr/>")
+    
     # Display current insights if available (for backward compatibility)
     elif "insights" in output_state and output_state["insights"]:
         html_lines.append("<h2>Key Insights</h2>")
         
         insights = output_state["insights"]
+        # Get visualizations for current insights if available
+        current_visualizations = []
+        if "visualizations" in output_state and output_state["visualizations"]:
+            current_visualizations = output_state["visualizations"]
+        
         for i, insight in enumerate(insights, 1):
             html_lines.append(f"<div class='insight'>")
             html_lines.append(f"  <div class='insight-number'>Insight {i}</div>")
             html_lines.append(f"  <div>{insight}</div>")
+            
+            # Find matching visualization for this insight
+            matching_visualization = None
+            for vis in current_visualizations:
+                if vis.get("insight", "").strip() == insight.strip():
+                    matching_visualization = vis
+                    break
+            
+            # Add visualization if found and appropriate
+            if matching_visualization and matching_visualization.get("is_appropriate", False):
+                html_lines.append(f"  <div class='insight-visualization' style='margin-top: 1em; padding: 1em; background-color: #f0f8ff; border-radius: 5px; border-left: 3px solid #3498db;'>")
+                html_lines.append(f"    <div style='font-weight: bold; color: #3498db; margin-bottom: 0.5em;'>📊 Visualization: {matching_visualization.get('chart_type', 'Chart')}</div>")
+                html_lines.append(f"    <div style='font-style: italic; margin-bottom: 1em;'>{matching_visualization.get('description', '')}</div>")
+                
+                # Add visualization container
+                div_id = f"current-insight-vis-{i}"
+                html_lines.append(f"    <div id='{div_id}' style='margin: 0.5em 0;'></div>")
+                
+                # Add Vega-Lite visualization
+                try:
+                    spec_str = matching_visualization.get('spec', '')
+                    if spec_str:
+                        vega_spec = json.loads(spec_str)
+                        spec_json = json.dumps(vega_spec)
+                        html_lines.extend([
+                            "    <script>",
+                            f"      vegaEmbed('#{div_id}', {spec_json})",
+                            "        .catch(console.error);",
+                            "    </script>",
+                        ])
+                except Exception as e:
+                    html_lines.append(f"    <p style='color: #e74c3c; font-size: 0.9em;'><em>Error loading visualization: {str(e)}</em></p>")
+                
+                html_lines.append(f"  </div>")
+            
             html_lines.append("</div>")
     else:
         html_lines.append("<h2>Key Insights</h2>")
         html_lines.append("<p><em>No insights available in the current state.</em></p>")
+
+
 
     html_lines.extend([
         "</body>",

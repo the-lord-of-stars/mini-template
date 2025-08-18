@@ -12,7 +12,11 @@ from agents.simple_iteration.node_select_data import select_data
 from agents.simple_iteration.node_question import question
 from agents.simple_iteration.node_facts import get_facts
 from agents.simple_iteration.node_insights import get_insights
+from agents.simple_iteration.node_storyline import generate_storyline
+from agents.simple_iteration.node_assign_insights import assign_insights_to_story_nodes
+from agents.simple_iteration.node_story_vis import generate_story_visualizations
 from agents.simple_iteration.node_follow_up_decision import follow_up_decision
+from agents.simple_iteration.node_vis import generate_visualizations
 from agents.simple_iteration.state import State
 
 
@@ -23,22 +27,40 @@ def create_workflow():
     builder.add_node("question", question)
     builder.add_node("facts", get_facts)
     builder.add_node("insights", get_insights)
+    builder.add_node("storyline", generate_storyline)
+    builder.add_node("assign_insights", assign_insights_to_story_nodes)
+    builder.add_node("story_visualizations", generate_story_visualizations)
     builder.add_node("follow_up_decision", follow_up_decision)
-    # builder.add_node("visualizations", get_visualizations)
+    builder.add_node("visualizations", generate_visualizations)
     
     builder.add_edge(START, "select_data")
     builder.add_edge("select_data", "question")
     builder.add_edge("question", "facts")
     builder.add_edge("facts", "insights")
     
-    # Add conditional edge from insights to follow_up_decision
+    # Add conditional edge from insights to either follow_up_decision or storyline
     def route_after_insights(state):
-        return "follow_up_decision" if state.get("should_continue", False) else "END"
+        if state.get("should_continue", False):
+            return "follow_up_decision"
+        else:
+            return "storyline"
 
     builder.add_conditional_edges("insights", route_after_insights, {
         "follow_up_decision": "follow_up_decision",
-        "END": END
+        "storyline": "storyline"
     })
+    
+    # Add edge from storyline to assign_insights
+    builder.add_edge("storyline", "assign_insights")
+    
+    # Add edge from assign_insights to story_visualizations
+    builder.add_edge("assign_insights", "story_visualizations")
+    
+    # Add edge from story_visualizations to visualizations
+    builder.add_edge("story_visualizations", "visualizations")
+    
+    # Add edge from visualizations to END
+    builder.add_edge("visualizations", END)
     
     # Add conditional edge from follow_up_decision to either select_data or facts
     def route_after_follow_up_decision(state):
@@ -69,11 +91,17 @@ class Agent:
 
     def initialize_state(self) -> dict:
         state = {
-            "topic": "evolution of research on sensemaking",
+            # "topic": "evolution of research on sensemaking",
+            # "topic": "find a phd on visualisation for digital humanities",
+            "topic": "Jefferey Heer's research and influences",
             "iteration_count": 0,      # Initialize iteration counter
             "max_iterations": 2,       # Set maximum iterations (adjust as needed)
             "should_continue": True,   # Initialize to continue
-            "iteration_history": []    # yuhan: this is not used
+            "iteration_history": [],   # yuhan: this is not used
+            "storyline": {             # Initialize storyline
+                "theme": "",
+                "nodes": []
+            }
         }
         return state
 
@@ -111,7 +139,9 @@ class Agent:
             output_state = self.workflow.invoke(state, config={"configurable": {"thread_id": thread_id}})
         except Exception as e:
             # output_state = self.workflow.get_latest_state()
-            output_state = shared_memory.get_state()
+            # Get the last state from memory history
+            history = shared_memory.get_history()
+            output_state = history[-1] if history else state
         print(output_state)
 
         # flatten the output
