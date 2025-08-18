@@ -16,7 +16,7 @@ class AnalysisDecision(BaseModel):
     question_text: str = Field(..., description="A specific analytical question based on the user question")
     analysis_text: str = Field(..., description="A short description of the analysis to do based on the question")
     analysis_type: str = Field(..., description="The type of analysis to do based on the question")
-    suggested_module: str = Field(..., description="Suggested analysis tool: node_analyse_authors, node_analyse_topics, or node_analysis_basics")
+    suggested_module: str = Field(..., description="Suggested analysis tool: author_analysis_module, author_analysis_module, or author_analysis_module")
     primary_attributes: List[str] = Field(..., description="Primary data columns to analyze")
     secondary_attributes: List[str] = Field(..., description="Secondary columns to analyze")
     suggested_chart_type: str = Field(..., description="Suggested type of chart to create")
@@ -162,7 +162,7 @@ def question(state: State):
             break
         else:
             print(f"Invalid module: {response.suggested_module}, expected one of: {valid_modules}")
-            print(f"Retrying... {i+1}/3")
+            print(f"Retrying... {i+1}/5")
 
     new_state = state.copy()
 
