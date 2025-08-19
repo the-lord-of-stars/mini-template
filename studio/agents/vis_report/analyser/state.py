@@ -1,0 +1,52 @@
+from typing_extensions import TypedDict
+from typing import Literal, List, Optional, Union
+from agents.vis_report.config import Config
+
+class InformationNeededPresent(TypedDict):
+    question_text: str # your exploration or analysis question
+    primary_attributes: List[str] # primary attributes to use for the analysis
+    secondary_attributes: List[str] # secondary attributes to use for the analysis
+    transformation: List[str] # possible transformations to apply to the data
+    expected_insight_types: List[str] # expected insight types from the analysis, such as top, trend, distribution, outlier, etc.
+
+class InformationNeededExplore(TypedDict):
+    question_text: str # your exploration or analysis question
+    key_uncertainty: str
+    expected_outputs: List[str] # expected outputs from the exploration to resolve uncertainty
+
+class Visualisation(TypedDict):
+    library: Literal["vega-lite"]
+    specification: str
+
+class Model(TypedDict):
+    method: Literal["llm_gen_py"]
+    python_script: Optional[str]
+
+class Knowledge(TypedDict):
+    # facts: List[
+    facts: str
+    insights: List[str]
+
+class AnalysisSchema(TypedDict):
+    action: Literal["present", "explore"]
+    information_needed: Union[InformationNeededPresent, InformationNeededExplore]
+
+class State(TypedDict):
+    analysis_schema: AnalysisSchema
+    visualisation: Optional[Visualisation] = None
+    knowledge: Optional[Knowledge] = None
+
+
+def is_vis_valid(state: State):
+    try:
+        return state["visualisation"]["specification"] is not None
+    except Exception as e:
+        print(f"🚫 Visualisation is invalid: {e}")
+        return False
+
+def is_knowledge_valid(state: State):
+    try:
+        return state["knowledge"]["facts"] is not None
+    except Exception as e:
+        print(f"🚫 Knowledge is invalid: {e}")
+        return False

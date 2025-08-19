@@ -46,7 +46,7 @@ def get_vega_lite_spec(info_need: str, context: str, dataset: str = "dataset.csv
     Requirements:
     1. Generate valid vega-lite specification.
     2. Robustness is prioritised over complexity.
-    3. If the information need is too complex, you don't need to fulfuil the complete need. You may generate a visualisation that is relevant to the core need.
+    3. If the information need is too complex, you don't need to fulfil the complete need. You may generate a visualisation that is relevant to the core need.
     """
     )
 
