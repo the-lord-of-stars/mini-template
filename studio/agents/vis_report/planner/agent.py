@@ -1,6 +1,7 @@
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import StateGraph, START, END
 from datetime import datetime
+import shutil
 
 from agents.vis_report.planner.node_plan import plan
 from agents.vis_report.planner.node_execute import execute
@@ -68,5 +69,8 @@ class Agent:
             output_state = memory.latest_state
         
         generate_html_report(output_state, f"outputs/vis_report/{memory.thread_id}/report.html")
+        
+        # copy to output.html
+        shutil.copy(f"outputs/vis_report/{memory.thread_id}/report.html", "output.html")
 
         return
