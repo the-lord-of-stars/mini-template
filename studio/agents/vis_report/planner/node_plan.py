@@ -11,7 +11,7 @@ from agents.vis_report.memory import memory
 from agents.vis_report.analyser.state import State as AnalysisState
 
 from agents.vis_report.config import config
-
+import time
 
 def plan(state: State):
     print(f"▶️ Planning report")
@@ -24,8 +24,15 @@ def plan(state: State):
     new_state = initiate(new_state, config)
     sections = new_state["report_outline"]
 
-    # TODO: can we do this in one go, i.e., plan all sections at once?
+    # save the report outline to a file
+    if config["dev"]:
+        import json 
+        with open(f"outputs/vis_report/{memory.thread_id}/report_outline.json", "w", encoding="utf-8") as f:
+            json.dump(new_state["report_outline"], f, indent=2, ensure_ascii=False)
 
+
+    # TODO: can we do this in one go, i.e., plan all sections at once?
+    start_time = time.time()
     for i, section in enumerate(sections):
         print(f"▶️ Planning section {i+1} of {len(sections)}")
         response = simple_action_plan(state, section, config)
@@ -33,6 +40,14 @@ def plan(state: State):
         print(f"✅ Section {i+1} planned")
 
         memory.save_state(new_state)
+    
+    if config["dev"]:
+        import json 
+        with open(f"outputs/vis_report/{memory.thread_id}/report_outline_planned.json", "w", encoding="utf-8") as f:
+            json.dump(new_state["report_outline"], f, indent=2, ensure_ascii=False)
+    print(f"✅ Report outline saved to {f}")
+    total_time = time.time() - start_time
+    print(f"⏱️ Total plan function time: {total_time:.2f} seconds")
 
     return new_state
 
