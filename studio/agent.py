@@ -1,8 +1,9 @@
-from module_report import decode_output_fixed_v2
 from graph import create_workflow
-from state import InputState, OutputState
+from state import InputState, OutputState, State
 import json
 import re
+from memory import shared_memory
+from datetime import datetime
 
 class Agent:
     def __init__(self):
@@ -14,64 +15,54 @@ class Agent:
         with open("graph.png", "wb") as f:
             f.write(png_data)
 
-    def initialize_state_from_csv(self, file_path: str, file_url: str, user_query: str) -> InputState:
+    def initialize_state(self) -> dict:
         """
         Prepares the initial input state for the workflow.
         """
-        if not file_path:
-            raise ValueError("File path must be provided to initialize_state_from_csv.")
 
-        initial_state: InputState = {
-            "file_path": file_path,
-            "dataset_url": file_url,
-            "dataset_info": "",
-            "user_query": user_query,
-            "messages": []
+        state = {
+            # "topic": "who are the researchers in sensemaking research",
+            "topic": "research on automated visualization",
+            "iteration_count": 0,  # Initialize iteration counter
+            "max_iterations": 2,  # Set maximum iterations (adjust as needed) - counting starts from "iteration_count"+1
+            "should_continue": True,  # Initialize to continue
+            "iteration_history": []  # yuhan: this is not used
         }
-        return initial_state
-
-    def decode_output(self, output_state):
-        # html_content = generate_report_html(output_state)
-        if 'analysis_result' in output_state:
-            spec = extract_vega_lite_spec_from_analysis_result(output_state['analysis_result'])
-            if spec:
-                output_state['analysis_result']['vega_lite_spec'] = spec
-        decode_output_fixed_v2(self, output_state)
+        return state
 
 
-    def process(self):
+    def generate_thread_id(self) -> str:
+        """Generate a unique thread ID"""
+        return f"thread_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+
+    def process(self, thread_id: str = None, use_workflow_synthesise: bool = False):
         if self.workflow is None:
             raise RuntimeError("Agent not initialised. Call initialize() first.")
 
-        user_query = "Based on the provided research publication record dataset, what are the most meaningful analysis tasks that can be performed? Consider trends, topics, and authors."
-        file_path = "./dataset.csv"
-        file_url = "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv"
-        print(f"Agent: Starting processing for query: '{user_query}' with file: '{file_path}'")
+        # Generate thread_id if not provided
+        if thread_id is None:
+            thread_id = self.generate_thread_id()
+            shared_memory.set_thread_id(thread_id)
+            print(f"Generated new thread_id: {thread_id}")
 
-        # initialize the state & read the dataset
-        input_state = self.initialize_state_from_csv(file_path, file_url, user_query)
+        # initialize the state & save to memory
+        input_state = self.initialize_state()
+        shared_memory.save_state(input_state)
 
-        # invoke the workflow
-        output_state: OutputState = self.workflow.invoke(input_state)
+        # invoke the workflow with generated thread_id
+        try:
+            output_state = self.workflow.invoke(input_state, config={"configurable": {"thread_id": thread_id}})
+        except Exception as e:
+            print(f"Workflow error: {e}")
+            # Get the latest state from memory history
+            history = shared_memory.get_history()
+            if history:
+                output_state = history[-1]
+            else:
+                output_state = input_state
+        
+        # Save the final state to memory
+        shared_memory.save_state(output_state)
 
-        # print("------Output State-----")
-        # print(output_state)
-
-        # decode the output
-        self.decode_output(output_state)
-
+        # return the result
         return output_state
-
-def extract_vega_lite_spec_from_analysis_result(analysis_result):
-    messages = analysis_result.get('messages', [])
-    for msg in messages:
-        content = getattr(msg, 'content', '')
-        match = re.search(r"```json\s*(\{.*?\})\s*```", content, re.DOTALL)
-        if match:
-            json_text = match.group(1)
-            try:
-                spec = json.loads(json_text)
-                return spec
-            except json.JSONDecodeError:
-                print("Failed to decode Vega-Lite JSON spec")
-    return None

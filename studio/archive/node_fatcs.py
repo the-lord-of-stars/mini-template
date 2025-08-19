@@ -1,0 +1,209 @@
+from typing_extensions import TypedDict
+from langchain_core.messages import HumanMessage, SystemMessage
+from pydantic import BaseModel, Field
+import json
+
+from helpers import get_llm, get_dataset_info, query_by_sql
+from state import State
+from memory import shared_memory
+from sandbox import run_in_sandbox, run_in_sandbox_with_venv
+import time
+
+# Configuration for retry mechanism and timeouts
+FACTS_TIMEOUT_CONFIG = {
+    "timeout": 30,  # seconds
+    "max_retries": 0,
+    "retry_delays": [1, 2, 4]  # seconds between retries
+}
+
+class ResponseFormatter(BaseModel):
+    code: str = Field(description="The python code to get the facts about the dataset")
+
+
+def execute_facts_with_retry(code: str, config: dict = None):
+    """
+    Execute facts analysis code with retry mechanism and timeout handling
+    
+    Args:
+        code: Python code to execute
+        config: Configuration dictionary with timeout and retry settings
+    
+    Returns:
+        dict: Execution result with stdout, stderr, and exit_code
+    """
+    if config is None:
+        config = FACTS_TIMEOUT_CONFIG
+    
+    timeout = config["timeout"]
+    max_retries = config["max_retries"]
+    retry_delays = config["retry_delays"]
+    
+    for attempt in range(max_retries + 1):
+        try:
+            print(f"Executing facts analysis... (attempt {attempt + 1}/{max_retries + 1})")
+            
+            # Execute the code
+            result = run_in_sandbox_with_venv(code)
+            
+            # Check if execution was successful
+            if result["exit_code"] == 0:
+                print(f"Facts analysis completed successfully!")
+                return result
+            else:
+                print(f"Facts analysis failed with exit code {result['exit_code']}")
+                if attempt < max_retries:
+                    delay = retry_delays[min(attempt, len(retry_delays) - 1)]
+                    print(f"Retrying in {delay} seconds...")
+                    time.sleep(delay)
+                else:
+                    print("Max retries reached. Returning last result.")
+                    return result
+                    
+        except Exception as e:
+            error_msg = str(e)
+            print(f"Facts analysis error (attempt {attempt + 1}): {error_msg}")
+            
+            # Check if it's a timeout error
+            if "timeout" in error_msg.lower() or "timed out" in error_msg.lower():
+                if attempt < max_retries:
+                    delay = retry_delays[min(attempt, len(retry_delays) - 1)]
+                    print(f"Timeout detected. Retrying in {delay} seconds...")
+                    time.sleep(delay)
+                else:
+                    print("Max retries reached after timeout errors.")
+                    return {
+                        "stdout": "",
+                        "stderr": f"Execution timed out after {max_retries + 1} attempts. Last error: {error_msg}",
+                        "exit_code": 1
+                    }
+            else:
+                # Non-timeout error, don't retry
+                print("Non-timeout error detected. Not retrying.")
+                return {
+                    "stdout": "",
+                    "stderr": f"Execution failed: {error_msg}",
+                    "exit_code": 1
+                }
+    
+    # This should never be reached, but just in case
+    return {
+        "stdout": "",
+        "stderr": "Unexpected error in retry mechanism",
+        "exit_code": 1
+    }
+
+
+def get_facts(state: State):
+    """
+    Generate SQL query to select the data (based on the topic)
+    """
+
+    fact_term = "facts"
+
+    # Get path of the main program being executed
+    dataset_info = get_dataset_info(state['select_data_state']['dataset_path'])
+
+    sys_prompt = f"""
+You are an expert data analyst who writes robust Python scripts to analyze datasets by understanding data types and applying appropriate preprocessing.
+
+CRITICAL DATA HANDLING RULES:
+1. This is a CSV file. Use pd.read_csv(path) with NO separator parameter, or explicitly use delimiter=','.
+2. DO NOT use sep='\\t' or assume it's a tab-separated file.
+3. ALWAYS inspect data types and handle them appropriately before analysis or plotting.
+
+The dataset is as follows:
+{dataset_info}
+
+DATA TYPE AWARENESS & PREPROCESSING:
+- ALWAYS start by examining data types: df.dtypes, df.info(), df.head()
+- For datetime columns: convert using pd.to_datetime() with error handling
+- For numeric columns: use pd.to_numeric() with errors='coerce' to handle mixed types
+- For text columns: clean whitespace, handle missing values appropriately
+- For categorical data: consider using pd.Categorical or value_counts()
+- Handle missing values (NaN, empty strings, 'Unknown', etc.) before analysis
+
+SPECIAL HANDLING FOR COMPLEX TEXT COLUMNS:
+1. AUTHORS, AFFILIATIONS, AUTHORKEYWORDS columns typically separated by semicolons, commas:
+   - Split and flatten
+   - Clean individual names: strip whitespace, handle empty entries
+   - Count collaborations, find most prolific authors
+   
+2. KEYWORDS/TAGS columns (usually comma or semicolon separated):
+   - Split into individual keywords
+   - Normalize case and whitespace
+   - Analyze keyword frequency and co-occurrence
+   
+3. LONG TEXT columns (abstracts, descriptions):
+   - Basic text analysis: word count, character count
+   - Extract key terms or themes
+   - Handle encoding issues
+
+PLOTTING REQUIREMENTS:
+- For numeric data: ensure data is actually numeric before plotting
+- For categorical data: limit to top N categories if too many unique values
+- For time series: ensure datetime conversion and proper sorting
+- For author/keyword analysis: show top N most frequent items
+- Always add proper labels, titles, and handle axis formatting
+- Use appropriate plot types based on data characteristics
+- Handle edge cases (empty data, single values, etc.)
+
+You should read the dataset from: {state['select_data_state']['dataset_path']}
+
+ANALYSIS REQUIREMENTS:
+1. Generate relevant {fact_term} that answer the given question
+2. Apply data type inspection and preprocessing BEFORE any analysis
+3. Use defensive programming - handle edge cases and errors
+4. Keep analysis focused and concise
+5. Choose {fact_term} based on data characteristics (numeric vs categorical vs text vs multi-value text)
+6. Each {fact_term} should be printed as:
+   ### Begin of {fact_term}
+   <{fact_term}>
+   ### End of {fact_term}
+
+SUPPORTED LIBRARIES: pandas, numpy, matplotlib, seaborn, PLOTLY
+
+COMMON DATA ISSUES TO HANDLE:
+- Multi-value text columns (Authors: "John Doe; Jane Smith; Bob Wilson")
+- Keywords separated by various delimiters (";", ",", " and ")
+- Mixed data types in columns (strings mixed with numbers)
+- Date formats that aren't automatically recognized
+- Missing values represented as strings ('N/A', 'Unknown', etc.)
+- Text columns that need cleaning or categorization
+- Numeric columns stored as strings
+- Very large categorical variables (limit to top N)
+
+Remember: ALWAYS inspect the actual data content, not just types. Look for patterns like semicolons, commas, or "and" that indicate multi-value fields requiring special processing!
+"""
+
+    human_prompt = f"""
+    I would like to explore the dataset about the topic of {state['topic']}.
+    The current analysis question is: {state['question']['question']}.
+    Please generate the python code.
+    """
+
+
+
+    llm = get_llm(temperature=0, max_tokens=8192)
+
+    response = llm.with_structured_output(ResponseFormatter).invoke(
+        [SystemMessage(content=sys_prompt), HumanMessage(content=human_prompt)]
+    )
+
+    # Run the code in sandbox with retry mechanism
+    print(f"Starting facts analysis for question: {state['question']['question']}")
+    result = execute_facts_with_retry(response.code)
+    print(result)
+
+    new_state = state.copy()
+    new_state["facts"] = {
+        "code": response.code,
+        "stdout": result["stdout"],
+        "stderr": result["stderr"],
+        "exit_code": result["exit_code"]
+    }
+
+    # Save the state to memory
+    shared_memory.save_state(new_state)
+    print(f"state saved to memory for thread {shared_memory.thread_id}")
+
+    return new_state

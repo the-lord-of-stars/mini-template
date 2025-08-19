@@ -1,1 +1,19 @@
-# Please copy your requirements.txt file from studio/ to submission/ folder. 
+langgraph
+langgraph-sdk
+langgraph-checkpoint-sqlite
+langsmith
+langchain-community
+langchain-core
+langchain-openai
+notebook
+tavily-python
+trustcall
+langgraph-cli[inmem]
+matplotlib
+numpy
+networkx
+seaborn
+reportlab
+altair
+pandasql
+plotly
