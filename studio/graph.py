@@ -8,12 +8,17 @@ def create_workflow():
     builder = StateGraph(State)
 
     # --- Add the nodes ---
-
+    # from node_select_data_new import select_data
     from node_select_data import select_data
     builder.add_node("select_data", select_data)
+    # builder.add_edge(START, "select_data")
+    # builder.add_edge("select_data", END)
 
-    # from node_question import question
-    # builder.add_node("question", question)
+    from node_question_structured import question
+    builder.add_node("question", question)
+    # builder.add_edge(START, "select_data")
+    # builder.add_edge("select_data", "question")
+    # builder.add_edge("question", END)
 
     # from node_fatcs import get_facts
     # builder.add_node("facts", get_facts)
@@ -117,11 +122,16 @@ def create_workflow():
     # builder.add_edge("synthesise", END)
 
     # -----------------------------with analysis planner node-----------------------------
-    from node_question_structured import question
-    builder.add_node("question", question)
+    # from node_question_structured import question
+    # builder.add_node("question", question)
 
     from node_analysis_planner import planner
     builder.add_node("planner", planner)
+
+    # builder.add_edge(START, "select_data")
+    # builder.add_edge("select_data", "question")
+    # builder.add_edge("question", "planner")
+    # builder.add_edge("planner", END)
 
     from node_executor import executor
     builder.add_node("executor", executor)

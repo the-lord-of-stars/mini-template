@@ -34,6 +34,8 @@ def question(state: State):
 
     selected_dataset_path = state["select_data_state"]["dataset_path"]
     dataset_info = get_dataset_info(selected_dataset_path)
+    # dataset_path = state["dataframe_path"]
+    # dataset_info = get_dataset_info(dataset_path)
 
     author_analysis = {
         "analysis_type": ["author_collaboration_networks"],
@@ -41,12 +43,12 @@ def question(state: State):
     }
 
     topic_analysis = {
-        "analysis_type": ["top keywords", "topic temporal evolution", "keyword cooccurrence"],
-        "chart_type": ["topic_evolution_plot","top_keywords_plot", "cooccurrence_matrix"]
+        "analysis_type": ["top keywords", "topic temporal evolution", "keyword cooccurrence", "topic modeling"],
+        "chart_type": ["topic_evolution_plot","top_keywords_plot", "cooccurrence_matrix", "topic_modeling"]
     }
 
     basic_analysis = {
-        "analysis_type": ["publication_trends", "citation_analysis", "download_patterns", "conference_comparisons", "time_series_analysis"],
+        "analysis_type": ["trend analysis","comparison analysis","relationship analysis","distribution analysis","frequency analysis","pattern analysis"],
         "chart_type": ["line_chart", "bar_chart", "scatter_plot", "box_plot", "histogram", "heatmap"]
     }
 
@@ -102,6 +104,24 @@ def question(state: State):
         For example, it can be a further analysis of specific insights that you find interesting.
     """
 
+    domain_enhanced_prompt = f"""
+        You have deep understanding of:
+        - Academic publication patterns and research lifecycle
+        - Citation impact metrics and their interpretation  
+        - Collaboration networks in research communities
+        - Topic evolution and trend identification methodologies
+
+        DOMAIN-SPECIFIC ANALYSIS PRIORITIES:
+        1. For collaboration analysis: Focus on co-authorship patterns, institutional networks, cross-disciplinary connections
+        2. For topic analysis: Emphasize keyword evolution, theme emergence/decline, semantic clustering, topic modeling
+        3. For impact analysis: Consider citation patterns, h-index evolution, venue prestige effects
+
+        CONTEXTUAL QUESTION GENERATION:
+        - Consider the research field maturity and typical analysis needs
+        - Account for temporal patterns in academic publishing (conference cycles, research trends)
+        - Incorporate field-specific metrics and evaluation criteria
+        """
+
     sys_prompt = f"""
         You are a talented assistant (MBTI: ISTJ). Your task is to generate analysis questions and suggest the appropriate analysis modules
 
@@ -111,30 +131,75 @@ def question(state: State):
         Here are the information of the selected dataset:
         {dataset_info}
 
+        Domain knowledge:
+        {domain_enhanced_prompt}
+
         Please generate ONLY ONE atomic question based on the interests of the user, you and the available analysis modules, and select the most appropriate analysis module.
 
         IMPORTANT: You must choose between THREE analysis modules:
 
-        1. author_analysis_module: Specialized in author-centric analysis
+        - basic_analysis_module: Specialized in statistical and trend analysis on the publication metrics
+           - CAPABILITIES: Publication trends, citation analysis, download patterns, conference comparisons, time series analysis
+           - DATA FIELDS: Year, Conference, Downloads_Xplore, CitationCount_CrossRef, PaperType
+           - ANALYSIS TYPES: {", ".join(basic_analysis["analysis_type"])}
+           - AVAILABLE CHART TYPES: {", ".join(basic_analysis["chart_type"])}
+           - EXAMPLES: "What are the publication trends?", "How do citations vary by conference?", "Do awarded papers get more downloads?"
+
+        - author_analysis_module: Specialized in author-centric analysis
            - CAPABILITIES: Author networks, collaboration patterns, author influence ranking, co-authorship analysis
            - DATA FIELDS: AuthorNames, AuthorNames-Deduped, AuthorAffiliation
            - ANALYSIS TYPES: {", ".join(author_analysis["analysis_type"])}
            - AVAILABLE CHART TYPES: {", ".join(author_analysis["chart_type"])}
            - EXAMPLES: "Who are the most influential authors?", "How do researchers collaborate?", "Which authors have the strongest networks?"
 
-        2. topic_analysis_module: Specialized in content and theme analysis
+        - topic_analysis_module: Specialized in content and theme analysis
            - CAPABILITIES: Topic modeling, keyword analysis, theme evolution, text mining, semantic analysis
            - DATA FIELDS: Abstract, Title, AuthorKeywords, AuthorNames-Deduped
            - ANALYSIS TYPES: {", ".join(topic_analysis["analysis_type"])}
            - AVAILABLE CHART TYPES: {", ".join(topic_analysis["chart_type"])}
            - EXAMPLES: "What are the main research themes?", "How have topics evolved over time?", "Which keywords are most connected?"
 
-        3. basic_analysis_module: Specialized in statistical and trend analysis on the publication metrics
+        SELECTION RULES:
+        1. Choose author_analysis_module when the question focuses on PEOPLE (authors, researchers, collaboration)
+        2. Choose topic_analysis_module when the question focuses on CONTENT (topics, themes, keywords, text)
+        3. Choose basic_analysis_module when the question focuses on METRICS (trends, statistics, comparisons, patterns)
+        4. The question should be focused and operationalizable
+        5. Suggest appropriate chart_type based on the analysis type
+        6. Consider module diversity - prefer modules that have been used less frequently
+        7. If one module has been heavily used, consider exploring other analysis perspectives
+
+        {context}
+    """
+
+    sys_prompt_new = f"""
+        You are a talented assistant (MBTI: ISTJ). Your task is to generate analysis questions and suggest the appropriate analysis modules
+
+        The dataset has been selected based on the topic of {state["topic"]}.
+        The query to select the dataset is to {state['select_data_state']['description']}.
+
+        Here are the information of the selected dataset:
+        {dataset_info}
+
+        Domain knowledge:
+        {domain_enhanced_prompt}
+
+        Please generate ONLY ONE atomic question based on the interests of the user, you and the available analysis modules, and select the most appropriate analysis module.
+
+        IMPORTANT: You must choose between THREE analysis modules:
+
+        - basic_analysis_module: Specialized in statistical and trend analysis on the publication metrics
            - CAPABILITIES: Publication trends, citation analysis, download patterns, conference comparisons, time series analysis
            - DATA FIELDS: Year, Conference, Downloads_Xplore, CitationCount_CrossRef, PaperType
            - ANALYSIS TYPES: {", ".join(basic_analysis["analysis_type"])}
            - AVAILABLE CHART TYPES: {", ".join(basic_analysis["chart_type"])}
            - EXAMPLES: "What are the publication trends?", "How do citations vary by conference?", "Do awarded papers get more downloads?"
+
+        - author_analysis_module: Specialized in author-centric analysis
+           - CAPABILITIES: Author networks, collaboration patterns, author influence ranking, co-authorship analysis
+           - DATA FIELDS: AuthorNames, AuthorNames-Deduped, AuthorAffiliation
+           - ANALYSIS TYPES: {", ".join(author_analysis["analysis_type"])}
+           - AVAILABLE CHART TYPES: {", ".join(author_analysis["chart_type"])}
+           - EXAMPLES: "Who are the most influential authors?", "How do researchers collaborate?", "Which authors have the strongest networks?"
 
         SELECTION RULES:
         1. Choose author_analysis_module when the question focuses on PEOPLE (authors, researchers, collaboration)
@@ -156,7 +221,9 @@ def question(state: State):
 
         response = llm.with_structured_output(AnalysisDecision).invoke(
             [SystemMessage(content=sys_prompt), HumanMessage(content=human_prompt)]
+            # [SystemMessage(content=sys_prompt_new), HumanMessage(content=human_prompt)]
         )
+        
         valid_modules = ["author_analysis_module", "topic_analysis_module", "basic_analysis_module"]
         if response.suggested_module in valid_modules:
             break

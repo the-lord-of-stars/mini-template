@@ -13,6 +13,75 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+CUSTOM_STOP_WORDS = {
+        'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 
+        'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+        'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
+        'should', 'may', 'might', 'must', 'can', 'this', 'that', 'these', 'those',
+        'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them',
+        'my', 'your', 'his', 'her', 'its', 'our', 'their', 'mine', 'yours', 'hers', 'ours', 'theirs',
+        'am', 'is', 'are', 'was', 'were', 'being', 'been',
+        'here', 'there', 'where', 'when', 'why', 'how', 'what', 'which', 'who', 'whom',
+        'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such',
+        'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very',
+        'just', 'now', 'then', 'well', 'also', 'even', 'still', 'back', 'away',
+        'up', 'down', 'out', 'off', 'over', 'under', 'again', 'further', 'then', 'once',
+        
+        'paper', 'papers', 'study', 'studies', 'research', 'work', 'works', 'method', 'methods',
+        'approach', 'approaches', 'technique', 'techniques', 'algorithm', 'algorithms',
+        'system', 'systems', 'model', 'models', 'framework', 'frameworks',
+        'analysis', 'analyses', 'evaluation', 'evaluations', 'experiment', 'experiments',
+        'result', 'results', 'finding', 'findings', 'conclusion', 'conclusions',
+        'discussion', 'discussions', 'section', 'sections', 'chapter', 'chapters',
+        'figure', 'figures', 'table', 'tables', 'example', 'examples',
+        'case', 'cases', 'scenario', 'scenarios', 'application', 'applications',
+        'implementation', 'implementations', 'design', 'designs', 'development', 'developments',
+        'performance', 'performances', 'quality', 'qualities', 'accuracy', 'accuracies',
+        'efficiency', 'efficiencies', 'effectiveness', 'effectivenesses',
+        
+        'visualization', 'visualizations', 'visual', 'visually', 'visualize', 'visualizes',
+        'chart', 'charts', 'graph', 'graphs', 'plot', 'plots', 'diagram', 'diagrams',
+        'display', 'displays', 'show', 'shows', 'present', 'presents', 'presentation',
+        'view', 'views', 'viewer', 'viewers', 'interface', 'interfaces', 'ui', 'ux',
+        'interaction', 'interactions', 'interactive', 'interactively',
+        'data', 'dataset', 'datasets', 'information', 'content', 'contents',
+        
+        'time', 'times', 'year', 'years', 'month', 'months', 'day', 'days',
+        'week', 'weeks', 'hour', 'hours', 'minute', 'minutes', 'second', 'seconds',
+        'period', 'periods', 'duration', 'durations', 'interval', 'intervals',
+        
+        'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
+        'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth',
+        'number', 'numbers', 'count', 'counts', 'amount', 'amounts', 'size', 'sizes',
+        'large', 'larger', 'largest', 'small', 'smaller', 'smallest',
+        'high', 'higher', 'highest', 'low', 'lower', 'lowest',
+        
+        'use', 'uses', 'used', 'using', 'get', 'gets', 'got', 'getting',
+        'make', 'makes', 'made', 'making', 'take', 'takes', 'took', 'taking',
+        'give', 'gives', 'gave', 'giving', 'go', 'goes', 'went', 'going',
+        'come', 'comes', 'came', 'coming', 'see', 'sees', 'saw', 'seeing',
+        'know', 'knows', 'knew', 'knowing', 'think', 'thinks', 'thought', 'thinking',
+        'say', 'says', 'said', 'saying', 'tell', 'tells', 'told', 'telling',
+        'ask', 'asks', 'asked', 'asking', 'want', 'wants', 'wanted', 'wanting',
+        'need', 'needs', 'needed', 'needing', 'like', 'likes', 'liked', 'liking',
+        
+        'good', 'better', 'best', 'bad', 'worse', 'worst',
+        'new', 'newer', 'newest', 'old', 'older', 'oldest',
+        'big', 'bigger', 'biggest', 'little', 'littler', 'littlest',
+        'long', 'longer', 'longest', 'short', 'shorter', 'shortest',
+        'easy', 'easier', 'easiest', 'hard', 'harder', 'hardest',
+        'important', 'more', 'most', 'less', 'least',
+        
+        'way', 'ways', 'thing', 'things', 'part', 'parts', 'place', 'places',
+        'people', 'person', 'persons', 'man', 'men', 'woman', 'women',
+        'child', 'children', 'boy', 'boys', 'girl', 'girls',
+        'world', 'worlds', 'life', 'lives', 'hand', 'hands', 'eye', 'eyes',
+        'head', 'heads', 'face', 'faces', 'body', 'bodies',
+        'day', 'days', 'night', 'nights', 'morning', 'mornings', 'evening', 'evenings',
+        'water', 'food', 'air', 'fire', 'earth', 'sun', 'moon', 'star', 'stars',
+        
+        'lt', 'gt', 'etx', 'amp', 'quot', 'apos',
+    }
 
 def get_llm(**kw):
     """

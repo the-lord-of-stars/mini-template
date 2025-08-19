@@ -81,7 +81,7 @@ def generate_topic_analysis_params(execution_plan: Dict[str, Any]) -> Dict[str, 
     human_prompt = "Generate topic analysis parameters"
     
     try:
-        llm = get_llm(temperature=0.3, max_tokens=512)
+        llm = get_llm(temperature=0.3, max_tokens=2048)
         response = llm.with_structured_output(TopicParams).invoke(
             [SystemMessage(content=sys_prompt), HumanMessage(content=human_prompt)]
         )

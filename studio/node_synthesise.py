@@ -66,12 +66,14 @@ def build_analysis_prompt_structured(iteration_history: List[Dict]) -> str:
         
         # add analysis code
         if "facts" in iteration and iteration["facts"]:
+            print("--------------------------------")
+            print(f"facts: {iteration['facts']}")
             facts = iteration["facts"]  
             # add analysis result
-            if facts.get("stdout"):
+            if "stdout" in facts:
                 prompt_parts.append("analysis output:")
                 # limit output length
-                output = facts['stdout']
+                output = facts["stdout"]
                 if len(output) > 1000:
                     output = output[:1000] + "... (output is too long, truncated)"
                 prompt_parts.append(f"```\n{output}\n```")
@@ -79,6 +81,8 @@ def build_analysis_prompt_structured(iteration_history: List[Dict]) -> str:
         
         # add insights
         if "insights" in iteration and iteration["insights"]:
+            print("--------------------------------")
+            print(f"insights: {iteration['insights']}")
             prompt_parts.append("identified insights:")
             for j, insight in enumerate(iteration["insights"], 1):
                 prompt_parts.append(f"{j}. {insight}")

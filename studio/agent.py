@@ -22,9 +22,9 @@ class Agent:
 
         state = {
             # "topic": "who are the researchers in sensemaking research",
-            "topic": "general trends in this field from various aspects",
+            "topic": "research on automated visualization",
             "iteration_count": 0,  # Initialize iteration counter
-            "max_iterations": 3,  # Set maximum iterations (adjust as needed) - counting starts from "iteration_count"+1
+            "max_iterations": 2,  # Set maximum iterations (adjust as needed) - counting starts from "iteration_count"+1
             "should_continue": True,  # Initialize to continue
             "iteration_history": []  # yuhan: this is not used
         }

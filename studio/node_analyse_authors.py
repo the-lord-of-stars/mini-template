@@ -382,6 +382,8 @@ def execute_author_network_analysis(state: State, analysis_params: AuthorAnalysi
     # construct the network
     G, df = construct_network(file_path)
     filtered_G, filtered_df = filter_network(G, df, filters)
+    print("before filter: ", len(G.nodes()), len(G.edges()))
+    print("after filter: ", len(filtered_G.nodes()), len(filtered_G.edges()))
 
     # Export filtered network to JSON format
     nodes_data = [{"id": node} for node in filtered_G.nodes()]

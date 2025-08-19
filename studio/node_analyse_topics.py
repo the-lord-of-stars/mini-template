@@ -18,6 +18,7 @@ import os
 from state import State, Visualization
 from helpers import update_state
 from schema_new import BaseAnalysisParameters
+import pyLDAvis
 
 class ToolDecision(BaseModel):
     """Schema for LLM tool selection decision"""
@@ -115,23 +116,27 @@ def get_tool_decision(state: State, analysis_plan: dict) -> ToolDecision:
     You are an intelligent topic analysis agent. Based on the analysis plan and available data, select the most appropriate analysis tool.
     
     Available tools:
-    1. top_keywords - Analyzes the most frequent keywords in the dataset
-       - Use when: Need to understand overall topic distribution, find dominant themes
+    1. top_keywords - Analyzes the most frequent KEYWORDS in the dataset
+       - Use when: Need to understand overall hot keywords distribution
        - Outputs: Keyword frequency list, bar chart visualization
     
-    2. temporal_evolution - Analyzes how keyword popularity changes over time
+    2. temporal_evolution - Analyzes how KEYWORDS popularity changes over time
        - Use when: Need to understand topic trends, identify emerging/declining themes
        - Outputs: Time series visualization, trend analysis
     
-    3. cooccurrence_matrix - Analyzes relationships between keywords
-       - Use when: Need to understand topic relationships, find related themes
+    3. cooccurrence_matrix - Analyzes relationships between KEYWORDS
+       - Use when: Need to understand topic relationships
        - Outputs: Co-occurrence network, correlation analysis
+    
+    4. topic_modeling - Analyzes the TOPICS modeling of the dataset
+       - Use when: Need to understand the topic modeling of the dataset
+       - Outputs: Topic modeling visualization
 
     Decision criteria:
-    - If the question focuses on "most common", "frequent", "dominant" topics → choose top_keywords
+    - If the question focuses on "most common", "frequent", "dominant" KEYWORDS → choose top_keywords
     - If the question focuses on "evolution", "trends", "over time", "emerging" → choose temporal_evolution  
-    - If the question focuses on "relationships", "correlations", "connections" between topics → choose cooccurrence_matrix
-    
+    - If the question focuses on "relationships", "correlations", "connections" between KEYWORDS → choose cooccurrence_matrix
+    - If the question focuses on "TOPICS modeling", "TOPICS distribution", "TOPICS trends" → choose topic_modeling
     Always provide clear reasoning for your selection.
     """
     
@@ -157,7 +162,9 @@ def prepare_decision_context(state: State, analysis_plan: dict) -> str:
     """
     Prepare context information for LLM decision
     """
-    df = state.get("dataframe", pd.DataFrame())
+    # df = state.get("dataframe", pd.DataFrame())
+    df_path = state["select_data_state"]["dataset_path"]
+    df = pd.read_csv(df_path)
     
     context = f"""
     Analysis Plan:
@@ -186,6 +193,8 @@ def execute_selected_tool(tool_name: str, state: State, analysis_plan: dict, ana
         return execute_temporal_evolution(state, analysis_plan, analysis_params)
     elif tool_name == "cooccurrence_matrix":
         return execute_cooccurrence_matrix(state, analysis_plan, analysis_params)
+    elif tool_name == "topic_modeling":
+        return execute_topic_modeling(state, analysis_plan, analysis_params)
     else:
         print(f"Unknown tool: {tool_name}")
         return {"error": f"Unknown tool: {tool_name}"}
@@ -200,7 +209,9 @@ def execute_top_keywords(state: State, analysis_plan: dict, analysis_params: Top
 
     question = state["question"].get("question", "")
     
-    df = state["dataframe"]
+    # df = state["dataframe"]
+    df_path = state["select_data_state"]["dataset_path"]
+    df = pd.read_csv(df_path)
     
     # Use analysis_params if provided, otherwise fall back to analysis_plan
     if analysis_params:
@@ -354,7 +365,9 @@ def execute_temporal_evolution(state: State, analysis_plan: dict, analysis_param
     current_iteration = state.get("iteration_count", 0)
     question = state["question"].get("question", "")
     
-    df = state["dataframe"]
+    # df = state["dataframe"]
+    df_path = state["select_data_state"]["dataset_path"]
+    df = pd.read_csv(df_path)
     success = True
     figure_html = ""
     # 确保thread_id存在，如果不存在则使用默认值
@@ -572,13 +585,15 @@ def analyze_temporal_trends(pivot_data: pd.DataFrame) -> dict:
 
 def execute_cooccurrence_matrix(state: State, analysis_plan: dict, analysis_params: TopicAnalysisParameters = None) -> dict:
     """
-    3. cooccurrence_matrix - 计算关键词共现矩阵
+    3. cooccurrence_matrix
     """
     print("=== Executing Co-occurrence Matrix Analysis ===")
     current_iteration = state.get("iteration_count", 0)
     question = state["question"].get("question", "")
     
-    df = state["dataframe"]
+    # df = state["dataframe"]
+    df_path = state["select_data_state"]["dataset_path"]
+    df = pd.read_csv(df_path)
     success = True
     figure_html = ""
     # 确保thread_id存在，如果不存在则使用默认值
@@ -878,31 +893,178 @@ def find_strongest_associations(keywords: List[str], cooccurrence_matrix: np.nda
     
     return associations
 
+def build_topic_model(df: pd.DataFrame, random_state: int) -> Dict[str, Any]:
+    from helpers_topic_modeling import clean_text, remove_stop_words, preprocess_documents, find_optimal_topics
+    if "Abstract" not in df.columns:
+        print("Error: 'Abstract' column not found in the dataset")
+        print(f"Available columns: {df.columns.tolist()}")
+        return
+    
+    df['Abstract'] = df['Abstract'].apply(clean_text)
+    df['Abstract'] = df['Abstract'].apply(remove_stop_words)
+    cleaned_docs, tfidf_matrix, count_matrix, tfidf_vectorizer, count_vectorizer = preprocess_documents(df['Abstract'].tolist())
+    if len(cleaned_docs) == 0:
+        print("Error: No valid documents found")
+        return
+    
+    tfidf_matrix = tfidf_vectorizer.transform(cleaned_docs)
+    n_topics = min(10, len(cleaned_docs) // 5)
+    best_model, best_params = find_optimal_topics(count_matrix, max_topics=n_topics)
+    doc_topics = best_model.transform(count_matrix)
+    doc_main_topics = doc_topics.argmax(axis=1)
+
+    facts = []
+    facts.append(f"n_topics: {n_topics}")
+    facts.append(f"n_documents: {len(cleaned_docs)}")
+    facts.append(f"vocabulary_size: {count_matrix.shape[1]}")
+    facts.append(f"topics: {best_model.components_}")
+    facts.append(f"document_topics: {doc_main_topics}")
+    facts.append(f"model_perplexity: {best_model.perplexity(count_matrix)}")
+    facts.append(f"model_log_likelihood: {best_model.score(count_matrix)}")
+    
+    return facts, doc_topics, doc_main_topics, best_model, best_params, n_topics, count_matrix, count_vectorizer
+
+    # fact_terms = []
+    # fact_terms.append(f"LDA topic modeling results: {n_topics} topics, {len(cleaned_docs)} documents, {count_matrix.shape[1]} vocabulary")
+
+def execute_topic_modeling(state: State, analysis_plan: dict, analysis_params: TopicAnalysisParameters = None) -> dict:
+    """
+    Execute line trend analysis using LLM for intelligent data processing and visualization
+    """
+    print("=== Executing Topic Modeling Analysis ===")
+    from helpers_topic_modeling import create_pyldavis_visualization
+    
+    # Define question variable to match other analysis functions
+    question = state["question"]["question"]
+    print(f"question: {question}")
+    success = False
+    thread_id = shared_memory.thread_id if shared_memory.thread_id else "default_thread"
+    current_iteration = state["iteration_count"]
+    df_path = state["select_data_state"]["dataset_path"]
+    max_iterations = state["max_iterations"]
+    df = pd.read_csv(df_path)
+
+    facts_list, doc_topics, doc_main_topics, best_model, best_params, n_topics, count_matrix, count_vectorizer = build_topic_model(df,random_state={thread_id})
+    vis_data = create_pyldavis_visualization(
+            best_model, 
+            count_matrix, 
+            count_vectorizer, 
+            f'outputs/simple_iteration/{thread_id}/lda_visualization_{current_iteration}.html'
+        )
+    lda_html = ""
+
+    if vis_data:
+        lda_html = pyLDAvis.prepared_data_to_html(vis_data, template_type='simple')
+        print("pyLDAvis interactive visualization created successfully!")
+        print("You can open 'lda_visualization.html' in your browser to view the interactive topic visualization")
+    else:
+        print("pyLDAvis interactive visualization creation failed!")
+        lda_html = ""
+    styled_lda_html = f"""
+        <div style="width: 100%; height: 600px; overflow: hidden; border: 1px solid #ddd; border-radius: 5px;">
+            <div style="transform: scale(0.8); transform-origin: top left; width: 125%; height: 125%;">
+                {lda_html}
+            </div>
+        </div>
+        """
+    lda_html = styled_lda_html
+    
+    question = {
+        "question": question,
+        "handled": True,
+        "spec": ""
+    }
+
+    facts_string = "\n".join(facts_list) if isinstance(facts_list, list) else str(facts_list)
+
+    sys_prompt = f"""
+    You are a helpful assistant that generates insights from the topic modeling analysis. The data is from abstract of the papers about the topic of {state['topic']}, the facts calculated are as follows:
+    {facts_string}
+
+    Please generate insights from the topic modeling analysis. The insights should be concise and to the point. The insights should be relevant to the user's topic and question.
+    """
+
+    human_prompt = f"""
+    I would like to explore the dataset about the topic of {state['topic']}.
+    The current analysis question is: {state['question']['question']}.
+    This is iteration {current_iteration} out of {max_iterations}.
+    Please generate the insights.
+    """
+    llm = get_llm(temperature=0.5, max_tokens=4096)
+    response = llm.invoke(
+        [SystemMessage(content=sys_prompt), HumanMessage(content=human_prompt)]
+    )
+    insights = [response.content]
+    print(f"insights: {insights}")
+    # insights = ["No keyword insights available"]
+
+    visualization = Visualization(
+        insight="Generated topic modeling analysis",
+        chart_type='topic_modeling',
+        altair_code="",  # Using matplotlib here, not altair
+        description="Topic modeling visualization",
+        is_appropriate=True,
+        image_path=f'output/simple_iteration/{thread_id}/lda_visualization.html',
+        success=True,
+        figure_object=lda_html,
+        code=""
+    )
+
+    current_iteration_data = {
+        "question": question,
+        "facts": facts_string,
+        "insights": insights,
+        "visualizations": [visualization]
+    }
+    return current_iteration_data
+    
+    
+    
+
+
+    
 
 if __name__ == "__main__":
     # Test the framework
     state = State()
     state["dataframe"] = pd.read_csv("dataset.csv")
+    state["select_data_state"] = {
+        "dataset_path": "dataset.csv"
+    }
+
+    state["topic"] = "automated visualization"
+    state["question"] = {
+        "question": "analyse the main topics of the dataset?",
+        "handled": False,
+        "spec": ""
+    }
+    state["iteration_count"] = 0
+    state["max_iterations"] = 1
+    state["iteration_history"] = []
+    state["thread_id"] = "test"
+
     
     # Create a mock analysis plan for testing
     state["analysis_plan"] = {
-        "primary_attributes": ["AuthorKeywords"],
-        "secondary_attributes": ["Year", "Conference"],
+        "primary_attributes": ["Abstract"],
+        "secondary_attributes": ["Title"],
         "parameters": {
             "top_n": 10,
-            "time_range": "1990-2024",
-            "conference_filter": True
+            "time_range": "all",
+            "min_frequency": 1,
+            "min_cooccurrence": 1,
+            "min_year": 1990
         },
         # "question_text": "What are correlations between frequent topics?"
-        "question_text": "analyse the temporal evolution of the most frequent topics?"
+        "question_text": "analyse the main topics of the dataset?"
     }
     
     result = analyse_topics(state)
     print("Analysis completed!")
     
     # Create HTML template to display the visualization
-    if 'topic_analysis_result' in result and 'visualizations' in result['topic_analysis_result']:
-        visualizations = result['topic_analysis_result']['visualizations']['visualizations']
+    if 'visualizations' in result:
+        visualizations = result['visualizations']
         if visualizations and len(visualizations) > 0:
             figure_html = visualizations[0]['figure_object']
             

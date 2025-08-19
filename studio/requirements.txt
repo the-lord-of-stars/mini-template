@@ -71,3 +71,7 @@ wordcloud==1.9.4
 xxhash==3.5.0
 zstandard==0.23.0
 networkx==2.8.3
+scikit-learn==1.6.1
+matplotlib==3.10.5
+seaborn==0.13.2
+pyLDAvis==3.4.1

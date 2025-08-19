@@ -524,7 +524,8 @@ if __name__ == "__main__":
 
 
 # Import sandbox function for safe code execution
-from sandbox import run_in_sandbox_with_venv
+# from sandbox import run_in_sandbox_with_venv
+from sandbox import run_in_sandbox
 
 def execute_basic_analysis_llm(df: pd.DataFrame, analysis_params: BasicAnalysisParameters, iteration: int) -> Dict[str, Any]:
     """
