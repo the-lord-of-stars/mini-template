@@ -79,20 +79,43 @@ def generate_html_report(output_state: dict, output_path: str):
         # Top Navigation Bar
         "  <nav class='sticky top-0 bg-white border-b border-gray-200 z-50'>",
         "    <div class='w-[95%] mx-auto px-6 py-3 flex justify-between items-center'>",
-        "      <a href='#' class='font-bold text-lg'>Agent-Based Visualization Report</a>",
-        "      <div class='flex items-center space-x-10 text-sm'>",
+        "      <a href='#' class='font-bold text-lg'>Agentic VIS Report</a>",
+        #     PC nav
+        "      <div class='hidden md:flex items-center space-x-10 text-sm'>",
         "        <a href='https://www.visagent.org/' target='_blank' class='hover:text-primary-600 text-lg'>Challenge</a>",
         "        <a href='https://github.com/the-lord-of-stars/mini-template' target='_blank'>",
         "          <img src='https://cdnjs.cloudflare.com/ajax/libs/simple-icons/9.16.0/github.svg' alt='GitHub' class='w-6 h-6'>",
         "        </a>",
         "      </div>",
+
+        #     Hamburger for mobile
+        "      <button id='menu-btn' class='md:hidden flex items-center focus:outline-none'>",
+        "        <svg xmlns='http://www.w3.org/2000/svg' class='w-6 h-6' fill='none' viewBox='0 0 24 24' stroke='currentColor'>",
+        "          <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 6h16M4 12h16M4 18h16' />",
+        "        </svg>",
+        "      </button>",
+        "    </div>",
+        "    <div id='mobile-menu' class='hidden md:hidden bg-white border-t border-gray-200'>",
+        "      <div class='px-6 py-3 flex flex-col space-y-4'>",
+        "        <a href='https://www.visagent.org/' target='_blank' class='hover:text-primary-600 text-lg'>Official Challenge Website</a>",
+        "        <a href='https://github.com/the-lord-of-stars/mini-template' target='_blank' class='flex items-center space-x-4'>",
+        "          <img src='https://cdnjs.cloudflare.com/ajax/libs/simple-icons/9.16.0/github.svg' alt='GitHub' class='w-6 h-6'>",
+        "          <span class='text-lg'>Project GitHub Repo</span>",
+        "        </a>",
+        "      </div>",
         "    </div>",
         "  </nav>",
+
+        "  <script>",
+        "    const btn = document.getElementById('menu-btn');",
+        "    const menu = document.getElementById('mobile-menu');",
+        "    btn.addEventListener('click', () => { menu.classList.toggle('hidden'); });",
+        "  </script>",
 
 
         # TOC
         "  <nav class='hidden lg:block fixed top-20 left-6 w-[15%] h-[80vh] overflow-y-auto",
-        "              rounded-xl bg-white shadow-lg border border-gray-200 p-4 text-sm'",
+        "               p-4 text-sm'",
         "       aria-label='Table of contents'>",
         "    <h2 class='font-semibold text-gray-900 mb-3'>Table of contents</h2>",
         "    <ol id='toc-list' class='space-y-2'></ol>",
@@ -108,15 +131,6 @@ def generate_html_report(output_state: dict, output_path: str):
         "    </header>"
         "    <article class='prose prose-lg prose-gray'>"
     ]
-
-    # # Add topic information if available
-    # if config.get("topic"):
-    #     html_lines.extend([
-    #         "    <div class='bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8'>",
-    #         "      <h2 class='text-2xl font-semibold text-gray-800 mb-4'>Research Topic</h2>",
-    #         f"      <p class='text-gray-700 text-lg'>{config['topic']}</p>",
-    #         "    </div>"
-    #     ])
     
     # Process each section
     for section in report_outline:
