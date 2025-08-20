@@ -1,5 +1,6 @@
 import re
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, List
 
@@ -93,13 +94,18 @@ def generate_html_report(output_state: dict, output_path: str):
         "  <nav class='hidden lg:block fixed top-20 left-6 w-[15%] h-[80vh] overflow-y-auto",
         "              rounded-xl bg-white shadow-lg border border-gray-200 p-4 text-sm'",
         "       aria-label='Table of contents'>",
-        "    <h2 class='font-semibold text-gray-900 mb-3'>On this page</h2>",
+        "    <h2 class='font-semibold text-gray-900 mb-3'>Table of contents</h2>",
         "    <ol id='toc-list' class='space-y-2'></ol>",
         "  </nav>",
 
 
         #  Main container
-        "  <main class='w-[70%] px-6 py-12 lg:ml-[20%]'>",
+        "  <main class='w-[90%] max-w-3xl mx-auto px-6 py-12 lg:w-[75%] lg:ml-[20%] lg:max-w-none lg:mx-0'>",
+        "    <header class='text-center mb-12'>",
+        f"      <h1 class='text-4xl font-bold text-gray-900 mb-4'>{output_state['config']['topic']}</h1>",
+        # Add Date
+        f"       <p class='text-lg text-gray-600'>Generated on {datetime.now().strftime("%Y-%m-%d")} </p>",
+        "    </header>"
         "    <article class='prose prose-lg prose-gray'>"
     ]
 
