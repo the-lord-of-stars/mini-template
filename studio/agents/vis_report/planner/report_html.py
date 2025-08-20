@@ -104,8 +104,8 @@ def generate_html_report(output_state: dict, output_path: str):
         "    <header class='text-center mb-12'>",
         f"      <h1 class='text-4xl font-bold text-gray-900 mb-4'>{output_state['config']['topic']}</h1>",
         # Add Date
-        f"       <p class='text-lg text-gray-600'>Generated on {datetime.now().strftime("%Y-%m-%d")} </p>",
-        "    </header>"
+        f"       <p class='text-lg text-gray-600'>Generated on {datetime.now().strftime('%Y-%m-%d')} </p>",
+        "    </header>",
         "    <article class='prose prose-lg prose-gray'>"
     ]
 
