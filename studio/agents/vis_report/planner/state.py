@@ -1,7 +1,7 @@
 from typing_extensions import TypedDict
 from typing import List, Union, Literal, Optional
 
-from agents.vis_report.config import Config
+from agents.vis_report.load_config import Config
 from agents.vis_report.analyser.state import State as AnalysisState
 from agents.vis_report.analyser.state import Visualisation
 

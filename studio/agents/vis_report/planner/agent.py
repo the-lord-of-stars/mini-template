@@ -8,11 +8,10 @@ import shutil
 from agents.vis_report.planner.node_plan import plan
 from agents.vis_report.planner.node_execute import execute
 from agents.vis_report.planner.state import State
-from agents.vis_report.config import config
 from agents.vis_report.planner.node_write import write_content
 from agents.vis_report.memory import memory
 
-from agents.vis_report.config import config
+from agents.vis_report.load_config import config
 from agents.vis_report.planner.report_html import generate_html_report
 
 def create_workflow():

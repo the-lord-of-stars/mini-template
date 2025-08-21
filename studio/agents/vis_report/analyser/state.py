@@ -1,6 +1,6 @@
 from typing_extensions import TypedDict
 from typing import Literal, List, Optional, Union
-from agents.vis_report.config import Config
+from agents.vis_report.load_config import Config
 
 class InformationNeededPresent(TypedDict):
     question_text: str # your exploration or analysis question

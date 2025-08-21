@@ -5,12 +5,12 @@ from pydantic import BaseModel, Field
 
 from helpers import get_llm, get_dataset_info
 
-from agents.vis_report.config import Config
+from agents.vis_report.load_config import Config
 from agents.vis_report.planner.state import ReportSection, State
 from agents.vis_report.memory import memory
 from agents.vis_report.analyser.state import State as AnalysisState
 
-from agents.vis_report.config import config
+from agents.vis_report.load_config import config
 import time
 
 def plan(state: State):

@@ -8,7 +8,7 @@ from agents.vis_report.analyser.state import State, Model
 from agents.vis_report.analyser.memory import memory
 from agents.vis_report.analyser.sandbox import run_in_sandbox, run_in_sandbox_with_venv
 
-from agents.vis_report.config import config
+from agents.vis_report.load_config import config
 
 
 def extract_facts(state: State):

@@ -189,13 +189,118 @@
           </div>
         </div>
         <script>
-          vegaEmbed('#vis-6-1', {"$schema": "https://vega.github.io/schema/vega-lite/v5.json", "description": "Median mpg, horsepower, and weight by model year and origin (USA/Europe/Japan). Vertical dashed line marks 1974 (oil-crisis era). Era buckets computed for reference.", "data": {"url": "https://raw.githubusercontent.com/the-lord-of-stars/mini-template/dev-yuhan/studio/auto-mpg.csv", "format": {"type": "csv"}}, "transform": [{"calculate": "toNumber(datum.mpg)", "as": "mpg_num"}, {"calculate": "datum.horsepower == '?' ? null : toNumber(datum.horsepower)", "as": "hp_num"}, {"calculate": "toNumber(datum.weight)", "as": "wt"}, {"calculate": "1900 + toNumber(datum['model year'])", "as": "year_int"}, {"calculate": "datetime(year_int, 0, 1)", "as": "year_date"}, {"calculate": "toNumber(datum.origin) == 1 ? 'USA' : toNumber(datum.origin) == 2 ? 'Europe' : toNumber(datum.origin) == 3 ? 'Japan' : ''", "as": "origin_label"}, {"calculate": "year_int >= 1970 && year_int <= 1973 ? '1970\u201373' : year_int >= 1974 && year_int <= 1979 ? '1974\u201379' : year_int >= 1980 && year_int <= 1982 ? '1980\u201382' : 'other'", "as": "era_bucket"}, {"aggregate": [{"op": "median", "field": "mpg_num", "as": "median_mpg"}, {"op": "median", "field": "hp_num", "as": "median_hp"}, {"op": "median", "field": "wt", "as": "median_wt"}], "groupby": ["year_date", "year_int", "origin_label", "era_bucket"]}], "vconcat": [{"title": "Median MPG by Year and Origin", "layer": [{"mark": {"type": "line", "point": true}, "encoding": {"x": {"field": "year_date", "type": "temporal", "title": "Year", "axis": {"format": "%Y"}}, "y": {"field": "median_mpg", "type": "quantitative", "title": "Median MPG"}, "color": {"field": "origin_label", "type": "nominal", "title": "Origin"}, "tooltip": [{"field": "year_int", "type": "quantitative", "title": "Year"}, {"field": "origin_label", "type": "nominal", "title": "Origin"}, {"field": "era_bucket", "type": "nominal", "title": "Era"}, {"field": "median_mpg", "type": "quantitative", "title": "Median MPG"}]}}, {"mark": {"type": "rule", "color": "#d62728", "strokeDash": [4, 4], "opacity": 0.8}, "transform": [{"calculate": "datetime(1974, 0, 1)", "as": "oil_date"}], "encoding": {"x": {"field": "oil_date", "type": "temporal"}}}]}, {"title": "Median Horsepower by Year and Origin", "layer": [{"mark": {"type": "line", "point": true}, "encoding": {"x": {"field": "year_date", "type": "temporal", "title": "Year", "axis": {"format": "%Y"}}, "y": {"field": "median_hp", "type": "quantitative", "title": "Median Horsepower"}, "color": {"field": "origin_label", "type": "nominal", "title": "Origin"}, "tooltip": [{"field": "year_int", "type": "quantitative", "title": "Year"}, {"field": "origin_label", "type": "nominal", "title": "Origin"}, {"field": "era_bucket", "type": "nominal", "title": "Era"}, {"field": "median_hp", "type": "quantitative", "title": "Median Horsepower"}]}}, {"mark": {"type": "rule", "color": "#d62728", "strokeDash": [4, 4], "opacity": 0.8}, "transform": [{"calculate": "datetime(1974, 0, 1)", "as": "oil_date"}], "encoding": {"x": {"field": "oil_date", "type": "temporal"}}}]}, {"title": "Median Weight (lbs) by Year and Origin", "layer": [{"mark": {"type": "line", "point": true}, "encoding": {"x": {"field": "year_date", "type": "temporal", "title": "Year", "axis": {"format": "%Y"}}, "y": {"field": "median_wt", "type": "quantitative", "title": "Median Weight (lbs)"}, "color": {"field": "origin_label", "type": "nominal", "title": "Origin"}, "tooltip": [{"field": "year_int", "type": "quantitative", "title": "Year"}, {"field": "origin_label", "type": "nominal", "title": "Origin"}, {"field": "era_bucket", "type": "nominal", "title": "Era"}, {"field": "median_wt", "type": "quantitative", "title": "Median Weight (lbs)"}]}}, {"mark": {"type": "rule", "color": "#d62728", "strokeDash": [4, 4], "opacity": 0.8}, "transform": [{"calculate": "datetime(1974, 0, 1)", "as": "oil_date"}], "encoding": {"x": {"field": "oil_date", "type": "temporal"}}}]}], "resolve": {"legend": {"title": "Origin"}}}, {
-            actions: false,
-            renderer: 'canvas',
-            config: {}
-          })
-          .catch(console.error);
-        </script>
+vegaEmbed('#vis-6-1', {
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Median mpg, horsepower, and weight by model year and origin (USA/Europe/Japan). Vertical dashed line marks 1974 (oil-crisis era).",
+  "data": {
+    "url": "https://raw.githubusercontent.com/the-lord-of-stars/mini-template/dev-yuhan/studio/auto-mpg.csv",
+    "format": {"type": "csv"}
+  },
+  "transform": [
+    {"calculate": "toNumber(datum['mpg'])", "as": "mpg_num"},
+    {"calculate": "datum['horsepower'] == '?' ? null : toNumber(datum['horsepower'])", "as": "hp_num"},
+    {"calculate": "toNumber(datum['weight'])", "as": "wt"},
+    {"calculate": "1900 + toNumber(datum['model year'])", "as": "year_int"},
+    {"calculate": "datetime(datum['year_int'], 0, 1)", "as": "year_date"},
+    {
+      "calculate": "toNumber(datum['origin']) == 1 ? 'USA' : toNumber(datum['origin']) == 2 ? 'Europe' : toNumber(datum['origin']) == 3 ? 'Japan' : ''",
+      "as": "origin_label"
+    },
+    {
+      "calculate": "datum['year_int'] >= 1970 && datum['year_int'] <= 1973 ? '1970–73' : datum['year_int'] >= 1974 && datum['year_int'] <= 1979 ? '1974–79' : datum['year_int'] >= 1980 && datum['year_int'] <= 1982 ? '1980–82' : 'other'",
+      "as": "era_bucket"
+    },
+    {
+      "aggregate": [
+        {"op": "median", "field": "mpg_num", "as": "median_mpg"},
+        {"op": "median", "field": "hp_num", "as": "median_hp"},
+        {"op": "median", "field": "wt", "as": "median_wt"}
+      ],
+      "groupby": ["year_date", "year_int", "origin_label", "era_bucket"]
+    }
+  ],
+  "vconcat": [
+    {
+      "title": "Median MPG by Year and Origin",
+      "layer": [
+        {
+          "mark": {"type": "line", "point": true},
+          "encoding": {
+            "x": {"field": "year_date", "type": "temporal", "title": "Year", "axis": {"format": "%Y"}},
+            "y": {"field": "median_mpg", "type": "quantitative", "title": "Median MPG"},
+            "color": {"field": "origin_label", "type": "nominal", "title": "Origin"},
+            "tooltip": [
+              {"field": "year_int", "type": "quantitative", "title": "Year"},
+              {"field": "origin_label", "type": "nominal", "title": "Origin"},
+              {"field": "era_bucket", "type": "nominal", "title": "Era"},
+              {"field": "median_mpg", "type": "quantitative", "title": "Median MPG"}
+            ]
+          }
+        },
+        {
+          "data": {"values": [{"oil_date": "1974-01-01"}]},
+          "mark": {"type": "rule", "color": "#d62728", "strokeDash": [4, 4], "opacity": 0.8},
+          "encoding": {"x": {"field": "oil_date", "type": "temporal"}}
+        }
+      ]
+    },
+    {
+      "title": "Median Horsepower by Year and Origin",
+      "layer": [
+        {
+          "mark": {"type": "line", "point": true},
+          "encoding": {
+            "x": {"field": "year_date", "type": "temporal", "title": "Year", "axis": {"format": "%Y"}},
+            "y": {"field": "median_hp", "type": "quantitative", "title": "Median Horsepower"},
+            "color": {"field": "origin_label", "type": "nominal", "title": "Origin"},
+            "tooltip": [
+              {"field": "year_int", "type": "quantitative", "title": "Year"},
+              {"field": "origin_label", "type": "nominal", "title": "Origin"},
+              {"field": "era_bucket", "type": "nominal", "title": "Era"},
+              {"field": "median_hp", "type": "quantitative", "title": "Median Horsepower"}
+            ]
+          }
+        },
+        {
+          "data": {"values": [{"oil_date": "1974-01-01"}]},
+          "mark": {"type": "rule", "color": "#d62728", "strokeDash": [4, 4], "opacity": 0.8},
+          "encoding": {"x": {"field": "oil_date", "type": "temporal"}}
+        }
+      ]
+    },
+    {
+      "title": "Median Weight (lbs) by Year and Origin",
+      "layer": [
+        {
+          "mark": {"type": "line", "point": true},
+          "encoding": {
+            "x": {"field": "year_date", "type": "temporal", "title": "Year", "axis": {"format": "%Y"}},
+            "y": {"field": "median_wt", "type": "quantitative", "title": "Median Weight (lbs)"},
+            "color": {"field": "origin_label", "type": "nominal", "title": "Origin"},
+            "tooltip": [
+              {"field": "year_int", "type": "quantitative", "title": "Year"},
+              {"field": "origin_label", "type": "nominal", "title": "Origin"},
+              {"field": "era_bucket", "type": "nominal", "title": "Era"},
+              {"field": "median_wt", "type": "quantitative", "title": "Median Weight (lbs)"}
+            ]
+          }
+        },
+        {
+          "data": {"values": [{"oil_date": "1974-01-01"}]},
+          "mark": {"type": "rule", "color": "#d62728", "strokeDash": [4, 4], "opacity": 0.8},
+          "encoding": {"x": {"field": "oil_date", "type": "temporal"}}
+        }
+      ]
+    }
+  ],
+  "resolve": {"legend": {"title": "Origin"}}
+}, {
+  actions: false,
+  renderer: 'canvas',
+  config: {}
+}).catch(console.error);
+</script>
+
         <p class='text-sm text-gray-600 mt-2 text-center'>
           <p class="text-gray-700 leading-relaxed mb-4">The median time‑series panels plot median MPG, horsepower and weight by year for each origin with a vertical marker at 1974 to emphasize the oil‑crisis inflection. The plotted medians confirm abrupt 1973→1974 changes: across origins horsepower and weight fall sharply while median MPG rises, and the magnitudes vary by origin—Japan shows very large immediate MPG gains and strong weight reductions, while the U.S. shows large horsepower declines and substantial weight reductions but from a higher baseline. Era summaries quantify these shifts: for example, from 1970–73 to 1974–79 Japan’s median MPG increases roughly +24% while horsepower falls ~24%; the U.S. sees a larger percent drop in horsepower (~30%) and a large MPG lift (~27%). The line plots make the oil‑crisis signal explicit and are useful automated checks: charting systems should reproduce the 1974 break, origin‑specific magnitudes, and tooltip medians per year as seen in the data.</p>
         </p>

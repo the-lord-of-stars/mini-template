@@ -10,7 +10,7 @@ from agents.vis_report.planner.state import State
 from agents.vis_report.analyser.state import is_vis_valid, is_knowledge_valid
 from agents.vis_report.memory import memory
 
-from agents.vis_report.config import config
+from agents.vis_report.load_config import config
 
 def write_content(state: State):
     """

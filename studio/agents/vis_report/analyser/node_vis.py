@@ -8,7 +8,7 @@ from helpers import get_llm, get_dataset_info
 from agents.vis_report.analyser.state import State, Visualisation
 from agents.vis_report.analyser.memory import memory
 
-from agents.vis_report.config import config
+from agents.vis_report.load_config import config
 
 def visualise(state: State):
     """

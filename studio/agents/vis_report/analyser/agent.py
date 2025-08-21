@@ -5,7 +5,7 @@ from langgraph.graph import StateGraph, START, END
 from datetime import datetime
 
 from agents.vis_report.analyser.state import State
-from agents.vis_report.config import config
+from agents.vis_report.load_config import config
 
 from agents.vis_report.analyser.node_vis import visualise
 from agents.vis_report.analyser.memory import memory

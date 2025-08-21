@@ -9,7 +9,7 @@ from agents.vis_report.analyser.agent import Agent as AnalyserAgent
 from agents.vis_report.planner.state import State
 from agents.vis_report.memory import memory
 
-from agents.vis_report.config import config
+from agents.vis_report.load_config import config
 
 
 def execute(state: State):
