@@ -60,8 +60,9 @@
   <main class='w-[90%] max-w-3xl mx-auto px-6 py-12 lg:w-[75%] lg:ml-[20%] lg:max-w-none lg:mx-0'>
     <header class='text-center mb-12'>
       <h1 class='text-4xl font-bold text-gray-900 mb-4'>What happened to research on automated visualization?</h1>
-       <p class='text-lg text-gray-600'>Generated on 2025-08-20 </p>
-    </header>    <article class='prose prose-lg prose-gray'>
+       <p class='text-lg text-gray-600'>Generated on 2025-08-21 </p>
+    </header>
+    <article class='prose prose-lg prose-gray'>
 <section class='mb-16'>
   <h2 class='text-3xl font-bold mb-6 border-b border-gray-200 pb-2'>
     1. Executive summary and key questions
@@ -82,8 +83,8 @@
     </div>
     <div class='my-8'>
       <div class='bg-gray-50 rounded-lg shadow-sm p-4'>
-        <div class='mb-4 flex justify-center overflow-x-auto'>
-          <div style='width: 100%;'>
+        <div class='mb-4 flex justify-center'>
+          <div class='inline-block mx-auto overflow-x-auto max-w-full'>
             <div id='vis-2-1'></div>
           </div>
         </div>
@@ -91,7 +92,6 @@
           vegaEmbed('#vis-2-1', {"$schema": "https://vega.github.io/schema/vega-lite/v5.json", "data": {"url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv"}, "transform": [{"calculate": "test(/automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent/i, (datum.AuthorKeywords || '') + ' ' + (datum.Abstract || '') + ' ' + (datum.Title || '')) ? 'AutoVis' : 'Other'", "as": "AutoVisLabel"}, {"filter": "datum.Year != null && datum.Year != ''"}, {"aggregate": [{"op": "count", "as": "Count"}], "groupby": ["Year", "AutoVisLabel", "PaperType"]}], "mark": "bar", "encoding": {"column": {"field": "AutoVisLabel", "type": "nominal", "header": {"title": "AutoVis label"}}, "x": {"field": "Year", "type": "ordinal", "axis": {"title": "Year", "labelAngle": 0}, "sort": "ascending"}, "y": {"field": "Count", "type": "quantitative", "axis": {"title": "Number of papers"}}, "color": {"field": "PaperType", "type": "nominal", "legend": {"title": "Paper Type"}}, "tooltip": [{"field": "AutoVisLabel", "type": "nominal"}, {"field": "Year", "type": "ordinal"}, {"field": "PaperType", "type": "nominal"}, {"field": "Count", "type": "quantitative"}]}, "width": 200, "height": 240, "title": "Papers matched by AutoVis rule: distribution over Year and PaperType"}, {
             actions: false,
             renderer: 'canvas',
-            config: {}
           })
           .catch(console.error);
         </script>
@@ -102,8 +102,8 @@
     </div>
     <div class='my-8'>
       <div class='bg-gray-50 rounded-lg shadow-sm p-4'>
-        <div class='mb-4 flex justify-center overflow-x-auto'>
-          <div style='width: 100%;'>
+        <div class='mb-4 flex justify-center'>
+          <div class='inline-block mx-auto overflow-x-auto max-w-full'>
             <div id='vis-2-2'></div>
           </div>
         </div>
@@ -111,7 +111,6 @@
           vegaEmbed('#vis-2-2', {"$schema": "https://vega.github.io/schema/vega-lite/v5.json", "description": "Counts of papers classified by the regex rule and distribution of empty key fields (Title, Abstract, AuthorKeywords). This helps estimate potential false negatives due to missing information and to assess rule robustness.", "data": {"url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv"}, "transform": [{"calculate": "test(/automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent/i, datum.AuthorKeywords || '')", "as": "kw_authorkeywords"}, {"calculate": "test(/automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent/i, datum.Abstract || '')", "as": "kw_abstract"}, {"calculate": "test(/automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent/i, datum.Title || '')", "as": "kw_title"}, {"calculate": "(datum.kw_authorkeywords ? 1 : 0) + (datum.kw_abstract ? 1 : 0) + (datum.kw_title ? 1 : 0)", "as": "num_fields_matched"}, {"calculate": "datum.num_fields_matched > 0 ? 'AutoVis' : 'Other'", "as": "Label"}, {"calculate": "((datum.AuthorKeywords || '') == '' ? 1 : 0) + ((datum.Abstract || '') == '' ? 1 : 0) + ((datum.Title || '') == '' ? 1 : 0)", "as": "num_empty_fields"}], "mark": "bar", "encoding": {"x": {"field": "Label", "type": "nominal", "axis": {"title": "AutoVis classification"}}, "y": {"aggregate": "count", "type": "quantitative", "axis": {"title": "Number of papers"}}, "color": {"field": "num_empty_fields", "type": "ordinal", "title": "# empty fields (Title, Abstract, AuthorKeywords)"}, "tooltip": [{"field": "Label", "type": "nominal"}, {"field": "num_empty_fields", "type": "quantitative", "title": "empty fields"}, {"aggregate": "count", "type": "quantitative", "title": "papers"}]}, "title": "AutoVis detection: counts by label and missing fields (helps identify potential false negatives)"}, {
             actions: false,
             renderer: 'canvas',
-            config: {}
           })
           .catch(console.error);
         </script>
@@ -132,8 +131,8 @@
     </div>
     <div class='my-8'>
       <div class='bg-gray-50 rounded-lg shadow-sm p-4'>
-        <div class='mb-4 flex justify-center overflow-x-auto'>
-          <div style='width: 100%;'>
+        <div class='mb-4 flex justify-center'>
+          <div class='inline-block mx-auto overflow-x-auto max-w-full'>
             <div id='vis-3-1'></div>
           </div>
         </div>
@@ -141,7 +140,6 @@
           vegaEmbed('#vis-3-1', {"$schema": "https://vega.github.io/schema/vega-lite/v5.json", "description": "Counts per year for AutoVis vs Other and the yearly fraction of AutoVis papers.", "data": {"url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv"}, "transform": [{"calculate": "test(/automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent/i, (datum.AuthorKeywords || '') + ' ' + (datum.Abstract || '') + ' ' + (datum.Title || '')) ? 'AutoVis' : 'Other'", "as": "Category"}, {"aggregate": [{"op": "count", "as": "Count"}], "groupby": ["Year", "Category"]}, {"joinaggregate": [{"op": "sum", "field": "Count", "as": "TotalInYear"}], "groupby": ["Year"]}, {"calculate": "datum.Count / datum.TotalInYear", "as": "Proportion"}], "width": 700, "height": 360, "layer": [{"mark": {"type": "bar", "cornerRadiusTopLeft": 2, "cornerRadiusTopRight": 2}, "encoding": {"x": {"field": "Year", "type": "ordinal", "axis": {"title": "Year", "labelAngle": 0}}, "y": {"field": "Count", "type": "quantitative", "axis": {"title": "Number of papers"}}, "color": {"field": "Category", "type": "nominal", "scale": {"range": ["#1f77b4", "#ff7f0e"]}}, "xOffset": {"field": "Category"}, "tooltip": [{"field": "Year", "type": "ordinal"}, {"field": "Category", "type": "nominal"}, {"field": "Count", "type": "quantitative"}, {"field": "Proportion", "type": "quantitative", "format": ".1%"}]}}, {"transform": [{"filter": "datum.Category == 'AutoVis'"}], "mark": {"type": "line", "point": true, "strokeWidth": 2}, "encoding": {"x": {"field": "Year", "type": "ordinal"}, "y": {"field": "Proportion", "type": "quantitative", "axis": {"title": "Proportion of AutoVis (right)", "format": ".0%", "orient": "right"}}, "color": {"value": "#000000"}, "tooltip": [{"field": "Year", "type": "ordinal"}, {"field": "Proportion", "type": "quantitative", "format": ".1%"}]}}], "resolve": {"scale": {"y": "independent"}}}, {
             actions: false,
             renderer: 'canvas',
-            config: {}
           })
           .catch(console.error);
         </script>
@@ -152,8 +150,8 @@
     </div>
     <div class='my-8'>
       <div class='bg-gray-50 rounded-lg shadow-sm p-4'>
-        <div class='mb-4 flex justify-center overflow-x-auto'>
-          <div style='width: 100%;'>
+        <div class='mb-4 flex justify-center'>
+          <div class='inline-block mx-auto overflow-x-auto max-w-full'>
             <div id='vis-3-2'></div>
           </div>
         </div>
@@ -161,7 +159,6 @@
           vegaEmbed('#vis-3-2', {"$schema": "https://vega.github.io/schema/vega-lite/v5.json", "data": {"url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv"}, "transform": [{"calculate": "test(/automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent/i, (datum.AuthorKeywords || '') + ' ' + (datum.Abstract || '') + ' ' + (datum.Title || '')) ? 1 : 0", "as": "isAutoVis"}, {"aggregate": [{"op": "sum", "field": "isAutoVis", "as": "AutoVisCount"}, {"op": "count", "as": "TotalPapers"}], "groupby": ["Conference", "Year"]}, {"calculate": "datum.AutoVisCount / datum.TotalPapers", "as": "Proportion_of_AutoVis"}, {"filter": "datum.TotalPapers >= 5"}], "mark": {"type": "line", "point": true}, "encoding": {"x": {"field": "Year", "type": "quantitative", "title": "Year", "axis": {"format": "d", "labelAngle": 0}}, "y": {"field": "Proportion_of_AutoVis", "type": "quantitative", "title": "Proportion of AutoVis papers", "axis": {"format": ".0%"}}, "color": {"field": "Conference", "type": "nominal", "title": "Conference"}, "tooltip": [{"field": "Conference", "type": "nominal"}, {"field": "Year", "type": "quantitative"}, {"field": "AutoVisCount", "type": "quantitative", "title": "AutoVis count"}, {"field": "TotalPapers", "type": "quantitative", "title": "Total papers"}, {"field": "Proportion_of_AutoVis", "type": "quantitative", "title": "Proportion", "format": ".1%"}]}, "width": 800, "height": 400, "title": "Proportion of AutoVis papers per conference-year (conference-years with >= 5 papers)"}, {
             actions: false,
             renderer: 'canvas',
-            config: {}
           })
           .catch(console.error);
         </script>
@@ -172,8 +169,8 @@
     </div>
     <div class='my-8'>
       <div class='bg-gray-50 rounded-lg shadow-sm p-4'>
-        <div class='mb-4 flex justify-center overflow-x-auto'>
-          <div style='width: 100%;'>
+        <div class='mb-4 flex justify-center'>
+          <div class='inline-block mx-auto overflow-x-auto max-w-full'>
             <div id='vis-3-3'></div>
           </div>
         </div>
@@ -181,7 +178,6 @@
           vegaEmbed('#vis-3-3', {"$schema": "https://vega.github.io/schema/vega-lite/v5.json", "description": "Year-level trend of paper impact (median \u00b1 IQR) for AutoVis vs Other across three candidate impact metrics. Point size encodes number of papers in that year-group; low-sample years are drawn with reduced opacity (count < 5). Tooltip shows count, median, mean and IQR.", "data": {"url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv"}, "transform": [{"calculate": "test(/automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent/i, (datum.AuthorKeywords || '') + ' ' + (datum.Abstract || '') + ' ' + (datum.Title || '')) ? 'AutoVis' : 'Other'", "as": "Group"}, {"fold": ["AminerCitationCount", "CitationCount_CrossRef", "Downloads_Xplore"], "as": ["metric", "value"]}, {"filter": "datum.value !== null && isFinite(+datum.value)"}, {"calculate": "(datum.Year === null || datum.Year === '') ? null : parseInt(datum.Year)", "as": "YearNum"}, {"aggregate": [{"op": "count", "field": "value", "as": "count"}, {"op": "median", "field": "value", "as": "median"}, {"op": "q1", "field": "value", "as": "q1"}, {"op": "q3", "field": "value", "as": "q3"}, {"op": "mean", "field": "value", "as": "mean"}], "groupby": ["YearNum", "Group", "metric"]}], "width": 760, "height": 160, "resolve": {"scale": {"color": "independent"}}, "facet": {"row": {"field": "metric", "type": "nominal", "header": {"labelAngle": 0, "labelFontWeight": "bold"}}}, "spec": {"layer": [{"mark": {"type": "rule", "cornerRadius": 1}, "encoding": {"x": {"field": "YearNum", "type": "ordinal", "axis": {"title": "Year"}}, "y": {"field": "q1", "type": "quantitative", "title": "Impact"}, "y2": {"field": "q3"}, "color": {"field": "Group", "type": "nominal"}, "opacity": {"condition": {"test": "datum.count >= 5", "value": 0.9}, "value": 0.22}, "tooltip": [{"field": "metric", "type": "nominal", "title": "Metric"}, {"field": "YearNum", "type": "ordinal", "title": "Year"}, {"field": "Group", "type": "nominal", "title": "Group"}, {"field": "count", "type": "quantitative", "title": "Papers (count)"}, {"field": "median", "type": "quantitative", "title": "Median"}, {"field": "mean", "type": "quantitative", "title": "Mean"}, {"field": "q1", "type": "quantitative", "title": "Q1 (25%)"}, {"field": "q3", "type": "quantitative", "title": "Q3 (75%)"}]}}, {"mark": {"type": "line", "point": false, "interpolate": "monotone"}, "encoding": {"x": {"field": "YearNum", "type": "ordinal"}, "y": {"field": "median", "type": "quantitative"}, "color": {"field": "Group", "type": "nominal"}, "opacity": {"condition": {"test": "datum.count >= 5", "value": 1}, "value": 0.25}}}, {"mark": {"type": "point", "filled": true}, "encoding": {"x": {"field": "YearNum", "type": "ordinal"}, "y": {"field": "median", "type": "quantitative"}, "color": {"field": "Group", "type": "nominal"}, "size": {"field": "count", "type": "quantitative", "scale": {"range": [20, 200]}, "title": "Papers (count)"}, "opacity": {"condition": {"test": "datum.count >= 5", "value": 1}, "value": 0.28}, "tooltip": [{"field": "metric", "type": "nominal", "title": "Metric"}, {"field": "YearNum", "type": "ordinal", "title": "Year"}, {"field": "Group", "type": "nominal", "title": "Group"}, {"field": "count", "type": "quantitative", "title": "Papers (count)"}, {"field": "median", "type": "quantitative", "title": "Median"}, {"field": "mean", "type": "quantitative", "title": "Mean"}, {"field": "q1", "type": "quantitative", "title": "Q1 (25%)"}, {"field": "q3", "type": "quantitative", "title": "Q3 (75%)"}]}}]}}, {
             actions: false,
             renderer: 'canvas',
-            config: {}
           })
           .catch(console.error);
         </script>
@@ -202,8 +198,8 @@
     </div>
     <div class='my-8'>
       <div class='bg-gray-50 rounded-lg shadow-sm p-4'>
-        <div class='mb-4 flex justify-center overflow-x-auto'>
-          <div style='width: 100%;'>
+        <div class='mb-4 flex justify-center'>
+          <div class='inline-block mx-auto overflow-x-auto max-w-full'>
             <div id='vis-4-1'></div>
           </div>
         </div>
@@ -211,7 +207,6 @@
           vegaEmbed('#vis-4-1', {"$schema": "https://vega.github.io/schema/vega-lite/v5.json", "data": {"url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv"}, "vconcat": [{"title": "AutoVis paper counts by year (yearly bins) with 3-year rolling average\nRecommended: yearly bin with 3-year rolling average", "transform": [{"calculate": "test(/automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent/i, (datum.AuthorKeywords || '') + ' ' + (datum.Abstract || '') + ' ' + (datum.Title || '')) ? 'AutoVis' : 'Other'", "as": "Category"}, {"filter": "datum.Year != null"}, {"aggregate": [{"op": "count", "as": "count"}], "groupby": ["Year", "Category"]}, {"window": [{"op": "mean", "field": "count", "as": "rolling_mean"}], "groupby": ["Category"], "sort": [{"field": "Year", "order": "ascending"}], "frame": [-2, 0]}], "layer": [{"mark": {"type": "line", "point": false}, "encoding": {"x": {"field": "Year", "type": "temporal", "timeUnit": "year", "title": "Year"}, "y": {"field": "count", "type": "quantitative", "title": "Paper count"}, "color": {"field": "Category", "type": "nominal"}}}, {"mark": {"type": "line", "strokeDash": [4, 4], "opacity": 0.9}, "encoding": {"x": {"field": "Year", "type": "temporal", "timeUnit": "year"}, "y": {"field": "rolling_mean", "type": "quantitative", "title": "3-year rolling mean"}, "color": {"field": "Category", "type": "nominal"}}}, {"mark": {"type": "point"}, "encoding": {"x": {"field": "Year", "type": "temporal", "timeUnit": "year"}, "y": {"field": "count", "type": "quantitative"}, "color": {"field": "Category", "type": "nominal"}, "tooltip": [{"field": "Year", "type": "temporal", "timeUnit": "year", "title": "Year"}, {"field": "Category", "type": "nominal"}, {"field": "count", "type": "quantitative", "title": "Count"}, {"field": "rolling_mean", "type": "quantitative", "title": "3-yr rolling mean"}]}}], "width": 700, "height": 320}, {"title": "AuthorKeywords presence for AutoVis papers (supports including keywords in topics)", "transform": [{"calculate": "test(/automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent/i, (datum.AuthorKeywords || '') + ' ' + (datum.Abstract || '') + ' ' + (datum.Title || '')) ? 'AutoVis' : 'Other'", "as": "Category"}, {"filter": "datum.Category == 'AutoVis'"}, {"calculate": "((datum.AuthorKeywords || '') != '') ? 'HasKeywords' : 'NoKeywords'", "as": "HasKeywords"}, {"aggregate": [{"op": "count", "as": "n"}], "groupby": ["HasKeywords"]}, {"joinaggregate": [{"op": "sum", "field": "n", "as": "total"}]}, {"calculate": "datum.n / datum.total", "as": "pct"}], "mark": {"type": "bar"}, "encoding": {"x": {"field": "HasKeywords", "type": "nominal", "title": "AuthorKeywords presence"}, "y": {"field": "pct", "type": "quantitative", "axis": {"format": ".0%"}, "title": "Share"}, "color": {"field": "HasKeywords", "type": "nominal"}, "tooltip": [{"field": "HasKeywords"}, {"field": "n", "type": "quantitative", "title": "Count"}, {"field": "pct", "type": "quantitative", "title": "Share", "format": ".1%"}]}, "width": 400, "height": 220}], "title": {"text": "Recommended topic-modeling & temporal-aggregation parameters for AutoVis corpus\nRecommendation summary: embedding-based (sentence embeddings) + clustering (HDBSCAN) preferred; candidate k: 8\u201312 (or multi-resolution/hierarchical clustering). Input scope: Title + Abstract + AuthorKeywords (include keywords where present). Time bin: yearly with 3-year rolling average smoothing. Emergence rule: topic share increases >2\u00d7 over 3-year window and absolute share >5%.", "anchor": "start"}}, {
             actions: false,
             renderer: 'canvas',
-            config: {}
           })
           .catch(console.error);
         </script>
@@ -222,8 +217,8 @@
     </div>
     <div class='my-8'>
       <div class='bg-gray-50 rounded-lg shadow-sm p-4'>
-        <div class='mb-4 flex justify-center overflow-x-auto'>
-          <div style='width: 100%;'>
+        <div class='mb-4 flex justify-center'>
+          <div class='inline-block mx-auto overflow-x-auto max-w-full'>
             <div id='vis-4-2'></div>
           </div>
         </div>
@@ -231,7 +226,6 @@
           vegaEmbed('#vis-4-2', {"$schema": "https://vega.github.io/schema/vega-lite/v5.json", "description": "Trends of AutoVis-related topic prevalence over time (stacked area). Top keywords and representative papers are attached as tooltip metadata per topic.", "data": {"url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv"}, "transform": [{"calculate": "(datum.Title || '') + ' ' + (datum.Abstract || '') + ' ' + (datum.AuthorKeywords || '')", "as": "text"}, {"filter": "test(/automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent/i, datum.text)"}, {"calculate": "test(/automatic vis|automated vis|visualization recommendation|visualization generation|vis generation/i, datum.text) ? 'Visualization recommendation' : test(/mixed[- ]?initiative/i, datum.text) ? 'Mixed-initiative' : test(/\\bagent\\b|agent-based/i, datum.text) ? 'Agent' : test(/generation|generate|synthesis|automatic|automated/i, datum.text) ? 'Automation/Generation' : test(/machine learning|deep learning|neural|supervised|unsupervised/i, datum.text) ? 'ML-driven' : test(/interaction|user study|evaluation|usability|user interface/i, datum.text) ? 'Interaction/Evaluation' : test(/visualization|visual analytics|layout|encoding|glyph/i, datum.text) ? 'Visualization methods' : test(/recommendation|suggestion|rank|ranking|score/i, datum.text) ? 'Recommendation/Ranking' : 'Other'", "as": "topic"}, {"filter": "datum.topic !== 'Other'"}, {"aggregate": [{"op": "count", "as": "papers"}], "groupby": ["Year", "topic"]}, {"joinaggregate": [{"op": "sum", "field": "papers", "as": "yearTotal"}], "groupby": ["Year"]}, {"calculate": "(datum.papers / datum.yearTotal) * 100", "as": "percent"}, {"lookup": "topic", "from": {"data": {"values": [{"topic": "Visualization recommendation", "topKeywords": "visualization recommendation, suggestion, automatic vis, ranking, generation", "representativePapers": "Example: 'AutoVis Recommender' (2018) doi:10.xxxx/av1; 'ChartSuggest' (2019) doi:10.xxxx/av2; 'RankVis' (2020) doi:10.xxxx/av3"}, {"topic": "Mixed-initiative", "topKeywords": "mixed-initiative, human-in-the-loop, interaction, collaboration, guidance", "representativePapers": "Example: 'Mixed-initiative Vis' (2017) doi:10.xxxx/mi1; 'Human+Agent' (2019) doi:10.xxxx/mi2; 'Co-Design Vis' (2021) doi:10.xxxx/mi3"}, {"topic": "Agent", "topKeywords": "agent, agent-based, autonomous, assistant, agent architecture", "representativePapers": "Example: 'VisAgent' (2016) doi:10.xxxx/ag1; 'Agent-Assisted Vis' (2018) doi:10.xxxx/ag2; 'Autonomous Viz Agent' (2020) doi:10.xxxx/ag3"}, {"topic": "Automation/Generation", "topKeywords": "generation, automatic, synthesis, auto-generation, template", "representativePapers": "Example: 'Auto-Generate Viz' (2015) doi:10.xxxx/gen1; 'AutomaticChart' (2017) doi:10.xxxx/gen2; 'VizSynthesis' (2019) doi:10.xxxx/gen3"}, {"topic": "ML-driven", "topKeywords": "machine learning, deep learning, neural, predictive, model", "representativePapers": "Example: 'ML for Vis' (2018) doi:10.xxxx/ml1; 'NeuralChart' (2019) doi:10.xxxx/ml2; 'PredictiveViz' (2020) doi:10.xxxx/ml3"}, {"topic": "Interaction/Evaluation", "topKeywords": "interaction, user study, evaluation, usability, user", "representativePapers": "Example: 'Evaluating AutoVis' (2014) doi:10.xxxx/ev1; 'User Study on AutoVis' (2016) doi:10.xxxx/ev2; 'Interaction Techniques' (2018) doi:10.xxxx/ev3"}, {"topic": "Visualization methods", "topKeywords": "visualization, layout, encoding, visual analytics, representation", "representativePapers": "Example: 'New Encodings for AutoVis' (2013) doi:10.xxxx/vm1; 'Layout for Sets' (2015) doi:10.xxxx/vm2; 'Encoding Strategies' (2017) doi:10.xxxx/vm3"}, {"topic": "Recommendation/Ranking", "topKeywords": "recommendation, ranking, score, sort, prioritize", "representativePapers": "Example: 'Rank-based Recs' (2016) doi:10.xxxx/rr1; 'ScoreVis' (2018) doi:10.xxxx/rr2; 'Prioritize Charts' (2020) doi:10.xxxx/rr3"}]}, "key": "topic"}}], "width": 900, "height": 420, "layer": [{"mark": {"type": "area", "interpolate": "monotone", "tooltip": null}, "encoding": {"x": {"timeUnit": "year", "field": "Year", "type": "temporal", "axis": {"title": "Year", "format": "%Y"}}, "y": {"field": "papers", "type": "quantitative", "stack": "normalize", "axis": {"title": "% of AutoVis papers (stacked by topic)", "format": ".0%"}}, "color": {"field": "topic", "type": "nominal", "title": "Topic", "legend": {"orient": "right", "columns": 1}}}}, {"mark": {"type": "line", "interpolate": "monotone", "opacity": 0.15}, "encoding": {"x": {"timeUnit": "year", "field": "Year", "type": "temporal"}, "y": {"field": "papers", "type": "quantitative", "stack": "normalize"}, "color": {"field": "topic", "type": "nominal"}}}], "resolve": {"legend": {"direction": "vertical"}}, "config": {"axis": {"labelFontSize": 11, "titleFontSize": 12}, "legend": {"labelFontSize": 11, "titleFontSize": 12}}, "title": "AutoVis-related topic prevalence over time (stacked normalized)", "encoding": {"tooltip": [{"field": "Year", "timeUnit": "year", "type": "temporal", "title": "Year"}, {"field": "topic", "type": "nominal", "title": "Topic"}, {"field": "papers", "type": "quantitative", "title": "Papers (count)"}, {"field": "percent", "type": "quantitative", "title": "Share (pct)", "format": ".1f"}, {"field": "topKeywords", "type": "nominal", "title": "Top keywords"}, {"field": "representativePapers", "type": "nominal", "title": "Representative papers (examples)"}]}}, {
             actions: false,
             renderer: 'canvas',
-            config: {}
           })
           .catch(console.error);
         </script>
@@ -252,8 +246,8 @@
     </div>
     <div class='my-8'>
       <div class='bg-gray-50 rounded-lg shadow-sm p-4'>
-        <div class='mb-4 flex justify-center overflow-x-auto'>
-          <div style='width: 100%;'>
+        <div class='mb-4 flex justify-center'>
+          <div class='inline-block mx-auto overflow-x-auto max-w-full'>
             <div id='vis-5-1'></div>
           </div>
         </div>
@@ -261,7 +255,6 @@
           vegaEmbed('#vis-5-1', {"$schema": "https://vega.github.io/schema/vega-lite/v5.json", "description": "Top AutoVis papers by combined impact (normalized citations + downloads). Filters papers by keyword matches in Title/Abstract/AuthorKeywords.", "data": {"url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv", "format": {"type": "csv"}}, "transform": [{"calculate": "(datum.AuthorKeywords || '') + ' ' + (datum.Abstract || '') + ' ' + (datum.Title || '')", "as": "combined_text"}, {"filter": "test(/automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent/i, datum.combined_text)"}, {"calculate": "isNaN(toNumber(datum.CitationCount_CrossRef)) ? 0 : toNumber(datum.CitationCount_CrossRef)", "as": "CitationCount_CrossRef_num"}, {"calculate": "isNaN(toNumber(datum.AminerCitationCount)) ? 0 : toNumber(datum.AminerCitationCount)", "as": "AminerCitationCount_num"}, {"calculate": "isNaN(toNumber(datum.Downloads_Xplore)) ? 0 : toNumber(datum.Downloads_Xplore)", "as": "Downloads_Xplore_num"}, {"joinaggregate": [{"op": "min", "field": "CitationCount_CrossRef_num", "as": "min_CitationCount_CrossRef"}, {"op": "max", "field": "CitationCount_CrossRef_num", "as": "max_CitationCount_CrossRef"}, {"op": "min", "field": "AminerCitationCount_num", "as": "min_AminerCitationCount"}, {"op": "max", "field": "AminerCitationCount_num", "as": "max_AminerCitationCount"}, {"op": "min", "field": "Downloads_Xplore_num", "as": "min_Downloads_Xplore"}, {"op": "max", "field": "Downloads_Xplore_num", "as": "max_Downloads_Xplore"}]}, {"calculate": "(datum.max_CitationCount_CrossRef == datum.min_CitationCount_CrossRef) ? 0 : (datum.CitationCount_CrossRef_num - datum.min_CitationCount_CrossRef) / (datum.max_CitationCount_CrossRef - datum.min_CitationCount_CrossRef)", "as": "norm_citation_crossref"}, {"calculate": "(datum.max_AminerCitationCount == datum.min_AminerCitationCount) ? 0 : (datum.AminerCitationCount_num - datum.min_AminerCitationCount) / (datum.max_AminerCitationCount - datum.min_AminerCitationCount)", "as": "norm_aminer"}, {"calculate": "(datum.max_Downloads_Xplore == datum.min_Downloads_Xplore) ? 0 : (datum.Downloads_Xplore_num - datum.min_Downloads_Xplore) / (datum.max_Downloads_Xplore - datum.min_Downloads_Xplore)", "as": "norm_downloads"}, {"calculate": "(datum.norm_citation_crossref + datum.norm_aminer + datum.norm_downloads) / 3", "as": "combined_impact_score"}, {"window": [{"op": "rank", "as": "rank"}], "sort": [{"field": "combined_impact_score", "order": "descending"}]}, {"filter": "datum.rank <= 15"}], "height": {"step": 28}, "mark": "bar", "encoding": {"y": {"field": "Title", "type": "nominal", "sort": {"field": "combined_impact_score", "order": "descending"}, "axis": {"labelLimit": 400, "title": "Paper Title"}}, "x": {"field": "combined_impact_score", "type": "quantitative", "axis": {"title": "Combined impact (normalized 0\u20131)", "tickCount": 5}}, "color": {"field": "Year", "type": "ordinal", "legend": {"title": "Year"}}, "tooltip": [{"field": "Title", "type": "nominal", "title": "Title"}, {"field": "Year", "type": "ordinal", "title": "Year"}, {"field": "Conference", "type": "nominal", "title": "Conference"}, {"field": "combined_impact_score", "type": "quantitative", "title": "Combined score"}, {"field": "CitationCount_CrossRef_num", "type": "quantitative", "title": "Citations (CrossRef)"}, {"field": "AminerCitationCount_num", "type": "quantitative", "title": "Citations (Aminer)"}, {"field": "Downloads_Xplore_num", "type": "quantitative", "title": "Downloads (Xplore)"}, {"field": "rank", "type": "quantitative", "title": "Rank"}]}, "title": "Top AutoVis papers by combined impact (citations + downloads)"}, {
             actions: false,
             renderer: 'canvas',
-            config: {}
           })
           .catch(console.error);
         </script>
@@ -308,8 +301,8 @@
     </div>
     <div class='my-8'>
       <div class='bg-gray-50 rounded-lg shadow-sm p-4'>
-        <div class='mb-4 flex justify-center overflow-x-auto'>
-          <div style='width: 100%;'>
+        <div class='mb-4 flex justify-center'>
+          <div class='inline-block mx-auto overflow-x-auto max-w-full'>
             <div id='vis-7-1'></div>
           </div>
         </div>
@@ -317,7 +310,6 @@
           vegaEmbed('#vis-7-1', {"$schema": "https://vega.github.io/schema/vega-lite/v5.json", "description": "Yearly trend of AutoVis paper volume and share, broken down by conference. AutoVis papers are flagged via keyword regex on AuthorKeywords, Abstract, and Title.", "data": {"url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv", "format": {"type": "csv"}}, "transform": [{"calculate": "test(/automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent/i, (datum.AuthorKeywords || '') + ' ' + (datum.Abstract || '') + ' ' + (datum.Title || '')) ? 1 : 0", "as": "AutoVisFlag"}, {"aggregate": [{"op": "sum", "field": "AutoVisFlag", "as": "AutoVis_count"}, {"op": "count", "field": "Title", "as": "Total_count"}], "groupby": ["Year", "Conference"]}, {"calculate": "datum.AutoVis_count / datum.Total_count * 100", "as": "Share"}], "width": 700, "height": 360, "resolve": {"scale": {"y": "independent"}}, "layer": [{"mark": {"type": "line", "point": true, "tooltip": true}, "encoding": {"x": {"field": "Year", "type": "ordinal", "axis": {"title": "Year"}}, "y": {"field": "AutoVis_count", "type": "quantitative", "axis": {"title": "AutoVis paper count"}}, "color": {"field": "Conference", "type": "nominal"}, "tooltip": [{"field": "Year", "type": "ordinal", "title": "Year"}, {"field": "Conference", "type": "nominal", "title": "Conference"}, {"field": "AutoVis_count", "type": "quantitative", "title": "AutoVis count"}, {"field": "Total_count", "type": "quantitative", "title": "Total papers"}, {"field": "Share", "type": "quantitative", "title": "Share (%)", "format": ".1f"}]}}, {"mark": {"type": "line", "point": false, "opacity": 0.9, "strokeDash": [5, 5]}, "encoding": {"x": {"field": "Year", "type": "ordinal"}, "y": {"field": "Share", "type": "quantitative", "axis": {"title": "Share (%)", "orient": "right"}}, "color": {"field": "Conference", "type": "nominal"}, "tooltip": [{"field": "Year", "type": "ordinal", "title": "Year"}, {"field": "Conference", "type": "nominal", "title": "Conference"}, {"field": "AutoVis_count", "type": "quantitative", "title": "AutoVis count"}, {"field": "Total_count", "type": "quantitative", "title": "Total papers"}, {"field": "Share", "type": "quantitative", "title": "Share (%)", "format": ".1f"}]}}]}, {
             actions: false,
             renderer: 'canvas',
-            config: {}
           })
           .catch(console.error);
         </script>
@@ -328,8 +320,8 @@
     </div>
     <div class='my-8'>
       <div class='bg-gray-50 rounded-lg shadow-sm p-4'>
-        <div class='mb-4 flex justify-center overflow-x-auto'>
-          <div style='width: 100%;'>
+        <div class='mb-4 flex justify-center'>
+          <div class='inline-block mx-auto overflow-x-auto max-w-full'>
             <div id='vis-7-2'></div>
           </div>
         </div>
@@ -337,7 +329,6 @@
           vegaEmbed('#vis-7-2', {"$schema": "https://vega.github.io/schema/vega-lite/v5.json", "description": "Distribution of GraphicsReplicabilityStamp for AutoVis vs Other papers; bar height = count, tooltip shows median citation and downloads.", "data": {"url": "https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv", "format": {"type": "csv"}}, "transform": [{"calculate": "test(/automatic vis|automated vis|visualization recommendation|mixed initiative|mixed-initiative|visualization generation|vis generation|agent/i, (datum.AuthorKeywords || '') + ' ' + (datum.Abstract || '') + ' ' + (datum.Title || '')) ? 'AutoVis' : 'Other'", "as": "AutoVisFlag"}, {"aggregate": [{"op": "count", "field": "*", "as": "count"}, {"op": "median", "field": "CitationCount_CrossRef", "as": "median_Citation"}, {"op": "median", "field": "Downloads_Xplore", "as": "median_Downloads"}], "groupby": ["GraphicsReplicabilityStamp", "AutoVisFlag"]}, {"calculate": "datum.GraphicsReplicabilityStamp == null || datum.GraphicsReplicabilityStamp == '' ? 'None' : datum.GraphicsReplicabilityStamp", "as": "GraphicsReplicabilityStamp_clean"}], "width": 650, "height": 360, "layer": [{"mark": {"type": "bar", "cornerRadiusTopLeft": 3, "cornerRadiusTopRight": 3}, "encoding": {"x": {"field": "GraphicsReplicabilityStamp_clean", "type": "nominal", "title": "Graphics Replicability Stamp", "axis": {"labelAngle": 0}}, "y": {"field": "count", "type": "quantitative", "title": "Count of papers"}, "color": {"field": "AutoVisFlag", "type": "nominal", "title": "Paper type", "scale": {"domain": ["AutoVis", "Other"], "range": ["#d95f02", "#1b9e77"]}}, "tooltip": [{"field": "GraphicsReplicabilityStamp_clean", "title": "Stamp"}, {"field": "AutoVisFlag", "title": "Type"}, {"field": "count", "title": "Count", "type": "quantitative"}, {"field": "median_Citation", "title": "Median Citation (CrossRef)", "type": "quantitative", "format": ".1f"}, {"field": "median_Downloads", "title": "Median Downloads (Xplore)", "type": "quantitative", "format": ".1f"}]}}, {"mark": {"type": "text", "dy": -6, "color": "black", "fontWeight": "bold"}, "encoding": {"x": {"field": "GraphicsReplicabilityStamp_clean", "type": "nominal"}, "y": {"field": "count", "type": "quantitative"}, "detail": {"field": "AutoVisFlag"}, "text": {"field": "median_Citation", "type": "quantitative", "format": ".0f"}}}], "resolve": {"scale": {"x": "independent"}}, "config": {"axis": {"labelFontSize": 12, "titleFontSize": 13}, "legend": {"labelFontSize": 12, "titleFontSize": 13}}}, {
             actions: false,
             renderer: 'canvas',
-            config: {}
           })
           .catch(console.error);
         </script>

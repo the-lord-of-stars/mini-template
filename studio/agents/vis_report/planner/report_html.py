@@ -174,8 +174,8 @@ def generate_html_report(output_state: dict, output_path: str):
                         spec = json.loads(visualisation["specification"])
                         div_id = f"vis-{section_number}-{content_item.get('id', idx)}"
                         html_lines.extend([
-                            f"        <div class='mb-4 flex justify-center overflow-x-auto'>",
-                            f"          <div style='width: 100%;'>",
+                            f"        <div class='mb-4 flex justify-center'>",
+                            f"          <div class='inline-block mx-auto overflow-x-auto max-w-full'>",
                             f"            <div id='{div_id}'></div>",
                             f"          </div>",
                             f"        </div>",
@@ -183,7 +183,6 @@ def generate_html_report(output_state: dict, output_path: str):
                             f"          vegaEmbed('#{div_id}', {json.dumps(spec)}, {{",
                             "            actions: false,",
                             "            renderer: 'canvas',",
-                            "            config: {}",
                             "          })",
                             "          .catch(console.error);",
                             "        </script>"
@@ -372,8 +371,8 @@ def generate_html_from_state_file(state_file_path: str, output_path: str):
 
 if __name__ == "__main__":
     # Example usage
-    state_file = "../../../testing/car(auto-mpg)/thread_20250821_104828/state.json"
-    output_file = "../../../testing/car(auto-mpg)/thread_20250821_104828/report.html"
+    state_file = "../../../outputs_sync/vis_report/thread_20250819_143215/state.json"
+    output_file = "../../../outputs_sync/vis_report/thread_20250819_143215/report.html"
     
     if Path(state_file).exists():
         generate_html_from_state_file(state_file, output_file)
