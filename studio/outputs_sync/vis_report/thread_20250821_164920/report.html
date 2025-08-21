@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='utf-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <title>Research Report: Automated Visualization</title>
+  <script src='https://cdn.jsdelivr.net/npm/vega@5'></script>
+  <script src='https://cdn.jsdelivr.net/npm/vega-lite@5'></script>
+  <script src='https://cdn.jsdelivr.net/npm/vega-embed@6'></script>
+  <script src='https://cdn.tailwindcss.com'></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          typography: ({ theme }) => ({
+            DEFAULT: { css: { color: theme('colors.gray.800') } }
+          })
+        }
+      }
+    }
+  </script>
+</head>
+<body class='bg-white text-gray-800'>
+  <div id='progress-bar' class='fixed top-0 left-0 h-1 bg-black z-[9999]' style='width:0%'></div>  <nav class='sticky top-0 bg-white border-b border-gray-200 z-50'>
+    <div class='w-[95%] mx-auto px-6 py-3 flex justify-between items-center'>
+      <a href='#' class='font-bold text-lg'>Agentic VIS Report</a>
+      <div class='hidden md:flex items-center space-x-10 text-sm'>
+        <a href='https://www.visagent.org/' target='_blank' class='hover:text-primary-600 text-lg'>Challenge</a>
+        <a href='https://github.com/the-lord-of-stars/mini-template' target='_blank'>
+          <img src='https://cdnjs.cloudflare.com/ajax/libs/simple-icons/9.16.0/github.svg' alt='GitHub' class='w-6 h-6'>
+        </a>
+      </div>
+      <button id='menu-btn' class='md:hidden flex items-center focus:outline-none'>
+        <svg xmlns='http://www.w3.org/2000/svg' class='w-6 h-6' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+          <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 6h16M4 12h16M4 18h16' />
+        </svg>
+      </button>
+    </div>
+    <div id='mobile-menu' class='hidden md:hidden bg-white border-t border-gray-200'>
+      <div class='px-6 py-3 flex flex-col space-y-4'>
+        <a href='https://www.visagent.org/' target='_blank' class='hover:text-primary-600 text-lg'>Official Challenge Website</a>
+        <a href='https://github.com/the-lord-of-stars/mini-template' target='_blank' class='flex items-center space-x-4'>
+          <img src='https://cdnjs.cloudflare.com/ajax/libs/simple-icons/9.16.0/github.svg' alt='GitHub' class='w-6 h-6'>
+          <span class='text-lg'>Project GitHub Repo</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+  <script>
+    const btn = document.getElementById('menu-btn');
+    const menu = document.getElementById('mobile-menu');
+    btn.addEventListener('click', () => { menu.classList.toggle('hidden'); });
+  </script>
+  <nav class='hidden lg:block fixed top-20 left-6 w-[15%] h-[80vh] overflow-y-auto
+               p-4 text-sm'
+       aria-label='Table of contents'>
+    <h2 class='font-semibold text-gray-900 mb-3'>Table of contents</h2>
+    <ol id='toc-list' class='space-y-2'></ol>
+  </nav>
+  <main class='w-[90%] max-w-3xl mx-auto px-6 py-12 lg:w-[75%] lg:ml-[20%] lg:max-w-none lg:mx-0'>
+    <header class='text-center mb-12'>
+      <h1 class='text-4xl font-bold text-gray-900 mb-4'>A multivariate exploration of the CS:GO professional players dataset</h1>
+       <p class='text-lg text-gray-600'>Generated on 2025-08-21 </p>
+    </header>
+    <article class='prose prose-lg prose-gray'>
+<section class='mb-16'>
+  <h2 class='text-3xl font-bold mb-6 border-b border-gray-200 pb-2'>
+    1. Executive summary & dataset overview
+  </h2>
+  <div class='space-y-10'>
+    <div class='prose prose-lg prose-gray max-w-none'>
+      <p class="text-gray-700 leading-relaxed mb-4">A compact, data-driven exploration of 811 professional CS:GO players (41 attributes) aims to help visualization researchers, data scientists and esports analysts compare multivariate performance, identify specialized roles, and surface trade-offs that underlie player value. The dataset contains rich per-player aggregates (kills, rounds, weapon breakdowns, opening-kill metrics and various per-round rates) with most core numeric fields fully populated; notable exceptions include a partially missing current_team field and a few columns that require parsing. Key questions driving the work are: which combinations of metrics define familiar roles (AWPer, entry, support, lurker), how do these roles map onto overall rating, and what trade-offs (e.g., weapon specialization versus consistency) appear when players are compared across many attributes simultaneously. Multivariate analysis matters here because single metrics such as rating or kills-per-round conflate different player behaviors; only by looking at patterns across opening impact, weapon shares, assists/saves and consistency can we interpret specialization and complementary strengths.</p>
+    </div>
+    <div class='my-8'>
+      <div class='bg-gray-50 rounded-lg shadow-sm p-4'>
+        <div class='mb-4 flex justify-center'>
+          <div class='inline-block mx-auto overflow-x-auto max-w-full'>
+            <div id='vis-1-1'></div>
+          </div>
+        </div>
+        <script>
+          vegaEmbed('#vis-1-1', {"$schema": "https://vega.github.io/schema/vega-lite/v5.json", "vconcat": [{"data": {"url": "https://raw.githubusercontent.com/the-lord-of-stars/mini-template/dev-yuhan/studio/testing/cs/csgo_players.csv", "format": {"type": "csv"}}, "transform": [{"aggregate": [{"op": "count", "as": "total_rows"}], "groupby": []}, {"calculate": "'Rows: ' + datum.total_rows + ' | Attributes: 41'", "as": "summary_label"}], "mark": {"type": "text", "align": "left", "baseline": "middle"}, "encoding": {"text": {"field": "summary_label", "type": "nominal"}}, "height": 40}, {"title": "Attribute completeness (percent of non-missing values per attribute)", "data": {"url": "https://raw.githubusercontent.com/the-lord-of-stars/mini-template/dev-yuhan/studio/testing/cs/csgo_players.csv", "format": {"type": "csv"}}, "transform": [{"joinaggregate": [{"op": "count", "as": "total_rows"}], "groupby": []}, {"calculate": "toNumber(replace(datum.headshot_percentage, '%', ''))", "as": "headshot_percentage_clean"}, {"calculate": "toNumber(trim(datum.age))", "as": "age_num"}, {"calculate": "toNumber(replace(datum.total_kills, ',', ''))", "as": "total_kills_num"}, {"calculate": "toLower(trim(datum.country))", "as": "country_norm"}, {"calculate": "toLower(trim(datum.current_team))", "as": "current_team_norm"}, {"fold": ["player_id", "nickname", "real_name", "age", "age_num", "country", "country_norm", "current_team", "current_team_norm", "teams", "total_kills", "total_kills_num", "total_deaths", "headshot_percentage", "headshot_percentage_clean", "damage_per_round", "grenade_dmg_per_round", "maps_played", "rounds_played", "kills_per_death", "kills_per_round", "assists_per_round", "deaths_per_round", "saved_by_teammate_per_round", "saved_teammates_per_round", "rounds_with_kills", "kill_to_death_diff", "total_opening_kills", "total_opening_deaths", "opening_kill_ratio", "opening_kill_rating", "team_win_percent_after_first_kill", "first_kill_in_won_rounds", "0_kill_rounds", "1_kill_rounds", "2_kill_rounds", "3_kill_rounds", "4_kill_rounds", "5_kill_rounds", "rifle_kills", "sniper_kills", "smg_kills", "pistol_kills", "grenade_kills", "other_kills", "rating"], "as": ["attribute", "value"]}, {"filter": "datum.value != null && datum.value !== '\\u0000' && datum.value !== ''"}, {"aggregate": [{"op": "count", "as": "non_missing"}, {"op": "max", "field": "total_rows", "as": "total_rows"}], "groupby": ["attribute"]}, {"calculate": "100 * datum.non_missing / datum.total_rows", "as": "completeness_percent"}], "mark": {"type": "bar", "tooltip": true}, "encoding": {"y": {"field": "attribute", "type": "nominal", "sort": "-x", "axis": {"title": "Attribute"}}, "x": {"field": "completeness_percent", "type": "quantitative", "axis": {"title": "Completeness (%)"}}, "tooltip": [{"field": "attribute", "type": "nominal", "title": "Attribute"}, {"field": "non_missing", "type": "quantitative", "title": "Non-missing count"}, {"field": "total_rows", "type": "quantitative", "title": "Total rows"}, {"field": "completeness_percent", "type": "quantitative", "title": "Completeness (%)", "format": ".1f"}]}, "width": 800, "height": 900}, {"hconcat": [{"title": "Top 10 countries by player count (normalized: lowercase/trim)", "data": {"url": "https://raw.githubusercontent.com/the-lord-of-stars/mini-template/dev-yuhan/studio/testing/cs/csgo_players.csv", "format": {"type": "csv"}}, "transform": [{"calculate": "toLower(trim(datum.country))", "as": "country_norm"}, {"filter": "datum.country_norm != null && datum.country_norm !== ''"}, {"aggregate": [{"op": "count", "as": "players"}], "groupby": ["country_norm"]}, {"window": [{"op": "rank", "as": "rank"}], "sort": [{"field": "players", "order": "descending"}]}, {"filter": "datum.rank <= 10"}], "mark": {"type": "bar", "tooltip": true}, "encoding": {"y": {"field": "country_norm", "type": "nominal", "sort": "-x", "axis": {"title": "Country (normalized)"}}, "x": {"field": "players", "type": "quantitative", "axis": {"title": "Player count"}}, "tooltip": [{"field": "country_norm", "type": "nominal", "title": "Country"}, {"field": "players", "type": "quantitative", "title": "Players"}]}, "width": 400, "height": 320}, {"title": "Top 10 current teams by player count (normalized: lowercase/trim)", "data": {"url": "https://raw.githubusercontent.com/the-lord-of-stars/mini-template/dev-yuhan/studio/testing/cs/csgo_players.csv", "format": {"type": "csv"}}, "transform": [{"calculate": "toLower(trim(datum.current_team))", "as": "current_team_norm"}, {"filter": "datum.current_team_norm != null && datum.current_team_norm !== ''"}, {"aggregate": [{"op": "count", "as": "players"}], "groupby": ["current_team_norm"]}, {"window": [{"op": "rank", "as": "rank"}], "sort": [{"field": "players", "order": "descending"}]}, {"filter": "datum.rank <= 10"}], "mark": {"type": "bar", "tooltip": true}, "encoding": {"y": {"field": "current_team_norm", "type": "nominal", "sort": "-x", "axis": {"title": "Team (normalized)"}}, "x": {"field": "players", "type": "quantitative", "axis": {"title": "Player count"}}, "tooltip": [{"field": "current_team_norm", "type": "nominal", "title": "Team"}, {"field": "players", "type": "quantitative", "title": "Players"}]}, "width": 400, "height": 320}]}]}, {
+            actions: false,
+            renderer: 'canvas',
+          })
+          .catch(console.error);
+        </script>
+        <p class='text-sm text-gray-600 mt-2 text-center'>
+          <p class="text-gray-700 leading-relaxed mb-4">The combined overview visual contains three elements that summarize dataset scope and quality and highlight where follow-up cleaning is needed. The top text line reports the dataset size (811 rows, 41 attributes). The large vertical bar chart of per-column completeness shows most fields are complete (many at 100%) while current_team is the biggest gap (about 63% complete, with ~297 missing entries) and one field (kill_to_death_diff) appears fully problematic and flagged for inspection. The paired horizontal bars compare the top 10 countries and current teams after simple normalization: the United States, Denmark and Russia supply the largest numbers of players, while teams such as mouz and havu appear most often in the current_team strings. These facts together suggest the table is broadly fit for multivariate analysis after deterministic parsing steps (percent stripping, numeric coercion and team-string normalization), but analysts should be cautious when conditioning on current_team or any sparsely populated fields.</p>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+<section class='mb-16'>
+  <h2 class='text-3xl font-bold mb-6 border-b border-gray-200 pb-2'>
+    2. Data cleaning, normalization and feature engineering
+  </h2>
+  <div class='space-y-10'>
+    <div class='prose prose-lg prose-gray max-w-none'>
+      <p class="text-gray-700 leading-relaxed mb-4">Cleaning focused on deterministic, auditable transforms to make heterogeneous string-encoded metrics usable for numeric analysis: percent strings were stripped and converted (e.g., headshot_percentage → numeric fraction), number-like strings with punctuation were normalized (commas removed), and free-text fields such as country and current_team were lowercased and trimmed to reduce casing inconsistencies. The teams field was parsed by splitting on common delimiters to expose multi-team histories for most players. Missing values were inspected per-column and either imputed conservatively (where appropriate) or left as a separate category for filtering (current_team). Features that mixed text and numbers were flagged for manual inspection (kill_to_death_diff showed pervasive non-numeric entries and was isolated). Continuous features used in modeling were scaled to comparable ranges (z-score or min–max depending on method); for profile visualizations we rescaled per-feature to [0,1] so centroids are directly comparable. A small set of derived metrics was created and justified by gameplay semantics: KD_ratio (kills_per_death) as a simple balance measure; Consistency_index = 1 - zero_kill_rounds / rounds_played to capture frequency of contributing rounds; an Impact score combining kills_per_round, opening_kill_ratio and damage_per_round to approximate direct match influence; a Clutch_index using first_kill_in_won_rounds and team_win_percent_after_first_kill to reflect high-leverage plays; an Aggression_flag based on opening_kill_ratio and kills_per_round to capture entry-style play; and role heuristics (AWPer, Entry, Support, Lurker) implemented as ordered rules so sparse but decisive signals (high sniper share) take precedence. Thresholds for role rules were chosen from empirical percentiles and refined across analyses, and borderline players are flagged for manual review rather than forced assignment.</p>
+    </div>
+    <div class='my-8'>
+      <div class='bg-gray-50 rounded-lg shadow-sm p-4'>
+        <div class='mb-4 flex justify-center'>
+          <div class='inline-block mx-auto overflow-x-auto max-w-full'>
+            <div id='vis-2-1'></div>
+          </div>
+        </div>
+        <script>
+          vegaEmbed('#vis-2-1', {"$schema": "https://vega.github.io/schema/vega-lite/v5.json", "description": "Per-column missingness and parsing/format quirks detected by folding all fields into key/value and classifying each cell.", "data": {"url": "https://raw.githubusercontent.com/the-lord-of-stars/mini-template/dev-yuhan/studio/testing/cs/csgo_players.csv"}, "transform": [{"fold": ["player_id", "nickname", "real_name", "age", "country", "current_team", "teams", "total_kills", "total_deaths", "headshot_percentage", "damage_per_round", "grenade_dmg_per_round", "maps_played", "rounds_played", "kills_per_death", "kills_per_round", "assists_per_round", "deaths_per_round", "saved_by_teammate_per_round", "saved_teammates_per_round", "rounds_with_kills", "kill_to_death_diff", "total_opening_kills", "total_opening_deaths", "opening_kill_ratio", "opening_kill_rating", "team_win_percent_after_first_kill", "first_kill_in_won_rounds", "0_kill_rounds", "1_kill_rounds", "2_kill_rounds", "3_kill_rounds", "4_kill_rounds", "5_kill_rounds", "rifle_kills", "sniper_kills", "smg_kills", "pistol_kills", "grenade_kills", "other_kills", "rating"], "as": ["column", "value"]}, {"calculate": "(datum.value == null || datum.value == '')", "as": "is_missing"}, {"calculate": "(datum.value && /%/.test(datum.value))", "as": "percent_flag"}, {"calculate": "(indexof(['player_id','age','total_kills','total_deaths','damage_per_round','grenade_dmg_per_round','maps_played','rounds_played','kills_per_death','kills_per_round','assists_per_round','deaths_per_round','saved_by_teammate_per_round','saved_teammates_per_round','rounds_with_kills','kill_to_death_diff','total_opening_kills','total_opening_deaths','opening_kill_ratio','opening_kill_rating','team_win_percent_after_first_kill','first_kill_in_won_rounds','0_kill_rounds','1_kill_rounds','2_kill_rounds','3_kill_rounds','4_kill_rounds','5_kill_rounds','rifle_kills','sniper_kills','smg_kills','pistol_kills','grenade_kills','other_kills','rating','headshot_percentage'], datum.column) >= 0 && !datum.is_missing && /[A-Za-z]/.test(datum.value))", "as": "non_numeric_flag"}, {"calculate": "(datum.column == 'teams' && !datum.is_missing && (/,|;/.test(datum.value)))", "as": "team_multi_flag"}, {"calculate": "((datum.column == 'country' || datum.column == 'current_team') && !datum.is_missing && datum.value != datum.value.toLowerCase())", "as": "casing_issue"}, {"calculate": "(datum.is_missing ? 'missing' : (datum.team_multi_flag ? 'multi_team' : (datum.percent_flag ? 'percent_string' : (datum.non_numeric_flag ? 'non_numeric' : (datum.casing_issue ? 'casing_issue' : 'ok')))))", "as": "quirk_type"}, {"aggregate": [{"op": "count", "as": "count"}], "groupby": ["column", "quirk_type"]}], "mark": "bar", "encoding": {"y": {"field": "column", "type": "nominal", "axis": {"title": "Column (dataset field)"}, "sort": {"op": "sum", "field": "count", "order": "descending"}}, "x": {"field": "count", "type": "quantitative", "axis": {"title": "Count of cells / occurrences"}}, "color": {"field": "quirk_type", "type": "nominal", "scale": {"domain": ["missing", "percent_string", "non_numeric", "multi_team", "casing_issue", "ok"], "range": ["#d62728", "#ff7f0e", "#1f77b4", "#2ca02c", "#9467bd", "#c7c7c7"]}, "legend": {"title": "Quirk type"}}, "tooltip": [{"field": "column", "type": "nominal"}, {"field": "quirk_type", "type": "nominal"}, {"field": "count", "type": "quantitative"}]}, "width": 800, "height": 1200, "config": {"axis": {"labelFontSize": 11, "titleFontSize": 12}, "view": {"stroke": "transparent"}}}, {
+            actions: false,
+            renderer: 'canvas',
+          })
+          .catch(console.error);
+        </script>
+        <p class='text-sm text-gray-600 mt-2 text-center'>
+          <p class="text-gray-700 leading-relaxed mb-4">The per-column quirk chart aggregates every cell into simple categories (missing, percent-formatted, non-numeric where numeric expected, multi-team entries, casing issues, or OK) so data-cleaning priorities are immediately visible. Results show that several percent-formatted attributes (headshot_percentage, team_win_percent_after_first_kill, first_kill_in_won_rounds) require percent stripping across all 811 rows, while current_team has the largest missing count (~297). The teams field is highly multi-valued: most players (697 of 811) list multiple teams and will benefit from controlled splitting, whereas kill_to_death_diff surfaced as non-numeric across the table and needs inspection or removal. The quirk summary was saved to columns_quirk_summary.csv to support reproducible cleaning steps; overall the chart justifies automated coercion for percentages and number-format normalization, special parsing for teams, and a conservative approach for fields with pervasive non-numeric entries.</p>
+        </p>
+      </div>
+    </div>
+    <div class='my-8'>
+      <div class='bg-gray-50 rounded-lg shadow-sm p-4'>
+        <div class='mb-4 flex justify-center'>
+          <div class='inline-block mx-auto overflow-x-auto max-w-full'>
+            <div id='vis-2-2'></div>
+          </div>
+        </div>
+        <script>
+          vegaEmbed('#vis-2-2', {"$schema": "https://vega.github.io/schema/vega-lite/v5.json", "data": {"url": "https://raw.githubusercontent.com/the-lord-of-stars/mini-template/dev-yuhan/studio/testing/cs/csgo_players.csv", "format": {"type": "csv"}}, "transform": [{"calculate": "toNumber(datum.sniper_kills) / (toNumber(datum.total_kills) === 0 ? 1 : toNumber(datum.total_kills))", "as": "sniper_share"}, {"calculate": "toNumber(datum.opening_kill_ratio)", "as": "opening_kill_ratio_num"}, {"calculate": "toNumber(datum.kills_per_round)", "as": "kills_per_round_num"}, {"calculate": "toNumber(datum.assists_per_round)", "as": "assists_per_round_num"}, {"calculate": "toNumber(datum.saved_teammates_per_round)", "as": "saved_teammates_per_round_num"}, {"calculate": "toNumber(datum.rounds_played)", "as": "rounds_played_num"}, {"calculate": "toNumber(datum['0_kill_rounds'])", "as": "zero_kill_rounds_num"}, {"calculate": "(datum.rounds_played_num == 0) ? 0 : 1 - (datum.zero_kill_rounds_num / datum.rounds_played_num)", "as": "consistency_index"}, {"calculate": "datum.sniper_share > 0.20 ? 'AWPer' : (datum.opening_kill_ratio_num > 1.2 && datum.kills_per_round_num > 0.8 ? 'Entry-fragger' : (datum.assists_per_round_num > 0.15 || datum.saved_teammates_per_round_num > 0.02 ? 'Support' : (datum.consistency_index > 0.7 && datum.kills_per_round_num > 0.6 ? 'Lurker' : 'Other'))))", "as": "role_candidate"}], "vconcat": [{"width": 600, "height": 360, "mark": {"type": "point", "filled": true, "opacity": 0.85, "stroke": "#222", "strokeWidth": 0.3}, "encoding": {"x": {"field": "opening_kill_ratio_num", "type": "quantitative", "title": "Opening kill ratio"}, "y": {"field": "kills_per_round_num", "type": "quantitative", "title": "Kills per round"}, "color": {"field": "role_candidate", "type": "nominal", "title": "Assigned role"}, "size": {"field": "rating", "type": "quantitative", "title": "Rating", "scale": {"range": [20, 200]}}, "tooltip": [{"field": "nickname", "type": "nominal"}, {"field": "country", "type": "nominal"}, {"field": "sniper_share", "type": "quantitative", "format": ".2f", "title": "Sniper share"}, {"field": "opening_kill_ratio_num", "type": "quantitative", "title": "Opening kill ratio"}, {"field": "kills_per_round_num", "type": "quantitative", "title": "Kills/round"}, {"field": "assists_per_round_num", "type": "quantitative", "title": "Assists/round"}, {"field": "consistency_index", "type": "quantitative", "format": ".2f", "title": "Consistency index"}]}, "description": "Scatter: opening kill ratio vs kills per round; points colored by assigned heuristic role. Useful to inspect entry-fragger heuristic coverage and borderline cases."}, {"width": 600, "height": 160, "mark": "bar", "encoding": {"x": {"field": "sniper_share", "type": "quantitative", "bin": {"maxbins": 30}, "title": "Sniper share (binned)"}, "y": {"aggregate": "count", "type": "quantitative", "title": "Number of players"}, "color": {"field": "role_candidate", "type": "nominal", "title": "Assigned role"}, "tooltip": [{"field": "role_candidate", "type": "nominal"}, {"aggregate": "count", "type": "quantitative", "title": "Players"}]}, "description": "Histogram of sniper_share: helps to choose a threshold for AWPer (e.g., 0.20 or 0.25)."}, {"width": 600, "height": 160, "transform": [{"aggregate": [{"op": "count", "as": "count"}], "groupby": ["role_candidate"]}], "layer": [{"mark": "bar", "encoding": {"x": {"field": "role_candidate", "type": "nominal", "title": "Assigned role"}, "y": {"field": "count", "type": "quantitative", "title": "Number of players"}, "color": {"field": "role_candidate", "type": "nominal", "legend": null}}}, {"mark": {"type": "text", "dy": -8, "fontWeight": "bold"}, "encoding": {"x": {"field": "role_candidate", "type": "nominal"}, "y": {"field": "count", "type": "quantitative"}, "text": {"field": "count", "type": "quantitative"}}}], "description": "Counts of players assigned to each role under the heuristic rules. Use this to evaluate coverage / plausibility."}], "title": "Role-assignment heuristics: entry / AWP / support / lurker (candidate thresholds)", "config": {"view": {"stroke": "transparent"}, "axis": {"labelFontSize": 11, "titleFontSize": 12}, "legend": {"titleFontSize": 12, "labelFontSize": 11}}}, {
+            actions: false,
+            renderer: 'canvas',
+          })
+          .catch(console.error);
+        </script>
+        <p class='text-sm text-gray-600 mt-2 text-center'>
+          <p class="text-gray-700 leading-relaxed mb-4">A role-assignment diagnostic scatter + histogram applies simple heuristics and shows how candidate thresholds partition players. The scatter of opening_kill_ratio vs kills_per_round colored by a first-pass role heuristic highlights clusters of high-sniper-share players, aggressive entry candidates and the broad mass of support-like players; point size encodes rating so high-rated players are easy to spot. The histogram of sniper share helps justify an AWPer cutoff (the dataset-driven p90 suggests a very high sniper share threshold, though lowering to a more practical 0.20–0.25 provides broader coverage). Using the heuristic rules shown, coverage is uneven: the chosen thresholds produced many Support assignments and a modest AWPer and Entry population (example counts: AWPer ≈ 82, Entry ≈ 59, Support ≈ 522, Other ≈ 148), with about 663 players assigned to a role and ~98 borderline players matching multiple rules. Several high-profile players (ZywOo, s1mple, sh1ro, deko and others) are flagged as borderline because they meet multiple role criteria, illustrating both the value and limits of simple rule-based role assignment and motivating a precedence order (AWPer → Entry → Support → Lurker) with manual review for boundary cases.</p>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+<section class='mb-16'>
+  <h2 class='text-3xl font-bold mb-6 border-b border-gray-200 pb-2'>
+    3. Global multivariate structure: PCA + UMAP/t-SNE
+  </h2>
+  <div class='space-y-10'>
+    <div class='prose prose-lg prose-gray max-w-none'>
+      <p class="text-gray-700 leading-relaxed mb-4">Global dimensionality reduction blends PCA for interpretable global axes and UMAP/t‑SNE for revealing local neighborhoods. PCA identifies major directions of variance that align with gameplay concepts — a fragging/impact axis (high kills_per_round, damage_per_round, opening_kill_ratio), an asset‑specialization axis (sniper_share vs rifle_share), and a consistency axis (few zero-kill rounds). UMAP/t‑SNE complement PCA by exposing tight pockets of weapon-specialists and hybrid profiles that PCA’s linear projection can blur. Coloring low-dimensional embeddings by rating, derived Impact and Clutch indices shows that the highest-rated players concentrate in regions of high impact and favorable trade-offs (high opening impact or weapon efficiency) rather than as a single global cluster, indicating multiple successful archetypes that differ by role and playstyle.</p>
+    </div>
+  </div>
+</section>
+<section class='mb-16'>
+  <h2 class='text-3xl font-bold mb-6 border-b border-gray-200 pb-2'>
+    4. Role identification and specialization
+  </h2>
+  <div class='space-y-10'>
+    <div class='prose prose-lg prose-gray max-w-none'>
+      <p class="text-gray-700 leading-relaxed mb-4">Roles are defined with interpretable, data-driven rules that prioritize decisive signals: AWPer when a player’s sniper share is clearly dominant, Entry when opening_kill_ratio and kills_per_round indicate aggressive first-contact fragging, Support when assists/saves or grenade damage signal secondary-team enabling, and Lurker when consistency and isolated fragging are relatively high while opening impact is low. This ordered-rule approach (AWPer → Entry → Support → Lurker → Other) balances precision and coverage; it leverages percentiles to set thresholds so the groups are meaningful and sufficiently large for downstream analysis. Typical role profiles differ predictably: AWPer players have large sniper shares and elevated headshot or damage-per-round; Entry players show higher opening_kill_ratio and KPR; Support players show elevated assists and saves; Lurkers have steadier per-round contribution with fewer zeros. Role prevalence and rating distributions vary by country/team and are useful for scouting and matchup analysis.</p>
+    </div>
+    <div class='my-8'>
+      <div class='bg-gray-50 rounded-lg shadow-sm p-4'>
+        <div class='mb-4 flex justify-center'>
+          <div class='inline-block mx-auto overflow-x-auto max-w-full'>
+            <div id='vis-4-1'></div>
+          </div>
+        </div>
+        <script>
+          vegaEmbed('#vis-4-1', {"$schema": "https://vega.github.io/schema/vega-lite/v5.json", "description": "Role-rule exploration: counts and per-role distributions for candidate features. Suggested thresholds shown in title (AWPer > sniper_prop 0.30; Entry > opening_kill_ratio 1.2 & kills_per_round 0.8; Support > assists_per_round 0.12; Lurker > consistency_index 0.7 & kills_per_round < 0.6). Rules are applied in priority: AWPer -> Entry -> Support -> Lurker -> Other.", "data": {"url": "https://raw.githubusercontent.com/the-lord-of-stars/mini-template/dev-yuhan/studio/testing/cs/csgo_players.csv"}, "transform": [{"calculate": "toNumber(datum.total_kills)", "as": "total_kills_n"}, {"calculate": "toNumber(datum.sniper_kills)", "as": "sniper_kills_n"}, {"calculate": "toNumber(datum.rounds_played)", "as": "rounds_played_n"}, {"calculate": "toNumber(datum['0_kill_rounds'])", "as": "zero_kill_rounds_n"}, {"calculate": "(datum.total_kills && toNumber(datum.total_kills) > 0) ? (toNumber(datum.sniper_kills)/toNumber(datum.total_kills)) : 0", "as": "sniper_prop"}, {"calculate": "(isNaN(toNumber(datum.opening_kill_ratio)) ? 0 : toNumber(datum.opening_kill_ratio))", "as": "opening_kill_ratio_n"}, {"calculate": "(isNaN(toNumber(datum.kills_per_round)) ? 0 : toNumber(datum.kills_per_round))", "as": "kills_per_round_n"}, {"calculate": "(isNaN(toNumber(datum.assists_per_round)) ? 0 : toNumber(datum.assists_per_round))", "as": "assists_per_round_n"}, {"calculate": "(datum.rounds_played && toNumber(datum.rounds_played) > 0) ? (1 - (toNumber(datum['0_kill_rounds']) / toNumber(datum.rounds_played))) : 0", "as": "consistency_index"}, {"calculate": "( (toNumber(datum.total_kills) > 0 && (toNumber(datum.sniper_kills)/toNumber(datum.total_kills)) > 0.30) ? 'AWPer' : ((toNumber(datum.opening_kill_ratio) > 1.2 && toNumber(datum.kills_per_round) > 0.8) ? 'Entry' : ((toNumber(datum.assists_per_round) > 0.12) ? 'Support' : (((datum.rounds_played && toNumber(datum.rounds_played) > 0) && (1 - (toNumber(datum[\"0_kill_rounds\"]) / toNumber(datum.rounds_played))) > 0.7 && toNumber(datum.kills_per_round) < 0.6) ? 'Lurker' : 'Other'))))", "as": "role"}], "vconcat": [{"width": 700, "height": 150, "mark": {"type": "bar", "cornerRadiusEnd": 3}, "encoding": {"x": {"field": "role", "type": "nominal", "axis": {"title": "Assigned Role (priority: AWPer -> Entry -> Support -> Lurker -> Other)"}}, "y": {"aggregate": "count", "type": "quantitative", "axis": {"title": "Player count"}}, "color": {"field": "role", "type": "nominal", "legend": null}}, "title": "Counts of players per assigned role using the sample rule set"}, {"width": 700, "height": 360, "repeat": {"column": ["sniper_prop", "opening_kill_ratio_n", "kills_per_round_n", "assists_per_round_n", "consistency_index"]}, "spec": {"layer": [{"mark": {"type": "boxplot", "extent": "iqr"}, "encoding": {"x": {"field": "role", "type": "nominal", "axis": {"labelAngle": -20}}, "y": {"field": {"repeat": "column"}, "type": "quantitative", "axis": {"title": null}}, "color": {"field": "role", "type": "nominal", "legend": {"title": "Role"}}}}, {"transform": [{"aggregate": [{"op": "median", "field": {"repeat": "column"}, "as": "median_val"}], "groupby": ["role"]}], "mark": {"type": "point", "filled": true, "size": 60, "opacity": 0.9}, "encoding": {"x": {"field": "role", "type": "nominal"}, "y": {"field": "median_val", "type": "quantitative"}, "shape": {"value": "diamond"}, "color": {"field": "role", "type": "nominal", "legend": null}}}]}}], "resolve": {"scale": {"y": "independent"}}, "config": {"view": {"stroke": "transparent"}, "axis": {"labelFontSize": 11, "titleFontSize": 12}, "title": {"fontSize": 14}}}, {
+            actions: false,
+            renderer: 'canvas',
+          })
+          .catch(console.error);
+        </script>
+        <p class='text-sm text-gray-600 mt-2 text-center'>
+          <p class="text-gray-700 leading-relaxed mb-4">The role-rule visualization combines a role-count bar chart with per-role boxplots for key features so typical profiles and spread are easy to compare. Counts under the sampled rule set show Support as the largest bucket (~40% in one configuration), AWPer and Lurker form smaller but meaningful groups, and Entry-fragger is the scarcest. Boxplots and median diamonds reveal clear separations: AWPer medians sit far above others on sniper_prop (AWPer median ≈ 0.52), Entry medians lead on opening_kill_ratio (≈1.29) and KPR, Support medians top assists_per_round (≈0.14), and Lurker medians show high consistency_index. These distributions both validate the heuristics and identify overlap regions where thresholds produce borderline cases; the diagnostics encourage minor threshold tuning and confirm that role buckets capture distinct multivariate signatures rather than single-metric artifacts.</p>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+<section class='mb-16'>
+  <h2 class='text-3xl font-bold mb-6 border-b border-gray-200 pb-2'>
+    5. Trade-offs and multivariate correlations
+  </h2>
+  <div class='space-y-10'>
+    <div class='prose prose-lg prose-gray max-w-none'>
+      <p class="text-gray-700 leading-relaxed mb-4">Trade-offs are central to interpreting player value: specialization often comes at the expense of other attributes, and simple correlations help quantify these patterns. Weapon specialization is a textbook trade-off — rifle and sniper shares are nearly perfectly negatively correlated, so high sniper reliance generally implies lower rifle contribution. Fragging metrics and consistency are tightly associated in this dataset, while opening impact and weapon selection show systematic antagonisms (e.g., high opening_kill_ratio tends to align with lower rifle share in some groups). Exploring pairwise, conditional and partial correlations (Pearson and Spearman) and visual interaction plots helps distinguish genuine trade-offs from sampling effects and reveals where players compensate (for instance, some high‑rating players combine above‑median consistency with strong opening impact, marking them as high-value hybrids).</p>
+    </div>
+    <div class='my-8'>
+      <div class='bg-gray-50 rounded-lg shadow-sm p-4'>
+        <div class='mb-4 flex justify-center'>
+          <div class='inline-block mx-auto overflow-x-auto max-w-full'>
+            <div id='vis-5-1'></div>
+          </div>
+        </div>
+        <script>
+          vegaEmbed('#vis-5-1', {"$schema": "https://vega.github.io/schema/vega-lite/v5.json", "description": "Pairwise scatterplot matrix of key aggression, opening impact, weapon specialization and rating for players with >= 500 rounds. Color shows weapon-specialization role derived from rifle/sniper share; aggressive entries get a different shape.", "data": {"url": "https://raw.githubusercontent.com/the-lord-of-stars/mini-template/dev-yuhan/studio/testing/cs/csgo_players.csv"}, "transform": [{"calculate": "toNumber(replace(datum.total_kills, ',', ''))", "as": "total_kills_num"}, {"calculate": "toNumber(replace(datum.rifle_kills, ',', ''))", "as": "rifle_kills_num"}, {"calculate": "toNumber(replace(datum.sniper_kills, ',', ''))", "as": "sniper_kills_num"}, {"calculate": "toNumber(replace(datum.rounds_played, ',', ''))", "as": "rounds_played_num"}, {"calculate": "toNumber(replace(datum.kills_per_round, ',', ''))", "as": "kills_per_round_num"}, {"calculate": "toNumber(replace(datum.deaths_per_round, ',', ''))", "as": "deaths_per_round_num"}, {"calculate": "toNumber(replace(datum.opening_kill_ratio, ',', ''))", "as": "opening_kill_ratio_num"}, {"calculate": "toNumber(replace(datum.kills_per_death, ',', ''))", "as": "kills_per_death_num"}, {"calculate": "toNumber(replace(replace(datum.headshot_percentage, '%', ''), ',', ''))", "as": "headshot_percentage_num"}, {"calculate": "toNumber(replace(datum.rating, ',', ''))", "as": "rating_num"}, {"calculate": "datum.total_kills_num > 0 ? datum.rifle_kills_num / datum.total_kills_num : 0", "as": "rifle_kills_pct"}, {"calculate": "datum.total_kills_num > 0 ? datum.sniper_kills_num / datum.total_kills_num : 0", "as": "sniper_kills_pct"}, {"calculate": "(datum.sniper_kills_pct > datum.rifle_kills_pct && datum.sniper_kills_pct > 0.25) ? 'AWPer' : (datum.rifle_kills_pct > datum.sniper_kills_pct ? 'Rifler' : 'Mixed')", "as": "role"}, {"calculate": "(datum.opening_kill_ratio_num > 1.2 && datum.kills_per_round_num > 0.8) ? true : false", "as": "aggression_flag"}, {"filter": "datum.rounds_played_num >= 500"}], "repeat": {"row": ["kills_per_round_num", "opening_kill_ratio_num", "kills_per_death_num", "headshot_percentage_num", "deaths_per_round_num", "rating_num"], "column": ["kills_per_round_num", "opening_kill_ratio_num", "kills_per_death_num", "headshot_percentage_num", "deaths_per_round_num", "rating_num"]}, "spec": {"width": 140, "height": 140, "mark": {"type": "point", "filled": true, "opacity": 0.8}, "encoding": {"x": {"field": {"repeat": "column"}, "type": "quantitative", "axis": {"labelAngle": -45}}, "y": {"field": {"repeat": "row"}, "type": "quantitative"}, "color": {"field": "role", "type": "nominal", "scale": {"domain": ["AWPer", "Rifler", "Mixed"], "range": ["#d62728", "#1f77b4", "#2ca02c"]}, "legend": {"title": "Weapon specialization (derived)"}}, "shape": {"condition": [{"test": "datum.aggression_flag == true", "value": "triangle"}], "value": "circle"}, "size": {"field": "rounds_played_num", "type": "quantitative", "scale": {"range": [20, 200]}, "legend": {"title": "Rounds played"}}, "tooltip": [{"field": "nickname", "type": "nominal", "title": "Player"}, {"field": "current_team", "type": "nominal", "title": "Team"}, {"field": "kills_per_round_num", "type": "quantitative", "title": "KPR"}, {"field": "deaths_per_round_num", "type": "quantitative", "title": "DPR"}, {"field": "opening_kill_ratio_num", "type": "quantitative", "title": "Opening ratio"}, {"field": "kills_per_death_num", "type": "quantitative", "title": "K/D"}, {"field": "headshot_percentage_num", "type": "quantitative", "title": "HS%"}, {"field": "rating_num", "type": "quantitative", "title": "Rating"}, {"field": "rifle_kills_pct", "type": "quantitative", "format": ".2f", "title": "Rifle %"}, {"field": "sniper_kills_pct", "type": "quantitative", "format": ".2f", "title": "Sniper %"}]}}, "config": {"axis": {"labelFontSize": 10, "titleFontSize": 11}, "legend": {"labelFontSize": 11, "titleFontSize": 12}}}, {
+            actions: false,
+            renderer: 'canvas',
+          })
+          .catch(console.error);
+        </script>
+        <p class='text-sm text-gray-600 mt-2 text-center'>
+          <p class="text-gray-700 leading-relaxed mb-4">The scatterplot matrix of core variables for players with ≥500 rounds highlights pairwise relationships and role- or weapon-driven clusters. A few robust signals stand out: kills_per_round is strongly related to consistency_index and to K/D and rating, making KPR a reliable proxy for impact in many contexts; rifle versus sniper specialization is a near-perfect negative axis (players cluster at opposite extremes); and headshot percentage negatively correlates with sniper share in this dataset, implying different engagement profiles for snipers versus riflers. Aggressive entry players (marked by a flag) form a compact group with higher median rating than the field, illustrating that certain aggressive playstyles, while rare, are predictive of top performance. Together, the matrix quantifies trade-offs and supports the interpretation that several distinct, high-performing archetypes coexist rather than a single optimal stat profile.</p>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+<section class='mb-16'>
+  <h2 class='text-3xl font-bold mb-6 border-b border-gray-200 pb-2'>
+    6. Clustering players into archetypes
+  </h2>
+  <div class='space-y-10'>
+    <div class='prose prose-lg prose-gray max-w-none'>
+      <p class="text-gray-700 leading-relaxed mb-4">Unsupervised clustering uncovers archetypal player groups and complements rule-based roles by finding structure in the full multivariate space. Using normalized features (kills/damage/headshot/opening metrics/sniper-per-round/consistency) and a KMeans-like pipeline with stability checks yields interpretable centroids that map to archetypes such as sniper-focused fraggers, generalist fraggers/hybrids, and several variants of support/anchor. Cluster diagnostics emphasize cluster compactness and feature contrasts: some clusters are defined by weapon specialization, others by consistency and enabling stats. Comparing cluster centroids and per-cluster rating distributions provides actionable archetype labels and suggests where a rule-based role bucket could be refined or merged.</p>
+    </div>
+    <div class='my-8'>
+      <div class='bg-gray-50 rounded-lg shadow-sm p-4'>
+        <div class='mb-4 flex justify-center'>
+          <div class='inline-block mx-auto overflow-x-auto max-w-full'>
+            <div id='vis-6-1'></div>
+          </div>
+        </div>
+        <script>
+          vegaEmbed('#vis-6-1', {"$schema": "https://vega.github.io/schema/vega-lite/v5.json", "description": "Centroid-like profile comparison for heuristic role clusters: compute mean feature values per role and rescale each feature 0-1 so profiles are comparable. Roles are inferred with simple heuristics (AWPer, EntryFragger, Support, Lurker, Other).", "data": {"url": "https://raw.githubusercontent.com/the-lord-of-stars/mini-template/dev-yuhan/studio/testing/cs/csgo_players.csv"}, "transform": [{"calculate": "toNumber(replace(datum.headshot_percentage, '%', '')) / 100", "as": "headshot_clean"}, {"calculate": "(toNumber(datum.rounds_played) == 0) ? 0 : toNumber(datum.sniper_kills) / toNumber(datum.rounds_played)", "as": "sniper_kpr"}, {"calculate": "(toNumber(datum.total_kills) > 0 && (toNumber(datum.sniper_kills) / toNumber(datum.total_kills) >= 0.2)) ? 'AWPer' : ((toNumber(datum.opening_kill_ratio) > 1.2 && toNumber(datum.kills_per_round) > 0.8) ? 'EntryFragger' : ((toNumber(datum.assists_per_round) > 0.12 || toNumber(datum.grenade_dmg_per_round) > 2.5) ? 'Support' : ((toNumber(datum.kills_per_round) > 0.6 && toNumber(datum.opening_kill_ratio) < 1.0) ? 'Lurker' : 'Other')))", "as": "role_label"}, {"fold": ["kills_per_round", "assists_per_round", "headshot_clean", "damage_per_round", "opening_kill_ratio", "sniper_kpr", "saved_teammates_per_round"]}, {"calculate": "toNumber(datum.value)", "as": "value_num"}, {"aggregate": [{"op": "mean", "field": "value_num", "as": "mean_value"}], "groupby": ["role_label", "key"]}, {"rename": {"key": "feature"}}, {"joinaggregate": [{"op": "min", "field": "mean_value", "as": "min_val"}, {"op": "max", "field": "mean_value", "as": "max_val"}], "groupby": ["feature"]}, {"calculate": "(datum.max_val == datum.min_val) ? 0.5 : (datum.mean_value - datum.min_val) / (datum.max_val - datum.min_val)", "as": "normalized_value"}, {"filter": "datum.role_label != null && datum.role_label != ''"}], "mark": {"type": "line", "point": true, "tooltip": true}, "encoding": {"x": {"field": "feature", "type": "ordinal", "title": "Feature", "sort": ["kills_per_round", "assists_per_round", "headshot_clean", "damage_per_round", "opening_kill_ratio", "sniper_kpr", "saved_teammates_per_round"]}, "y": {"field": "normalized_value", "type": "quantitative", "title": "Rescaled centroid (0-1)", "scale": {"domain": [0, 1]}}, "color": {"field": "role_label", "type": "nominal", "title": "Inferred role"}, "detail": {"field": "role_label"}, "tooltip": [{"field": "role_label", "type": "nominal", "title": "Role"}, {"field": "feature", "type": "nominal", "title": "Feature"}, {"field": "mean_value", "type": "quantitative", "title": "Mean (raw)"}, {"field": "normalized_value", "type": "quantitative", "title": "Rescaled (0-1)"}]}, "width": 700, "height": 320, "title": "Profile centroids (mean) per inferred role \u2014 features rescaled per-feature to 0-1 for comparability"}, {
+            actions: false,
+            renderer: 'canvas',
+          })
+          .catch(console.error);
+        </script>
+        <p class='text-sm text-gray-600 mt-2 text-center'>
+          <p class="text-gray-700 leading-relaxed mb-4">Centroid profiles for inferred roles show rescaled means across a compact feature set so shape differences are immediately visible. One cluster resembles a support/anchor with relatively high assists, damage and consistency; another looks like a hybrid/fragger group with elevated sniper_kills_per_round and intermediate damage; remaining clusters emphasize different mixes of kills, damage and support metrics. The existence of multiple clusters that map to 'support-like' behavior indicates heterogeneity inside the support label (e.g., anchors versus utility specialists). This centroid view helps interpreters see that high-impact players are not a single homogeneous group but occupy distinct parts of the feature space—useful for scouting and building role-diverse rosters.</p>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+<section class='mb-16'>
+  <h2 class='text-3xl font-bold mb-6 border-b border-gray-200 pb-2'>
+    7. Case studies & benchmark players
+  </h2>
+  <div class='space-y-10'>
+    <div class='prose prose-lg prose-gray max-w-none'>
+      <p class="text-gray-700 leading-relaxed mb-4">Case studies of benchmark players illustrate how multivariate profiles explain elite performance and caveats around single-metric evaluation. Top-rated players in the dataset tend to cluster near AWPer-like centroids or in hybrid high-impact zones, but individual differences matter: some top names exceed their role centroid across multiple attributes, while others are high outliers on a single specialty. Short player deep-dives (profile similarity to role centroid, attribute-level strengths/weaknesses, and team-history candidates where available) demonstrate how the framework supports scouting, matchup planning and automated charting benchmarks.</p>
+    </div>
+    <div class='my-8'>
+      <div class='bg-gray-50 rounded-lg shadow-sm p-4'>
+        <div class='mb-4 flex justify-center'>
+          <div class='inline-block mx-auto overflow-x-auto max-w-full'>
+            <div id='vis-7-1'></div>
+          </div>
+        </div>
+        <script>
+          vegaEmbed('#vis-7-1', {"$schema": "https://vega.github.io/schema/vega-lite/v5.json", "description": "Compare top-rated players (top 6 by rating) to role centroids across four normalized attributes (kills_per_round, damage_per_round, opening_kill_ratio, headshot_percentage) using a polar (radar-like) layout.", "width": 360, "height": 360, "data": {"url": "https://raw.githubusercontent.com/the-lord-of-stars/mini-template/dev-yuhan/studio/testing/cs/csgo_players.csv"}, "layer": [{"title": "Role centroids (normalized)", "data": {"url": "https://raw.githubusercontent.com/the-lord-of-stars/mini-template/dev-yuhan/studio/testing/cs/csgo_players.csv"}, "transform": [{"calculate": "toNumber(replace(datum.headshot_percentage, '%', ''))", "as": "headshot_pct"}, {"calculate": "toNumber(datum.kills_per_round)", "as": "kills_pr"}, {"calculate": "toNumber(datum.damage_per_round)", "as": "damage_pr"}, {"calculate": "toNumber(datum.opening_kill_ratio)", "as": "opening_kr"}, {"calculate": "toNumber(datum.assists_per_round)", "as": "assists_pr"}, {"calculate": "toNumber(datum.rifle_kills)", "as": "rifle_k"}, {"calculate": "toNumber(datum.sniper_kills)", "as": "sniper_k"}, {"calculate": "toNumber(datum.smg_kills)", "as": "smg_k"}, {"calculate": "toNumber(datum.pistol_kills)", "as": "pistol_k"}, {"calculate": "toNumber(datum.grenade_kills)", "as": "grenade_k"}, {"calculate": "toNumber(datum.other_kills)", "as": "other_k"}, {"calculate": "datum.rifle_k + datum.sniper_k + datum.smg_k + datum.pistol_k + datum.grenade_k + datum.other_k", "as": "weapon_total"}, {"calculate": "(datum.weapon_total>0) ? (datum.sniper_k / datum.weapon_total) : 0", "as": "sniper_share"}, {"calculate": "(datum.sniper_share > 0.12) ? 'AWPer' : ((datum.opening_kr > 1.2 && datum.kills_pr > 0.8) ? 'Entry' : ((datum.assists_pr > 0.2) ? 'Support' : 'Lurker'))", "as": "role"}, {"joinaggregate": [{"op": "min", "field": "kills_pr", "as": "min_kpr"}, {"op": "max", "field": "kills_pr", "as": "max_kpr"}, {"op": "min", "field": "damage_pr", "as": "min_dpr"}, {"op": "max", "field": "damage_pr", "as": "max_dpr"}, {"op": "min", "field": "opening_kr", "as": "min_okr"}, {"op": "max", "field": "opening_kr", "as": "max_okr"}, {"op": "min", "field": "headshot_pct", "as": "min_hs"}, {"op": "max", "field": "headshot_pct", "as": "max_hs"}], "as": []}, {"calculate": "(datum.max_kpr==datum.min_kpr) ? 0.5 : (datum.kills_pr - datum.min_kpr) / (datum.max_kpr - datum.min_kpr)", "as": "norm_kills_pr"}, {"calculate": "(datum.max_dpr==datum.min_dpr) ? 0.5 : (datum.damage_pr - datum.min_dpr) / (datum.max_dpr - datum.min_dpr)", "as": "norm_damage_pr"}, {"calculate": "(datum.max_okr==datum.min_okr) ? 0.5 : (datum.opening_kr - datum.min_okr) / (datum.max_okr - datum.min_okr)", "as": "norm_opening_kr"}, {"calculate": "(datum.max_hs==datum.min_hs) ? 0.5 : (datum.headshot_pct - datum.min_hs) / (datum.max_hs - datum.min_hs)", "as": "norm_headshot_pct"}, {"aggregate": [{"op": "mean", "field": "norm_kills_pr", "as": "mean_norm_kills_pr"}, {"op": "mean", "field": "norm_damage_pr", "as": "mean_norm_damage_pr"}, {"op": "mean", "field": "norm_opening_kr", "as": "mean_norm_opening_kr"}, {"op": "mean", "field": "norm_headshot_pct", "as": "mean_norm_headshot_pct"}], "groupby": ["role"]}, {"fold": ["mean_norm_kills_pr", "mean_norm_damage_pr", "mean_norm_opening_kr", "mean_norm_headshot_pct"], "as": ["key", "value"]}, {"calculate": "datum.key == 'mean_norm_kills_pr' ? 'kills_per_round' : (datum.key == 'mean_norm_damage_pr' ? 'damage_per_round' : (datum.key == 'mean_norm_opening_kr' ? 'opening_kill_ratio' : 'headshot_percentage'))", "as": "attribute"}, {"calculate": "datum.value", "as": "value"}], "mark": {"type": "line", "point": true, "interpolate": "linear", "clip": true}, "encoding": {"theta": {"field": "attribute", "type": "nominal", "title": null, "sort": ["kills_per_round", "damage_per_round", "opening_kill_ratio", "headshot_percentage"]}, "radius": {"field": "value", "type": "quantitative", "scale": {"domain": [0, 1]}}, "color": {"field": "role", "type": "nominal", "legend": {"title": "Role centroids"}}, "strokeDash": {"value": [5, 3]}, "opacity": {"value": 0.9}}}, {"title": "Top 6 players (normalized)", "data": {"url": "https://raw.githubusercontent.com/the-lord-of-stars/mini-template/dev-yuhan/studio/testing/cs/csgo_players.csv"}, "transform": [{"calculate": "toNumber(replace(datum.headshot_percentage, '%', ''))", "as": "headshot_pct"}, {"calculate": "toNumber(datum.kills_per_round)", "as": "kills_pr"}, {"calculate": "toNumber(datum.damage_per_round)", "as": "damage_pr"}, {"calculate": "toNumber(datum.opening_kill_ratio)", "as": "opening_kr"}, {"calculate": "toNumber(datum.assists_per_round)", "as": "assists_pr"}, {"calculate": "toNumber(datum.rifle_kills)", "as": "rifle_k"}, {"calculate": "toNumber(datum.sniper_kills)", "as": "sniper_k"}, {"calculate": "toNumber(datum.smg_kills)", "as": "smg_k"}, {"calculate": "toNumber(datum.pistol_kills)", "as": "pistol_k"}, {"calculate": "toNumber(datum.grenade_kills)", "as": "grenade_k"}, {"calculate": "toNumber(datum.other_kills)", "as": "other_k"}, {"calculate": "toNumber(datum.rating)", "as": "rating_num"}, {"calculate": "datum.rifle_k + datum.sniper_k + datum.smg_k + datum.pistol_k + datum.grenade_k + datum.other_k", "as": "weapon_total"}, {"calculate": "(datum.weapon_total>0) ? (datum.sniper_k / datum.weapon_total) : 0", "as": "sniper_share"}, {"calculate": "(datum.sniper_share > 0.12) ? 'AWPer' : ((datum.opening_kr > 1.2 && datum.kills_pr > 0.8) ? 'Entry' : ((datum.assists_pr > 0.2) ? 'Support' : 'Lurker'))", "as": "role"}, {"joinaggregate": [{"op": "min", "field": "kills_pr", "as": "min_kpr"}, {"op": "max", "field": "kills_pr", "as": "max_kpr"}, {"op": "min", "field": "damage_pr", "as": "min_dpr"}, {"op": "max", "field": "damage_pr", "as": "max_dpr"}, {"op": "min", "field": "opening_kr", "as": "min_okr"}, {"op": "max", "field": "opening_kr", "as": "max_okr"}, {"op": "min", "field": "headshot_pct", "as": "min_hs"}, {"op": "max", "field": "headshot_pct", "as": "max_hs"}], "as": []}, {"calculate": "(datum.max_kpr==datum.min_kpr) ? 0.5 : (datum.kills_pr - datum.min_kpr) / (datum.max_kpr - datum.min_kpr)", "as": "norm_kills_pr"}, {"calculate": "(datum.max_dpr==datum.min_dpr) ? 0.5 : (datum.damage_pr - datum.min_dpr) / (datum.max_dpr - datum.min_dpr)", "as": "norm_damage_pr"}, {"calculate": "(datum.max_okr==datum.min_okr) ? 0.5 : (datum.opening_kr - datum.min_okr) / (datum.max_okr - datum.min_okr)", "as": "norm_opening_kr"}, {"calculate": "(datum.max_hs==datum.min_hs) ? 0.5 : (datum.headshot_pct - datum.min_hs) / (datum.max_hs - datum.min_hs)", "as": "norm_headshot_pct"}, {"window": [{"op": "row_number", "as": "rank"}], "sort": [{"field": "rating_num", "order": "descending"}]}, {"filter": "datum.rank <= 6"}, {"fold": ["norm_kills_pr", "norm_damage_pr", "norm_opening_kr", "norm_headshot_pct"], "as": ["key", "value"]}, {"calculate": "datum.key == 'norm_kills_pr' ? 'kills_per_round' : (datum.key == 'norm_damage_pr' ? 'damage_per_round' : (datum.key == 'norm_opening_kr' ? 'opening_kill_ratio' : 'headshot_percentage'))", "as": "attribute"}, {"calculate": "datum.value", "as": "value"}], "mark": {"type": "line", "point": true, "interpolate": "linear", "clip": true}, "encoding": {"theta": {"field": "attribute", "type": "nominal", "sort": ["kills_per_round", "damage_per_round", "opening_kill_ratio", "headshot_percentage"]}, "radius": {"field": "value", "type": "quantitative", "scale": {"domain": [0, 1]}}, "color": {"field": "nickname", "type": "nominal", "legend": {"title": "Top players (nick)"}}, "opacity": {"value": 0.9}}}], "resolve": {"legend": {"color": "independent"}}, "title": "Top-6 Players vs Role Centroids \u2014 Normalized Profile Comparison\n(attributes: kills_per_round, damage_per_round, opening_kill_ratio, headshot_percentage)"}, {
+            actions: false,
+            renderer: 'canvas',
+          })
+          .catch(console.error);
+        </script>
+        <p class='text-sm text-gray-600 mt-2 text-center'>
+          <p class="text-gray-700 leading-relaxed mb-4">The normalized profile comparison between top-6 players and role centroids shows that the highest-rated players are AWPer‑leaning in this snapshot and often exceed their role centroid on several axes (kills_per_round, damage_per_round, opening_kill_ratio, headshot percentage). For example, ZywOo and s1mple both register above‑centroid values across multiple attributes, explaining their exceptional ratings; blameF (an Entry example) sits closest to his role centroid, reflecting a prototypical profile. The radar-like comparison highlights which attributes drive a player away from the centroid and helps identify individual strengths that might be masked by a single overall rating.</p>
+        </p>
+      </div>
+    </div>
+    <div class='my-8'>
+      <div class='bg-gray-50 rounded-lg shadow-sm p-4'>
+        <div class='mb-4 flex justify-center'>
+          <div class='inline-block mx-auto overflow-x-auto max-w-full'>
+            <div id='vis-7-2'></div>
+          </div>
+        </div>
+        <script>
+          vegaEmbed('#vis-7-2', {"$schema": "https://vega.github.io/schema/vega-lite/v5.json", "description": "Count of players by parsed number of teams (teams field split on comma/semicolon). Use the controls to require a minimum rounds_played and optionally restrict to players with >1 parsed team. This helps identify candidates for career/team decomposition given the available team-history string.", "data": {"url": "https://raw.githubusercontent.com/the-lord-of-stars/mini-template/dev-yuhan/studio/testing/cs/csgo_players.csv"}, "params": [{"name": "minRounds", "value": 2000, "bind": {"input": "range", "min": 0, "max": 50000, "step": 100, "name": "Min rounds_played: "}}, {"name": "showMultiple", "value": true, "bind": {"input": "checkbox", "name": "Show only players with >1 parsed team"}}], "transform": [{"calculate": "toNumber(datum.rounds_played)", "as": "rounds_played_num"}, {"calculate": "length(split(datum.teams, /[,;]+/))", "as": "team_count"}, {"filter": "datum.rounds_played_num >= params.minRounds"}, {"filter": "(!params.showMultiple) || (datum.team_count > 1)"}, {"aggregate": [{"op": "count", "field": "player_id", "as": "players_count"}], "groupby": ["team_count"]}], "width": 640, "height": 360, "mark": {"type": "bar", "cornerRadius": 3}, "encoding": {"x": {"field": "team_count", "type": "ordinal", "title": "Parsed team count (from teams field)", "axis": {"labelAngle": 0}}, "y": {"field": "players_count", "type": "quantitative", "title": "Number of players"}, "color": {"condition": {"test": "datum.team_count > 1", "value": "#1f77b4"}, "value": "#bbb"}, "tooltip": [{"field": "team_count", "type": "quantitative", "title": "Parsed team count"}, {"field": "players_count", "type": "quantitative", "title": "Players (count)"}, {"field": "minRounds", "type": "quantitative", "title": "Min rounds_played (filter)", "format": "d"}]}, "config": {"view": {"stroke": "transparent"}, "axis": {"labelFontSize": 12, "titleFontSize": 13}}}, {
+            actions: false,
+            renderer: 'canvas',
+          })
+          .catch(console.error);
+        </script>
+        <p class='text-sm text-gray-600 mt-2 text-center'>
+          <p class="text-gray-700 leading-relaxed mb-4">A pragmatic team-history suitability chart counts parsed team entries per player and helps identify candidates for a limited career decomposition. Most players (≈86%) list more than one team, and a short list of veterans with many teams and very high rounds played (e.g., Liazz, fnx, NBK-, TACO) are natural candidates for team-level time comparisons if per-team timestamps can be located externally. The dataset lacks explicit time ranges for teams, so exhaustive per-team time-series reconstruction is generally infeasible; practical fallbacks are weapon-type decomposition across full career or coarse splits by career quantiles for players with sufficient rounds.</p>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+<section class='mb-16'>
+  <h2 class='text-3xl font-bold mb-6 border-b border-gray-200 pb-2'>
+    8. Interactive dashboard design, reproducibility & conclusions
+  </h2>
+  <div class='space-y-10'>
+    <div class='prose prose-lg prose-gray max-w-none'>
+      <p class="text-gray-700 leading-relaxed mb-4">A compact interactive dashboard design and reproducibility blueprint emphasizes linked filters (role, rounds cutoff), selectable points for player comparison, and a weapon-breakdown detail panel to support common analyst workflows. The pipeline should be fully scripted with deterministic parsing steps, saved intermediate artifacts (cleaned CSV and columns_quirk_summary.csv), and versioned notebooks with random seeds for dimensionality reduction and clustering so results are reproducible. Limitations include per-player aggregates without per-match timestamps (which prevents confident team-period decompositions) and sensitivity of rule thresholds to sampling decisions; recommended mitigations are to expose thresholds as tunable controls, require minimum rounds for stable assignments, and surface borderline players for manual review. Actionable takeaways: KPR and opening impact are strong predictors of rating, weapon shares define clear specialization axes, and combining interpretable heuristics with clustering yields robust, explainable archetypes that are useful for scouting and as benchmarks for automated charting systems.</p>
+    </div>
+    <div class='my-8'>
+      <div class='bg-gray-50 rounded-lg shadow-sm p-4'>
+        <p class='text-red-600'>Error loading visualization</p>
+        <p class='text-sm text-gray-600 mt-2 text-center'>
+          <p class="text-gray-700 leading-relaxed mb-4">The two-panel compact dashboard concept links a scatter of rating vs kills-per-round with a selectable weapon-kill breakdown: selecting players in the scatter immediately updates a stacked/aggregated bar chart of weapon kills so analysts can fluently move between global patterns and granular composition. Interaction paradigms include point/brush selection, role dropdown filters and a player-compare mode; practical defaults filter to players with ≥500 rounds to reduce noise. Empirical checks underpinning this design include a strong correlation between rating and KPR (≈0.87) and role-level medians that show AWPer and Entry buckets tend to have higher median KPR and rating than Support, making the scatter+breakdown layout an intuitive, high-signal starting point for exploration and comparison.</p>
+        </p>
+      </div>
+    </div>
+    <div class='my-8'>
+      <div class='bg-gray-50 rounded-lg shadow-sm p-4'>
+        <div class='mb-4 flex justify-center'>
+          <div class='inline-block mx-auto overflow-x-auto max-w-full'>
+            <div id='vis-8-2'></div>
+          </div>
+        </div>
+        <script>
+          vegaEmbed('#vis-8-2', {"$schema": "https://vega.github.io/schema/vega-lite/v5.json", "description": "Assign players to role buckets using simple data-driven rules and show counts. Scatter shows opening_kill_ratio vs sniper_share with threshold lines; bar chart below shows counts per assigned role. Recommended minimum rounds_played cutoff = 1000 (stable flag).", "data": {"url": "https://raw.githubusercontent.com/the-lord-of-stars/mini-template/dev-yuhan/studio/testing/cs/csgo_players.csv", "format": {"type": "csv"}}, "vconcat": [{"title": "Opening kill ratio vs. Sniper share \u2014 colored by assigned role", "width": 700, "height": 420, "transform": [{"calculate": "toNumber(datum['total_kills'])", "as": "total_kills_n"}, {"calculate": "toNumber(datum['sniper_kills'])", "as": "sniper_kills_n"}, {"calculate": "toNumber(datum['opening_kill_ratio'])", "as": "opening_kill_ratio_n"}, {"calculate": "toNumber(datum['kills_per_round'])", "as": "kills_per_round_n"}, {"calculate": "toNumber(datum['assists_per_round'])", "as": "assists_per_round_n"}, {"calculate": "toNumber(datum['rounds_played'])", "as": "rounds_played_n"}, {"calculate": "datum.total_kills_n > 0 ? (datum.sniper_kills_n / datum.total_kills_n) : 0", "as": "sniper_share"}, {"calculate": "(datum.opening_kill_ratio_n > 1.2 && datum.kills_per_round_n > 0.8)", "as": "aggression_flag"}, {"calculate": "datum.sniper_share > 0.12 && datum.kills_per_round_n > 0.7 ? 'AWPer' : (datum.aggression_flag ? 'EntryFragger' : (datum.assists_per_round_n > 0.12 ? 'Support' : 'Lurker'))", "as": "role"}, {"calculate": "datum.rounds_played_n >= 1000", "as": "stable_flag"}], "layer": [{"mark": {"type": "point", "filled": true, "opacity": 0.85}, "encoding": {"x": {"field": "opening_kill_ratio_n", "type": "quantitative", "title": "Opening kill ratio", "scale": {"zero": false}}, "y": {"field": "sniper_share", "type": "quantitative", "title": "Sniper kills / total kills (share)", "axis": {"format": ".2f"}, "scale": {"domain": [0, null]}}, "size": {"field": "rounds_played_n", "type": "quantitative", "title": "Rounds played", "scale": {"range": [20, 400]}}, "color": {"field": "role", "type": "nominal", "legend": {"title": "Assigned role"}}, "opacity": {"condition": {"test": "datum.stable_flag == true", "value": 1}, "value": 0.45}, "tooltip": [{"field": "nickname", "type": "nominal", "title": "Nickname"}, {"field": "role", "type": "nominal", "title": "Assigned role"}, {"field": "sniper_share", "type": "quantitative", "title": "Sniper share", "format": ".3f"}, {"field": "opening_kill_ratio_n", "type": "quantitative", "title": "Opening kill ratio"}, {"field": "kills_per_round_n", "type": "quantitative", "title": "Kills / round"}, {"field": "assists_per_round_n", "type": "quantitative", "title": "Assists / round"}, {"field": "rounds_played_n", "type": "quantitative", "title": "Rounds played"}, {"field": "stable_flag", "type": "nominal", "title": "Stable (>=1000 rounds)"}]}}, {"data": {"values": [{"x": 1.2}]}, "mark": {"type": "rule", "color": "#666", "strokeDash": [4, 4]}, "encoding": {"x": {"field": "x", "type": "quantitative"}}}, {"data": {"values": [{"y": 0.12}]}, "mark": {"type": "rule", "orient": "horizontal", "color": "#666", "strokeDash": [4, 4]}, "encoding": {"y": {"field": "y", "type": "quantitative"}}}, {"mark": {"type": "text", "align": "left", "dx": 8, "dy": -6, "color": "#333"}, "encoding": {"x": {"value": 10}, "y": {"value": 20}, "text": {"value": "Thresholds: sniper_share = 0.12 (AWPer); opening_kill_ratio = 1.2 & KPR>0.8 (Entry). Assists>0.12 -> Support. Rounds cutoff >=1000 = stable."}}}]}, {"title": "Counts per assigned role (after rules)", "width": 700, "height": 160, "transform": [{"calculate": "toNumber(datum['total_kills'])", "as": "total_kills_n"}, {"calculate": "toNumber(datum['sniper_kills'])", "as": "sniper_kills_n"}, {"calculate": "toNumber(datum['opening_kill_ratio'])", "as": "opening_kill_ratio_n"}, {"calculate": "toNumber(datum['kills_per_round'])", "as": "kills_per_round_n"}, {"calculate": "toNumber(datum['assists_per_round'])", "as": "assists_per_round_n"}, {"calculate": "toNumber(datum['rounds_played'])", "as": "rounds_played_n"}, {"calculate": "datum.total_kills_n > 0 ? (datum.sniper_kills_n / datum.total_kills_n) : 0", "as": "sniper_share"}, {"calculate": "(datum.opening_kill_ratio_n > 1.2 && datum.kills_per_round_n > 0.8)", "as": "aggression_flag"}, {"calculate": "datum.sniper_share > 0.12 && datum.kills_per_round_n > 0.7 ? 'AWPer' : (datum.aggression_flag ? 'EntryFragger' : (datum.assists_per_round_n > 0.12 ? 'Support' : 'Lurker'))", "as": "role"}, {"calculate": "datum.rounds_played_n >= 1000", "as": "stable_flag"}, {"aggregate": [{"op": "count", "as": "count"}], "groupby": ["role"]}], "mark": {"type": "bar", "cornerRadius": 3}, "encoding": {"x": {"field": "role", "type": "nominal", "title": "Role", "sort": "-y"}, "y": {"field": "count", "type": "quantitative", "title": "Number of players"}, "color": {"field": "role", "type": "nominal", "legend": null}, "tooltip": [{"field": "role", "type": "nominal", "title": "Role"}, {"field": "count", "type": "quantitative", "title": "Players assigned"}]}}], "config": {"axis": {"labelFontSize": 11, "titleFontSize": 12}, "legend": {"labelFontSize": 11, "titleFontSize": 12}}}, {
+            actions: false,
+            renderer: 'canvas',
+          })
+          .catch(console.error);
+        </script>
+        <p class='text-sm text-gray-600 mt-2 text-center'>
+          <p class="text-gray-700 leading-relaxed mb-4">A rules-and-thresholds visual makes the operational role-assignment choices transparent: vertical and horizontal threshold lines on opening_kill_ratio and sniper_share show the cutoffs used to label AWPer, Entry, Support and Lurker and a companion bar chart tallies resulting counts. Recommended data-driven thresholds (derived from quantiles) and a stable-sample rounds cutoff are displayed so analysts can adjust sensitivity: example quantiles were sniper_share p75 ≈ 0.154, opening_kill_ratio p75 ≈ 1.15, assists_per_round p75 ≈ 0.14, and kills_per_round median ≈ 0.69. Applying these rules yields a working partitioning (Support the largest bucket, AWPer and Entry smaller), and the visualization highlights the effect of changing thresholds and rounds cutoffs so automated charting systems can expose sensible defaults while leaving final role assignment to the analyst.</p>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const toc = document.getElementById('toc');
+  if (!toc) return;
+
+  const headers = document.querySelectorAll('article h2, article h3');
+  headers.forEach(h => {
+    let id = h.textContent.trim().replace(/\s+/g, '-').toLowerCase();
+    h.setAttribute('id', id);
+
+    const link = document.createElement('a');
+    link.href = '#' + id;
+    link.textContent = h.textContent;
+    link.className = (h.tagName === 'H2'
+      ? 'block font-semibold mb-1'      : 'block ml-4 text-gray-500') + ' hover:text-primary-600';
+
+    toc.appendChild(link);
+  });
+});
+</script>
+    </article>
+  </main>
+  <footer class='border-t mt-12 py-6 text-center text-sm text-gray-500'>
+    © 2025 Agentic VIS
+  </footer>
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+  const tocList = document.getElementById('toc-list');
+  const headers = document.querySelectorAll('article h2, article h3');
+  const links = [];
+
+  headers.forEach((h, idx) => {
+    let id = h.textContent.trim().replace(/\s+/g, '-').toLowerCase() + '-' + idx;
+    h.setAttribute('id', id);
+
+    const li = document.createElement('li');
+    li.className = 'flex items-center space-x-2';
+
+    const dot = document.createElement('span');
+    dot.className = 'w-2 h-2 rounded-full border border-gray-300';
+    li.appendChild(dot);
+
+    const link = document.createElement('a');
+    link.href = '#' + id;
+
+    const text = h.textContent.trim();
+    link.textContent = text.length > 40 ? text.slice(0, 37) + '…' : text;
+    link.title = text;
+
+    link.className = 'block truncate text-gray-400 hover:text-gray-600';
+    if (h.tagName === 'H3') {
+      link.className += ' ml-4';
+    }
+
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.getElementById(id);
+      if (target) {
+        const y = target.getBoundingClientRect().top + window.scrollY - 100;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    });
+
+    li.appendChild(link);
+    tocList.appendChild(li);
+    links.push({id, link, el: h, dot});
+  });
+
+  function onScroll() {
+    let scrollPos = document.documentElement.scrollTop || document.body.scrollTop;
+    let current;
+    links.forEach(item => {
+      if (item.el.offsetTop - 120 <= scrollPos) {
+        current = item;
+      }
+    });
+    links.forEach(item => {
+      item.link.classList.remove('font-semibold', 'text-black');
+      item.link.classList.add('text-gray-400');
+      item.dot.className = 'w-2 h-2 rounded-full border border-gray-300';
+    });
+    if (current) {
+      current.link.classList.remove('text-gray-400');
+      current.link.classList.add('font-semibold', 'text-black');
+      current.dot.className = 'w-2 h-2 rounded-full bg-black';
+    }
+  }
+  window.addEventListener('scroll', onScroll);
+  onScroll();
+});
+</script>
+<script>
+window.addEventListener('scroll', function () {
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const scrollTop = window.scrollY || document.documentElement.scrollTop;
+  const progress = (scrollTop / docHeight) * 100;
+  document.getElementById('progress-bar').style.width = progress + '%';
+});
+</script></body>
+</html>
