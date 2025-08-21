@@ -1,3 +1,5 @@
+import traceback
+
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import StateGraph, START, END
 from datetime import datetime
@@ -72,11 +74,12 @@ class Agent:
             output_state = self.workflow.invoke(state, config={"configurable": {"thread_id": memory.thread_id}})
         except Exception as e:
             print(f"❌ Error: {e}")
+            traceback.print_exc()
             output_state = memory.latest_state
         
-        generate_html_report(output_state, f"outputs/vis_report/{memory.thread_id}/report.html")
+        generate_html_report(output_state, f"outputs_sync/vis_report/{memory.thread_id}/report.html")
         
         # copy to output.html
-        shutil.copy(f"outputs/vis_report/{memory.thread_id}/report.html", "output.html")
+        shutil.copy(f"outputs_sync/vis_report/{memory.thread_id}/report.html", "output.html")
 
         return

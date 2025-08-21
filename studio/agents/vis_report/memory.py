@@ -9,7 +9,7 @@ class Memory:
     Manage intermediate states and results
     """
 
-    def __init__(self, thread_id: str | None = None, output_dir: str = "outputs/vis_report/"):
+    def __init__(self, thread_id: str | None = None, output_dir: str = "outputs_sync/vis_report/"):
         if thread_id is None:
             self._generate_thread_id()
         else:
@@ -52,4 +52,4 @@ class Memory:
             return json.load(f)
 
 
-memory = Memory(output_dir="outputs/vis_report/")
+memory = Memory(output_dir="outputs_sync/vis_report/")

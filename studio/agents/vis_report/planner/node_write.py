@@ -25,6 +25,7 @@ def write_content(state: State):
 
     # generate captions for successful analysis
     for section in sections:
+        print(f"🔎 Analyzing section {section['section_number']}...")
         analyses = section["analyses"]
 
         content = [{

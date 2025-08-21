@@ -1,3 +1,5 @@
+import traceback
+
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import StateGraph, START, END
 from datetime import datetime
@@ -47,7 +49,8 @@ class Agent:
         try:
             output_state = self.workflow.invoke(state, config={"configurable": {"thread_id": thread_id}})
         except Exception as e:
-            print(f"❌ Error: {e}")
+            print(f"❌ Analyser Error: {e}")
+            traceback.print_exc()
             output_state = memory.get_latest_state()
 
         return output_state

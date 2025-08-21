@@ -372,8 +372,8 @@ def generate_html_from_state_file(state_file_path: str, output_path: str):
 
 if __name__ == "__main__":
     # Example usage
-    state_file = "../../../outputs_sync/vis_report/thread_20250819_143215/state.json"
-    output_file = "../../../outputs_sync/vis_report/thread_20250819_143215/report.html"
+    state_file = "../../../outputs_sync/vis_report/thread_20250821_104828/state.json"
+    output_file = "../../../outputs_sync/vis_report/thread_20250821_104828/report.html"
     
     if Path(state_file).exists():
         generate_html_from_state_file(state_file, output_file)

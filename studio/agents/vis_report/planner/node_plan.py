@@ -27,7 +27,7 @@ def plan(state: State):
     # save the report outline to a file
     if config["dev"]:
         import json 
-        with open(f"outputs/vis_report/{memory.thread_id}/report_outline.json", "w", encoding="utf-8") as f:
+        with open(f"outputs_sync/vis_report/{memory.thread_id}/report_outline.json", "w", encoding="utf-8") as f:
             json.dump(new_state["report_outline"], f, indent=2, ensure_ascii=False)
 
 
@@ -43,9 +43,10 @@ def plan(state: State):
     
     if config["dev"]:
         import json 
-        with open(f"outputs/vis_report/{memory.thread_id}/report_outline_planned.json", "w", encoding="utf-8") as f:
+        with open(f"outputs_sync/vis_report/{memory.thread_id}/report_outline_planned.json", "w", encoding="utf-8") as f:
             json.dump(new_state["report_outline"], f, indent=2, ensure_ascii=False)
-    print(f"✅ Report outline saved to {f}")
+
+    print(f"✅ Report outline saved")
     total_time = time.time() - start_time
     print(f"⏱️ Total plan function time: {total_time:.2f} seconds")
 
