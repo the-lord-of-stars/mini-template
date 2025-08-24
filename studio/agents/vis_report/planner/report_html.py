@@ -171,24 +171,37 @@ def generate_html_report(output_state: dict, output_path: str):
                 # Add visualization if available
                 if visualisation and visualisation.get("specification"):
                     try:
-                        spec = json.loads(visualisation["specification"])
                         div_id = f"vis-{section_number}-{content_item.get('id', idx)}"
-                        html_lines.extend([
-                            f"        <div class='mb-4 flex justify-center'>",
-                            f"          <div class='inline-block mx-auto overflow-x-auto max-w-full'>",
-                            f"            <div id='{div_id}'></div>",
-                            f"          </div>",
-                            f"        </div>",
-                            "        <script>",
-                            f"          vegaEmbed('#{div_id}', {json.dumps(spec)}, {{",
-                            "            actions: false,",
-                            "            renderer: 'canvas',",
-                            "          })",
-                            "          .catch(console.error);",
-                            "        </script>"
-                        ])
 
-
+                        library = visualisation.get("library", "vega-lite")
+                        if library == "vega-lite":
+                            spec = json.loads(visualisation["specification"])
+                            html_lines.extend([
+                                f"        <div class='mb-4 flex justify-center'>",
+                                f"          <div class='inline-block mx-auto overflow-x-auto max-w-full'>",
+                                f"            <div id='{div_id}'></div>",
+                                f"          </div>",
+                                f"        </div>",
+                                "        <script>",
+                                f"          vegaEmbed('#{div_id}', {json.dumps(spec)}, {{",
+                                "            actions: false,",
+                                "            renderer: 'canvas',",
+                                "          })",
+                                "          .catch(console.error);",
+                                "        </script>"
+                            ])
+                        elif library == "antv":
+                            spec = visualisation["specification"]
+                            html_lines.extend([
+                                f"        <div class='mb-4 flex justify-center'>",
+                                f"          <div class='inline-block mx-auto overflow-x-auto max-w-full'>",
+                                f"            <div id='{div_id}'></div>",
+                                f"          </div>",
+                                f"        </div>",
+                                f"        {spec}"
+                            ])
+                        else:
+                            html_lines.append(f"        <p class='text-red-600'>Error loading visualization</p>")
 
                     except json.JSONDecodeError:
                         html_lines.append("        <p class='text-red-600'>Error loading visualization</p>")

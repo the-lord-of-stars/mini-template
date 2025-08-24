@@ -13,7 +13,11 @@ from agents.vis_report.analyser.node_facts import extract_facts
 
 def create_workflow():
     builder = StateGraph(State)
+    # builder.add_node("vis", visualise)
+
+    from agents.vis_report.analyser.node_vis_withnetwork import visualise
     builder.add_node("vis", visualise)
+
     builder.add_node("facts", extract_facts)
     builder.add_edge(START, "vis")
     builder.add_edge("vis", "facts")
