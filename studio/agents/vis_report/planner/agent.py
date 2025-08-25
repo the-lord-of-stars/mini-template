@@ -22,12 +22,23 @@ def create_workflow():
     from agents.vis_report.planner.node_plan_async import plan
     builder.add_node("plan", plan)
 
+    # TODO: add global filter node
+    from agents.vis_report.planner.node_global_filter import global_filter
+    builder.add_node("global_filter", global_filter)
+
     builder.add_node("execute", execute)
     builder.add_node("write", write_content)
+
     builder.add_edge(START, "plan")
-    builder.add_edge("plan", "execute")
+    builder.add_edge("plan", "global_filter")
+    builder.add_edge("global_filter", "execute")
     builder.add_edge("execute", "write")
     builder.add_edge("write", END)
+
+    # builder.add_edge(START, "plan")
+    # builder.add_edge("plan", "execute")
+    # builder.add_edge("execute", "write")
+    # builder.add_edge("write", END)
 
     # builder.add_node("write", write_content)
     # builder.add_edge(START, "write")

@@ -21,6 +21,12 @@ class ReportSection(TypedDict):
     analyses: Optional[List[AnalysisState]] = None
     content: Optional[List[Content]] = None
 
+class GlobalFilterState(TypedDict):
+    description: str
+    sql_query: str
+    dataset_path: str
+
 class State(TypedDict):
     config: Config
     report_outline: List[ReportSection]
+    global_filter_state: Optional[GlobalFilterState] = None

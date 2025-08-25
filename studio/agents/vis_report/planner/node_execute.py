@@ -36,6 +36,11 @@ def execute(state: State):
 
             analyser_agent = AnalyserAgent()
             analyser_agent.initialize(analysis)
+
+            # Change made:add global filter to the analyser agent
+            global_filter_state = new_state["global_filter_state"]
+            analyser_agent.state["global_filter_state"] = global_filter_state
+
             analyse_result = analyser_agent.process()
             # print(f"    - Analysis result: {analyse_result}")
 

@@ -44,7 +44,7 @@ def run_in_sandbox(code: str, python_path: str = "python3"):
 # print(result["stderr"])
 # print("退出码:", result["exit_code"])
 
-def run_in_sandbox_with_venv(code: str, venv_path: str="./mini-template-env/"):
+def run_in_sandbox_with_venv(code: str, venv_path: str="../mini-template-env/"):
     # Activate virtual environment
     if os.name == 'nt':  # Windows
         python_path = os.path.join(venv_path, 'Scripts', 'python.exe')
@@ -54,7 +54,7 @@ def run_in_sandbox_with_venv(code: str, venv_path: str="./mini-template-env/"):
     return run_in_sandbox(code, python_path)
 
 
-def run_visualization_in_sandbox(code: str, dataset_path: str, output_filename: str, memory_dir: str, venv_path: str = "./mini-template-env/"):
+def run_visualization_in_sandbox(code: str, dataset_path: str, output_filename: str, memory_dir: str, venv_path: str = "../mini-template-env/"):
     """
     Run visualization code in sandbox and copy generated images to memory directory
     

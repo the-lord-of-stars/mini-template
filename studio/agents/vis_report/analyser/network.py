@@ -32,7 +32,7 @@ class AuthorFilter(TypedDict):
 class ResponseFormatter(BaseModel):
     filters: List[Union[PaperFilter, AuthorFilter]]
 
-def llm_filter(topic: str, file_path: str = 'dataset.csv', domain_knowledge: str = ''):
+def llm_filter(topic: str, file_path: str = 'dataset.csv', filtered_df_path: str = '', domain_knowledge: str = ''):
     """
     Use LLM to get the filter for the network based on the task
     """
@@ -49,6 +49,9 @@ def llm_filter(topic: str, file_path: str = 'dataset.csv', domain_knowledge: str
 
     The following knowledge may help you make the report:
     {domain_knowledge}
+
+    The filtered dataset is at the following path:
+    {filtered_df_path} if it is available, otherwise use the original dataset path: {file_path}
 
     You can generate a list of one or more filters based on the given task.
     Each filter should be either a paper filter or an author filter
@@ -82,8 +85,75 @@ def llm_filter(topic: str, file_path: str = 'dataset.csv', domain_knowledge: str
     return response
 
 
+def filter_network(G: nx.Graph, filtered_df_path: str, filters: List[dict]) -> nx.Graph:
+    """
+    Filter the network based on the given filtered dataset.
 
-def filter_network(G: nx.Graph, df: pd.DataFrame, filters: List[dict]) -> nx.Graph:
+    The filtered dataset is at the following path:
+    {filtered_df_path}
+    """
+
+    filtered_G = G.copy()
+    filtered_df = pd.read_csv(filtered_df_path)
+
+    def apply_paper_filter(filter: dict) -> nx.Graph:
+        # filtered_df = filtered_df.query(filter['query'])
+
+        nodes_to_keep = []
+
+        for authorNamesStr in filtered_df['AuthorNames-Deduped'].values:
+            try:
+                authors = authorNamesStr.split(';')
+                nodes_to_keep = set(nodes_to_keep).union(set(authors))
+            except:
+                continue
+
+        nodes_to_keep = [node for node in nodes_to_keep if node in G.nodes()]
+
+        filtered_G = G.subgraph(nodes_to_keep)
+        # initialise all edges as not filtered
+        for edge in filtered_G.edges():
+            filtered_G[edge[0]][edge[1]]['filtered'] = False
+
+        for authorNamesStr in filtered_df['AuthorNames-Deduped'].values:
+            try:
+                authors = authorNamesStr.split(';')
+                for i in range(len(authors)):
+                    for j in range(i+1, len(authors)):
+                        filtered_G[authors[i]][authors[j]]['filtered'] = True
+            except:
+                continue
+
+        return filtered_G, filtered_df
+
+    def multi_khop_ego(G, seeds, k=2):
+        keep_nodes = set()
+        node_hops = {}
+
+        for s in seeds:
+            lengths = nx.single_source_shortest_path_length(G, s, cutoff=k)
+            for n, d in lengths.items():
+                if n not in node_hops or d < node_hops[n]:
+                    node_hops[n] = d
+            keep_nodes |= set(lengths.keys())
+        
+        H = G.subgraph(keep_nodes).copy()
+        return H
+
+    def apply_author_filter(filter: dict) -> nx.Graph:
+        nodes_to_keep = set(filter['authors'])
+        filtered_G = multi_khop_ego(G, nodes_to_keep, k=filter['k'] if 'k' in filter else 2)
+        return filtered_G, filtered_df
+
+    for filter in filters:
+        if filter['filter'] == 'paper':
+            filtered_G, filtered_df = apply_paper_filter(filter)
+        elif filter['filter'] == 'author':
+            filtered_G, filtered_df = apply_author_filter(filter)
+
+    return filtered_G, filtered_df
+
+def filter_network_with_sql(G: nx.Graph, df: pd.DataFrame, filters: List[dict]) -> nx.Graph:
     """
     Filter the network based on the given filters.
 
@@ -220,7 +290,7 @@ def get_antv_script(container_id: str, network_json: dict) -> str:
         "const graph = new Graph({",
             f"container: '{container_id}',",
             "autoFit: 'view',",
-            "data,",
+            f"data,",
             "layout: {",
                 "type: 'force-atlas2',",
                 "preventOverlap: true,",

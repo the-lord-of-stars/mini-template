@@ -173,7 +173,8 @@ def simple_action_plan_sync(state: State, section: ReportSection, config: Config
     You are preparing a visualization report based on analysis of the vis publication dataset.
 
     You have created an outline of the report and now you are working on a specific section.
-    You need to design the analysis to perform for completing the section.
+    You need to design the analysis to perform for completing the section. However, the analysis should be simple and focused that does not require too much data transformation.
+    For example, "Who are the top authors shaping automated-visualization ('AutoVis') research by citations and downloads, and how does their productivity and impact evolve over time?" is an extremely complex analysis that requires multiple steps. "Who are the top authors shaping automated-visualization ('AutoVis') research by citations" is a simple analysis that does not require too much data transformation.
 
     Please follow the steps below to design the analysis:
     1. Decide whether to perform analysis and how many analysess

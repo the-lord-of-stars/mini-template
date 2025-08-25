@@ -31,10 +31,16 @@ class AnalysisSchema(TypedDict):
     action: Literal["present", "explore"]
     information_needed: Union[InformationNeededPresent, InformationNeededExplore]
 
+class GlobalFilterState(TypedDict):
+    description: str
+    sql_query: str
+    dataset_path: str
+
 class State(TypedDict):
     analysis_schema: AnalysisSchema
     visualisation: Optional[Visualisation] = None
     knowledge: Optional[Knowledge] = None
+    global_filter_state: Optional[GlobalFilterState] = None
 
 
 def is_vis_valid(state: State):
