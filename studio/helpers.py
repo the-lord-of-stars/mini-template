@@ -10,6 +10,17 @@ import pandasql as ps
 from dotenv import load_dotenv
 load_dotenv()     
 
+class _LLMProxy:
+    def __init__(self, base, force_fc: bool):
+        self._base = base
+        self._force_fc = force_fc
+    def with_structured_output(self, schema, **kwargs):
+        if self._force_fc and "method" not in kwargs:
+            kwargs["method"] = "function_calling"
+        return self._base.with_structured_output(schema, **kwargs)
+    def __getattr__(self, name):
+        return getattr(self._base, name)
+
 def get_llm(**kw):
     """
     Return a Chat‑compatible LLM whose backend (OpenAI, Azure, local stub…)
@@ -33,13 +44,15 @@ def get_llm(**kw):
             if "temperature" in kw:
                 del kw["temperature"]
 
-        return AzureChatOpenAI(
+        llm = AzureChatOpenAI(
             azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
-            api_key       =os.environ["AZURE_OPENAI_API_KEY"],
-            deployment_name=os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4o"), # For submission, the default value is always gpt-4o, but you can choose from o1, o3 and o4-mini too.
-            api_version   =os.getenv("AZURE_OPENAI_API_VERSION", "2025-01-01-preview"),
+            api_key=os.environ["AZURE_OPENAI_API_KEY"],
+            deployment_name=os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-5-mini"),
+            # For submission, the default value is always gpt-4o, but you can choose from o1, o3 and o4-mini too.
+            api_version=os.getenv("AZURE_OPENAI_API_VERSION", "2025-08-07"),
             **kw,
         )
+        return _LLMProxy(llm, force_fc=True)
     elif provider.lower() == "local-echo":
         from langchain.llms.fake import FakeListLLM
         return FakeListLLM(responses=["This is a stub."])  

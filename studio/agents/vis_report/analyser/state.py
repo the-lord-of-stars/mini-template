@@ -19,8 +19,8 @@ class Visualisation(TypedDict):
     specification: str
 
 class Model(TypedDict):
-    method: Literal["llm_gen_py"]
-    python_script: Optional[str]
+    method: str
+    python_script: str
 
 class Knowledge(TypedDict):
     # facts: List[
