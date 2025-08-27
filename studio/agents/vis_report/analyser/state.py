@@ -15,7 +15,7 @@ class InformationNeededExplore(TypedDict):
     expected_outputs: List[str] # expected outputs from the exploration to resolve uncertainty
 
 class Visualisation(TypedDict):
-    library: Literal["vega-lite"]
+    library: Literal["vega-lite", "altair", "antv"]
     specification: str
 
 class Model(TypedDict):

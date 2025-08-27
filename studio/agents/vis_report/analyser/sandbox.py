@@ -17,7 +17,7 @@ def run_in_sandbox(code: str, python_path: str = "python3"):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            timeout=5  # 5 second timeout
+            timeout=30  # 5 second timeout
         )
 
         return {
