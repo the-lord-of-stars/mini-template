@@ -18,8 +18,6 @@ import subprocess
 import tempfile
 import os
 
-# from agents.vis_report.analyser.sandbox import run_in_sandbox
-
 def visualise(state: State):
     """
     Visualise the data based on the information need.
@@ -542,7 +540,7 @@ def get_altair_visualisation(state: State):
                 continue
 
 
-def run_in_sandbox(code: str, python_path: str = "python3"):
+def run_in_sandbox(code: str, python_path: str = "python3"): # same as the one in sandbox.py, can be removed
     # 1. Write LLM generated code to temporary file
     with tempfile.NamedTemporaryFile(delete=False, suffix=".py") as f:
         f.write(code.encode())

@@ -2,6 +2,14 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import StateGraph, START, END
 from datetime import datetime
 
+## TODO: for competition evaluation
+# import os, sys
+# current_dir = os.path.dirname(os.path.abspath(__file__))
+# print("Agent current_dir", current_dir)
+# if current_dir not in sys.path:
+#     sys.path.insert(0, current_dir)
+# print("Agent current_dir", sys.path)
+
 from agents.vis_report.memory import memory
 
 from agents.vis_report.planner.state import State
