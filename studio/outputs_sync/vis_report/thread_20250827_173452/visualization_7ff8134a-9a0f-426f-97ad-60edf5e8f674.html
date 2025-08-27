@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    #vis.vega-embed {
+      width: 100%;
+      display: flex;
+    }
+
+    #vis.vega-embed details,
+    #vis.vega-embed details summary {
+      position: relative;
+    }
+  </style>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-lite@5.20.1"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+</head>
+<body>
+  <div id="vis"></div>
+  <script>
+    (function(vegaEmbed) {
+      var spec = {"config": {"view": {"continuousWidth": 300, "continuousHeight": 300}}, "data": {"name": "data-cc3a260f1932ea9c3d846d9df2672733"}, "mark": {"type": "area"}, "encoding": {"color": {"field": "term", "title": "Theme (top term)", "type": "nominal"}, "tooltip": [{"field": "Year", "type": "ordinal"}, {"field": "term", "type": "nominal"}, {"field": "count", "type": "quantitative"}], "x": {"field": "Year", "title": "Year", "type": "ordinal"}, "y": {"field": "count", "stack": "normalize", "title": "Proportion of papers", "type": "quantitative"}}, "height": 350, "title": "Prevalence over time of top extracted theme terms (multi-label by term presence)", "width": 700, "$schema": "https://vega.github.io/schema/vega-lite/v5.20.1.json", "datasets": {"data-cc3a260f1932ea9c3d846d9df2672733": [{"Year": 1995, "count": 2, "term": "design"}, {"Year": 2010, "count": 1, "term": "design"}, {"Year": 2013, "count": 1, "term": "design"}, {"Year": 2014, "count": 1, "term": "design"}, {"Year": 2015, "count": 3, "term": "design"}, {"Year": 2016, "count": 3, "term": "design"}, {"Year": 2018, "count": 2, "term": "design"}, {"Year": 2019, "count": 1, "term": "design"}, {"Year": 2020, "count": 3, "term": "design"}, {"Year": 2021, "count": 10, "term": "design"}, {"Year": 2022, "count": 1, "term": "design"}, {"Year": 2023, "count": 5, "term": "design"}, {"Year": 2024, "count": 5, "term": "design"}, {"Year": 2007, "count": 1, "term": "user"}, {"Year": 2008, "count": 1, "term": "user"}, {"Year": 2009, "count": 1, "term": "user"}, {"Year": 2010, "count": 1, "term": "user"}, {"Year": 2013, "count": 1, "term": "user"}, {"Year": 2014, "count": 2, "term": "user"}, {"Year": 2015, "count": 2, "term": "user"}, {"Year": 2016, "count": 5, "term": "user"}, {"Year": 2017, "count": 2, "term": "user"}, {"Year": 2018, "count": 2, "term": "user"}, {"Year": 2019, "count": 1, "term": "user"}, {"Year": 2020, "count": 3, "term": "user"}, {"Year": 2021, "count": 7, "term": "user"}, {"Year": 2022, "count": 4, "term": "user"}, {"Year": 2023, "count": 7, "term": "user"}, {"Year": 2024, "count": 1, "term": "user"}, {"Year": 2006, "count": 1, "term": "users"}, {"Year": 2008, "count": 1, "term": "users"}, {"Year": 2009, "count": 1, "term": "users"}, {"Year": 2010, "count": 1, "term": "users"}, {"Year": 2013, "count": 1, "term": "users"}, {"Year": 2014, "count": 1, "term": "users"}, {"Year": 2015, "count": 2, "term": "users"}, {"Year": 2016, "count": 2, "term": "users"}, {"Year": 2017, "count": 2, "term": "users"}, {"Year": 2018, "count": 3, "term": "users"}, {"Year": 2019, "count": 3, "term": "users"}, {"Year": 2020, "count": 4, "term": "users"}, {"Year": 2021, "count": 6, "term": "users"}, {"Year": 2022, "count": 4, "term": "users"}, {"Year": 2023, "count": 4, "term": "users"}, {"Year": 2024, "count": 2, "term": "users"}, {"Year": 2004, "count": 1, "term": "analysis"}, {"Year": 2006, "count": 1, "term": "analysis"}, {"Year": 2007, "count": 1, "term": "analysis"}, {"Year": 2008, "count": 1, "term": "analysis"}, {"Year": 2011, "count": 2, "term": "analysis"}, {"Year": 2014, "count": 3, "term": "analysis"}, {"Year": 2015, "count": 3, "term": "analysis"}, {"Year": 2016, "count": 2, "term": "analysis"}, {"Year": 2018, "count": 1, "term": "analysis"}, {"Year": 2020, "count": 4, "term": "analysis"}, {"Year": 2021, "count": 5, "term": "analysis"}, {"Year": 2022, "count": 4, "term": "analysis"}, {"Year": 2023, "count": 5, "term": "analysis"}, {"Year": 2024, "count": 5, "term": "analysis"}, {"Year": 2008, "count": 1, "term": "visualizations"}, {"Year": 2012, "count": 1, "term": "visualizations"}, {"Year": 2015, "count": 3, "term": "visualizations"}, {"Year": 2018, "count": 1, "term": "visualizations"}, {"Year": 2020, "count": 3, "term": "visualizations"}, {"Year": 2021, "count": 8, "term": "visualizations"}, {"Year": 2022, "count": 2, "term": "visualizations"}, {"Year": 2023, "count": 5, "term": "visualizations"}, {"Year": 2024, "count": 5, "term": "visualizations"}, {"Year": 2006, "count": 1, "term": "analytics"}, {"Year": 2009, "count": 1, "term": "analytics"}, {"Year": 2010, "count": 1, "term": "analytics"}, {"Year": 2011, "count": 1, "term": "analytics"}, {"Year": 2014, "count": 2, "term": "analytics"}, {"Year": 2015, "count": 2, "term": "analytics"}, {"Year": 2016, "count": 3, "term": "analytics"}, {"Year": 2017, "count": 2, "term": "analytics"}, {"Year": 2018, "count": 2, "term": "analytics"}, {"Year": 2019, "count": 2, "term": "analytics"}, {"Year": 2020, "count": 2, "term": "analytics"}, {"Year": 2021, "count": 4, "term": "analytics"}, {"Year": 2023, "count": 3, "term": "analytics"}, {"Year": 2024, "count": 2, "term": "analytics"}]}};
+      var embedOpt = {"mode": "vega-lite"};
+
+      function showError(el, error){
+          el.innerHTML = ('<div style="color:red;">'
+                          + '<p>JavaScript Error: ' + error.message + '</p>'
+                          + "<p>This usually means there's a typo in your chart specification. "
+                          + "See the javascript console for the full traceback.</p>"
+                          + '</div>');
+          throw error;
+      }
+      const el = document.getElementById('vis');
+      vegaEmbed("#vis", spec, embedOpt)
+        .catch(error => showError(el, error));
+    })(vegaEmbed);
+
+  </script>
+</body>
+</html>

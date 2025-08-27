@@ -200,6 +200,16 @@ def generate_html_report(output_state: dict, output_path: str):
                                 f"        </div>",
                                 f"        {spec}"
                             ])
+                        elif library == "altair":
+                            spec = visualisation["specification"]
+                            html_lines.extend([
+                                f"        <div class='mb-4 flex justify-center'>",
+                                f"          <div class='inline-block mx-auto overflow-x-auto max-w-full'>",
+                                f"            <div id='{div_id}'></div>",
+                                f"            {spec}",
+                                f"          </div>",
+                                f"        </div>",
+                            ])
                         else:
                             html_lines.append(f"        <p class='text-red-600'>Error loading visualization</p>")
 
