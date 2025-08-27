@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    #vis.vega-embed {
+      width: 100%;
+      display: flex;
+    }
+
+    #vis.vega-embed details,
+    #vis.vega-embed details summary {
+      position: relative;
+    }
+  </style>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-lite@5.20.1"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+</head>
+<body>
+  <div id="vis"></div>
+  <script>
+    (function(vegaEmbed) {
+      var spec = {"config": {"view": {"continuousWidth": 300, "continuousHeight": 300}}, "data": {"name": "data-dcf39b2aee410b9bb3198b16211309a7"}, "mark": {"type": "bar"}, "encoding": {"color": {"field": "era", "title": "Era", "type": "nominal"}, "tooltip": [{"field": "kw", "type": "nominal"}, {"field": "era", "type": "nominal"}, {"field": "count", "type": "quantitative"}], "x": {"field": "count", "title": "Count", "type": "quantitative"}, "y": {"field": "kw", "sort": null, "title": "Keyword", "type": "nominal"}}, "height": 420, "title": "Top author keywords (by era) in the AutoVis corpus", "width": 760, "$schema": "https://vega.github.io/schema/vega-lite/v5.20.1.json", "datasets": {"data-dcf39b2aee410b9bb3198b16211309a7": [{"kw": "application motivated visualization", "era": "2021+", "count": 3}, {"kw": "automatic visualization", "era": "2016-2020", "count": 2}, {"kw": "automatic visualization", "era": "2021+", "count": 5}, {"kw": "conversational agent", "era": "2021+", "count": 2}, {"kw": "glyph-based visualization", "era": "2021+", "count": 2}, {"kw": "graph visualization", "era": "2010-2015", "count": 2}, {"kw": "infographics", "era": "2016-2020", "count": 1}, {"kw": "infographics", "era": "2021+", "count": 1}, {"kw": "mixed initiative human-machine analysis", "era": "2021+", "count": 4}, {"kw": "mixed-initiative visual analytics", "era": "2010-2015", "count": 1}, {"kw": "mixed-initiative visual analytics", "era": "2016-2020", "count": 2}, {"kw": "mixed-initiative visual analytics", "era": "2021+", "count": 1}, {"kw": "recommender systems", "era": "2010-2015", "count": 1}, {"kw": "recommender systems", "era": "2016-2020", "count": 1}, {"kw": "reinforcement learning", "era": "2016-2020", "count": 2}, {"kw": "reinforcement learning", "era": "2021+", "count": 2}, {"kw": "sports visualization", "era": "2021+", "count": 2}, {"kw": "temporal data", "era": "2021+", "count": 3}, {"kw": "visual analytics", "era": "2010-2015", "count": 1}, {"kw": "visual analytics", "era": "2016-2020", "count": 5}, {"kw": "visual analytics", "era": "2021+", "count": 4}, {"kw": "visual analytics", "era": "pre-2010", "count": 1}, {"kw": "visualization", "era": "2010-2015", "count": 4}, {"kw": "visualization", "era": "2016-2020", "count": 1}, {"kw": "visualization", "era": "2021+", "count": 5}, {"kw": "visualization", "era": "pre-2010", "count": 1}, {"kw": "visualization recommendation", "era": "2010-2015", "count": 2}, {"kw": "visualization recommendation", "era": "2016-2020", "count": 2}, {"kw": "visualization recommendation", "era": "2021+", "count": 4}]}};
+      var embedOpt = {"mode": "vega-lite"};
+
+      function showError(el, error){
+          el.innerHTML = ('<div style="color:red;">'
+                          + '<p>JavaScript Error: ' + error.message + '</p>'
+                          + "<p>This usually means there's a typo in your chart specification. "
+                          + "See the javascript console for the full traceback.</p>"
+                          + '</div>');
+          throw error;
+      }
+      const el = document.getElementById('vis');
+      vegaEmbed("#vis", spec, embedOpt)
+        .catch(error => showError(el, error));
+    })(vegaEmbed);
+
+  </script>
+</body>
+</html>

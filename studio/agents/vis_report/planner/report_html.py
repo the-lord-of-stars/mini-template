@@ -4,6 +4,36 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, List
 
+def clean_duplicate_graph_declarations(html_content: str) -> str:
+    """
+    Clean up duplicate 'const { Graph } = G6' declarations in the HTML content.
+    Keeps only the first occurrence and removes subsequent ones.
+    """
+    # Pattern to match 'const { Graph } = G6' declarations
+    graph_declaration_pattern = r'const\s*\{\s*Graph\s*\}\s*=\s*G6'
+    
+    # Find all occurrences
+    matches = list(re.finditer(graph_declaration_pattern, html_content))
+    
+    if len(matches) <= 1:
+        # No duplicates found, return original content
+        return html_content
+    
+    # Keep the first occurrence, remove the rest
+    result = html_content
+    # Remove from last to first to avoid index shifting issues
+    for match in reversed(matches[1:]):
+        start, end = match.span()
+        # Remove the entire line containing the declaration
+        line_start = html_content.rfind('\n', 0, start) + 1
+        line_end = html_content.find('\n', end)
+        if line_end == -1:
+            line_end = len(html_content)
+        
+        result = result[:line_start] + result[line_end:]
+    
+    return result
+
 def markdown_to_html(md: str) -> str:
     """Convert markdown to HTML with basic formatting."""
     if not md:
@@ -361,8 +391,12 @@ def generate_html_report(output_state: dict, output_path: str):
         "</html>"
     ])
 
+    # Clean up duplicate Graph declarations
+    html_content = "\n".join(html_lines)
+    html_content = clean_duplicate_graph_declarations(html_content)
+    
     # Write out HTML file
-    Path(output_path).write_text("\n".join(html_lines), encoding="utf-8")
+    Path(output_path).write_text(html_content, encoding="utf-8")
     print(f"✓ HTML report generated: {output_path}")
 
 def generate_html_from_state_file(state_file_path: str, output_path: str):

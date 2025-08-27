@@ -278,19 +278,26 @@ def construct_network(filepath: str = 'dataset.csv') -> nx.Graph:
     
     return G, df
 
-
 def get_antv_script(container_id: str, network_json: dict) -> str:
     """
     Get the AntV script for the network
     """
+    import json
+    import uuid
+    unique_id = str(uuid.uuid4())[:8]
+    print(f"unique_id: {unique_id}")
+    data_var = f"data_{unique_id}"
+    graph_var = f"graph_{unique_id}"
+    
     script_lines = [
         "<script>",
-        f"const data = {network_json}",
+        f"const {data_var} = {network_json}",
         "const { Graph } = G6",
-        "const graph = new Graph({",
+        f"const {graph_var} = new Graph(",
+            "{",
             f"container: '{container_id}',",
             "autoFit: 'view',",
-            f"data,",
+            f"data:{data_var},",
             "layout: {",
                 "type: 'force-atlas2',",
                 "preventOverlap: true,",
@@ -310,11 +317,11 @@ def get_antv_script(container_id: str, network_json: dict) -> str:
                 "},",
             "},",
         "});",
-        "graph.render();",
+        f"{graph_var}.render();",
         "</script>"
     ]
-
     script = "\n".join(script_lines)
+    
     return script
 
 def graph_container(container_id: str, network_json: dict, width: int = 800, height: int = 600) -> str:

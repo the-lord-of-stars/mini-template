@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    #vis.vega-embed {
+      width: 100%;
+      display: flex;
+    }
+
+    #vis.vega-embed details,
+    #vis.vega-embed details summary {
+      position: relative;
+    }
+  </style>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-lite@5.20.1"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+</head>
+<body>
+  <div id="vis"></div>
+  <script>
+    (function(vegaEmbed) {
+      var spec = {"config": {"view": {"continuousWidth": 300, "continuousHeight": 300}}, "vconcat": [{"layer": [{"mark": {"type": "bar"}, "encoding": {"color": {"field": "Field", "legend": null, "type": "nominal"}, "tooltip": [{"field": "Field", "type": "nominal"}, {"field": "MissingRate", "format": ".0%", "type": "quantitative"}], "x": {"field": "Field", "sort": "-y", "title": "Metadata field", "type": "nominal"}, "y": {"axis": {"format": "%"}, "field": "MissingRate", "title": "Missing rate", "type": "quantitative"}}}, {"mark": {"type": "text", "color": "black", "dy": -10}, "encoding": {"color": {"field": "Field", "legend": null, "type": "nominal"}, "text": {"field": "MissingRate", "format": ".0%", "type": "quantitative"}, "tooltip": [{"field": "Field", "type": "nominal"}, {"field": "MissingRate", "format": ".0%", "type": "quantitative"}], "x": {"field": "Field", "sort": "-y", "title": "Metadata field", "type": "nominal"}, "y": {"axis": {"format": "%"}, "field": "MissingRate", "title": "Missing rate", "type": "quantitative"}}}], "data": {"name": "data-73e2e7cafdc1f44f4faf1fb4e5c3c0f6"}, "height": 220, "width": 500}, {"data": {"name": "data-e0ef4d2cebecd45c8c742a4e9bc6e26e"}, "mark": {"type": "rect"}, "encoding": {"color": {"field": "Missing", "legend": {"title": "Missing rate"}, "scale": {"scheme": "magma"}, "type": "quantitative"}, "tooltip": [{"field": "Year", "type": "nominal"}, {"field": "Field", "type": "nominal"}, {"field": "Missing", "format": ".0%", "type": "quantitative"}], "x": {"field": "Year", "title": "Year", "type": "ordinal"}, "y": {"field": "Field", "title": "Metadata field", "type": "nominal"}}, "height": 220, "width": 500}], "resolve": {"scale": {"color": "independent"}}, "$schema": "https://vega.github.io/schema/vega-lite/v5.20.1.json", "datasets": {"data-73e2e7cafdc1f44f4faf1fb4e5c3c0f6": [{"Field": "Abstract", "Missing": 0.0, "MissingRate": 0.0}, {"Field": "AuthorKeywords", "Missing": 0.07228915662650602, "MissingRate": 0.07228915662650602}, {"Field": "AuthorNames-Deduped", "Missing": 0.0, "MissingRate": 0.0}, {"Field": "DOI", "Missing": 0.0, "MissingRate": 0.0}], "data-e0ef4d2cebecd45c8c742a4e9bc6e26e": [{"Year": "1995", "Field": "Abstract", "Missing": 0.0}, {"Year": "2004", "Field": "Abstract", "Missing": 0.0}, {"Year": "2006", "Field": "Abstract", "Missing": 0.0}, {"Year": "2007", "Field": "Abstract", "Missing": 0.0}, {"Year": "2008", "Field": "Abstract", "Missing": 0.0}, {"Year": "2009", "Field": "Abstract", "Missing": 0.0}, {"Year": "2010", "Field": "Abstract", "Missing": 0.0}, {"Year": "2011", "Field": "Abstract", "Missing": 0.0}, {"Year": "2012", "Field": "Abstract", "Missing": 0.0}, {"Year": "2013", "Field": "Abstract", "Missing": 0.0}, {"Year": "2014", "Field": "Abstract", "Missing": 0.0}, {"Year": "2015", "Field": "Abstract", "Missing": 0.0}, {"Year": "2016", "Field": "Abstract", "Missing": 0.0}, {"Year": "2017", "Field": "Abstract", "Missing": 0.0}, {"Year": "2018", "Field": "Abstract", "Missing": 0.0}, {"Year": "2019", "Field": "Abstract", "Missing": 0.0}, {"Year": "2020", "Field": "Abstract", "Missing": 0.0}, {"Year": "2021", "Field": "Abstract", "Missing": 0.0}, {"Year": "2022", "Field": "Abstract", "Missing": 0.0}, {"Year": "2023", "Field": "Abstract", "Missing": 0.0}, {"Year": "2024", "Field": "Abstract", "Missing": 0.0}, {"Year": "1995", "Field": "AuthorKeywords", "Missing": 1.0}, {"Year": "2004", "Field": "AuthorKeywords", "Missing": 0.5}, {"Year": "2006", "Field": "AuthorKeywords", "Missing": 0.0}, {"Year": "2007", "Field": "AuthorKeywords", "Missing": 0.0}, {"Year": "2008", "Field": "AuthorKeywords", "Missing": 0.0}, {"Year": "2009", "Field": "AuthorKeywords", "Missing": 1.0}, {"Year": "2010", "Field": "AuthorKeywords", "Missing": 0.0}, {"Year": "2011", "Field": "AuthorKeywords", "Missing": 0.5}, {"Year": "2012", "Field": "AuthorKeywords", "Missing": 0.0}, {"Year": "2013", "Field": "AuthorKeywords", "Missing": 0.0}, {"Year": "2014", "Field": "AuthorKeywords", "Missing": 0.0}, {"Year": "2015", "Field": "AuthorKeywords", "Missing": 0.25}, {"Year": "2016", "Field": "AuthorKeywords", "Missing": 0.0}, {"Year": "2017", "Field": "AuthorKeywords", "Missing": 0.0}, {"Year": "2018", "Field": "AuthorKeywords", "Missing": 0.0}, {"Year": "2019", "Field": "AuthorKeywords", "Missing": 0.0}, {"Year": "2020", "Field": "AuthorKeywords", "Missing": 0.0}, {"Year": "2021", "Field": "AuthorKeywords", "Missing": 0.0}, {"Year": "2022", "Field": "AuthorKeywords", "Missing": 0.0}, {"Year": "2023", "Field": "AuthorKeywords", "Missing": 0.0}, {"Year": "2024", "Field": "AuthorKeywords", "Missing": 0.0}, {"Year": "1995", "Field": "AuthorNames-Deduped", "Missing": 0.0}, {"Year": "2004", "Field": "AuthorNames-Deduped", "Missing": 0.0}, {"Year": "2006", "Field": "AuthorNames-Deduped", "Missing": 0.0}, {"Year": "2007", "Field": "AuthorNames-Deduped", "Missing": 0.0}, {"Year": "2008", "Field": "AuthorNames-Deduped", "Missing": 0.0}, {"Year": "2009", "Field": "AuthorNames-Deduped", "Missing": 0.0}, {"Year": "2010", "Field": "AuthorNames-Deduped", "Missing": 0.0}, {"Year": "2011", "Field": "AuthorNames-Deduped", "Missing": 0.0}, {"Year": "2012", "Field": "AuthorNames-Deduped", "Missing": 0.0}, {"Year": "2013", "Field": "AuthorNames-Deduped", "Missing": 0.0}, {"Year": "2014", "Field": "AuthorNames-Deduped", "Missing": 0.0}, {"Year": "2015", "Field": "AuthorNames-Deduped", "Missing": 0.0}, {"Year": "2016", "Field": "AuthorNames-Deduped", "Missing": 0.0}, {"Year": "2017", "Field": "AuthorNames-Deduped", "Missing": 0.0}, {"Year": "2018", "Field": "AuthorNames-Deduped", "Missing": 0.0}, {"Year": "2019", "Field": "AuthorNames-Deduped", "Missing": 0.0}, {"Year": "2020", "Field": "AuthorNames-Deduped", "Missing": 0.0}, {"Year": "2021", "Field": "AuthorNames-Deduped", "Missing": 0.0}, {"Year": "2022", "Field": "AuthorNames-Deduped", "Missing": 0.0}, {"Year": "2023", "Field": "AuthorNames-Deduped", "Missing": 0.0}, {"Year": "2024", "Field": "AuthorNames-Deduped", "Missing": 0.0}, {"Year": "1995", "Field": "DOI", "Missing": 0.0}, {"Year": "2004", "Field": "DOI", "Missing": 0.0}, {"Year": "2006", "Field": "DOI", "Missing": 0.0}, {"Year": "2007", "Field": "DOI", "Missing": 0.0}, {"Year": "2008", "Field": "DOI", "Missing": 0.0}, {"Year": "2009", "Field": "DOI", "Missing": 0.0}, {"Year": "2010", "Field": "DOI", "Missing": 0.0}, {"Year": "2011", "Field": "DOI", "Missing": 0.0}, {"Year": "2012", "Field": "DOI", "Missing": 0.0}, {"Year": "2013", "Field": "DOI", "Missing": 0.0}, {"Year": "2014", "Field": "DOI", "Missing": 0.0}, {"Year": "2015", "Field": "DOI", "Missing": 0.0}, {"Year": "2016", "Field": "DOI", "Missing": 0.0}, {"Year": "2017", "Field": "DOI", "Missing": 0.0}, {"Year": "2018", "Field": "DOI", "Missing": 0.0}, {"Year": "2019", "Field": "DOI", "Missing": 0.0}, {"Year": "2020", "Field": "DOI", "Missing": 0.0}, {"Year": "2021", "Field": "DOI", "Missing": 0.0}, {"Year": "2022", "Field": "DOI", "Missing": 0.0}, {"Year": "2023", "Field": "DOI", "Missing": 0.0}, {"Year": "2024", "Field": "DOI", "Missing": 0.0}]}};
+      var embedOpt = {"mode": "vega-lite"};
+
+      function showError(el, error){
+          el.innerHTML = ('<div style="color:red;">'
+                          + '<p>JavaScript Error: ' + error.message + '</p>'
+                          + "<p>This usually means there's a typo in your chart specification. "
+                          + "See the javascript console for the full traceback.</p>"
+                          + '</div>');
+          throw error;
+      }
+      const el = document.getElementById('vis');
+      vegaEmbed("#vis", spec, embedOpt)
+        .catch(error => showError(el, error));
+    })(vegaEmbed);
+
+  </script>
+</body>
+</html>
