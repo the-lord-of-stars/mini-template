@@ -39,8 +39,8 @@ def visualise(state: State):
         # visualisation = get_vega_lite_spec_inline(state)
         # new_state["visualisation"] = visualisation.visualisation
 
-        # visualisation = get_altair_visualisation(state)
-        visualisation = get_altair_visualisation_sandbox(state)
+        visualisation = get_altair_visualisation(state)
+        # visualisation = get_altair_visualisation_sandbox(state)
         new_state["visualisation"] = visualisation
     memory.add_state(new_state)
     return new_state
@@ -388,6 +388,14 @@ def get_altair_visualisation(state: State):
     8. Do NOT use Vega-Lite syntax like 'lower(datum.field)' - use Python syntax instead.
     9. IMPORTANT: Assign the final chart to a variable named 'chart' so it can be captured.
     10. Keep the code simple and avoid complex multi-line expressions.
+    
+    CRITICAL OUTPUT RULES:
+    - Return ONLY executable Python code for Altair, nothing else (no prose).
+    - The DataFrame is available as `df`; pandas is `pd`; Altair is `alt`.
+    - The final chart object MUST be assigned to a variable named `chart`.
+    - Keep code simple and robust. Use pandas for preprocessing, not Vega-Lite transforms.
+    - Do NOT wrap code in backticks. Do NOT return JSON. Do NOT return explanations.
+    - If complex, produce a simpler but relevant chart.
     """
     )
 
@@ -424,7 +432,7 @@ def get_altair_visualisation(state: State):
                 )
             else:
                 human_message = HumanMessage(content=f"""
-                Please generate the Altair chart code for the visualisation.
+                Please generate the Altair code for the visualisation in one time and return only the Altair chart code..
                 
                 The DataFrame 'df' is already loaded with {len(data_values)} rows of data. The data is already filtered to fulfil the targeted topic, so you don't need to filter the data again.
                 

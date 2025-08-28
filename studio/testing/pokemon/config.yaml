@@ -45,9 +45,9 @@ domain_knowledge: |
 
 dataset_url: https://raw.githubusercontent.com/the-lord-of-stars/mini-template/dev-yuhan/studio/testing/pokemon/Pokemon.csv
 
-max_section_number: 8
+max_section_number: 5
 
-max_analyses_per_section: 3
+max_analyses_per_section: 1
 
 dev: false
 
