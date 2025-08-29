@@ -105,7 +105,8 @@ def get_antv_visualisation(state: State):
     print('number of nodes after filtering: ', len(filtered_G.nodes()))
     print('filtered_df: ', filtered_df.shape)
 
-    nodes_data = [{"id": node} for node in filtered_G.nodes()]
+    # nodes_data = [{"id": node} for node in filtered_G.nodes()]
+    nodes_data = [{"id": node, "filtered_paper_count": filtered_G.nodes[node]["filtered_paper_count"], "institution": filtered_G.nodes[node]["institution"]} for node in filtered_G.nodes()]
     edges_data = [{"source": u, "target": v, "value": filtered_G[u][v]["weight"], "filtered": filtered_G[u][v]["filtered"] if "filtered" in filtered_G[u][v] else True} 
                   for u, v in filtered_G.edges()]
     network_json = json.dumps({
