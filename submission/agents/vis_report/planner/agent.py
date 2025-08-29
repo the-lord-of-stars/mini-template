@@ -16,11 +16,11 @@ from agents.vis_report.planner.report_html import generate_html_report
 
 def create_workflow():
     builder = StateGraph(State)
-    builder.add_node("plan", plan)
+    # builder.add_node("plan", plan)
 
     # TODO: use the async version
-    # from agents.vis_report.planner.node_plan_async import plan
-    # builder.add_node("plan", plan)
+    from agents.vis_report.planner.node_plan_async import plan
+    builder.add_node("plan", plan)
 
     # TODO: add global filter node
     from agents.vis_report.planner.node_global_filter import global_filter

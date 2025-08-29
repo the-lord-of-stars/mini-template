@@ -17,8 +17,7 @@ import altair as alt
 import subprocess
 import tempfile
 import os
-
-# from agents.vis_report.analyser.sandbox import run_in_sandbox
+import shutil
 
 def visualise(state: State):
     """
@@ -26,6 +25,7 @@ def visualise(state: State):
     """
 
     if config["dev"]:
+
         if "visualisation" in state and state["visualisation"]:
             return state
 
@@ -41,8 +41,8 @@ def visualise(state: State):
         # visualisation = get_vega_lite_spec_inline(state)
         # new_state["visualisation"] = visualisation.visualisation
 
-        # visualisation = get_altair_visualisation(state)
-        visualisation = get_altair_visualisation_sandbox(state)
+        visualisation = get_altair_visualisation(state)
+        # visualisation = get_altair_visualisation_sandbox(state)
         new_state["visualisation"] = visualisation
     memory.add_state(new_state)
     return new_state
@@ -107,7 +107,8 @@ def get_antv_visualisation(state: State):
     print('number of nodes after filtering: ', len(filtered_G.nodes()))
     print('filtered_df: ', filtered_df.shape)
 
-    nodes_data = [{"id": node} for node in filtered_G.nodes()]
+    # nodes_data = [{"id": node} for node in filtered_G.nodes()]
+    nodes_data = [{"id": node, "filtered_paper_count": filtered_G.nodes[node]["filtered_paper_count"], "institution": filtered_G.nodes[node]["institution"]} for node in filtered_G.nodes()]
     edges_data = [{"source": u, "target": v, "value": filtered_G[u][v]["weight"], "filtered": filtered_G[u][v]["filtered"] if "filtered" in filtered_G[u][v] else True} 
                   for u, v in filtered_G.edges()]
     network_json = json.dumps({
@@ -342,8 +343,19 @@ def get_altair_visualisation(state: State):
     if global_memory and global_memory.latest_state is not None:
         thread_dir = global_memory._get_thread_dir()
     else:
-        thread_dir = "outputs_sync/vis_report"
-    
+        thread_id = config['thread_to_load']
+        thread_dir = f"outputs_sync/vis_report/{thread_id}"
+    print(thread_dir)
+
+    if config["dev"]:
+        thread_id_filter = config['thread_to_load']
+        thread_dir_filter = f"outputs_sync/vis_report/{thread_id_filter}"
+        source = thread_dir_filter+"/dataset_global_filtered.csv" 
+        destination_folder = thread_dir
+        destination = os.path.join(destination_folder, os.path.basename(source))
+        shutil.copy(source, destination)
+        print(f"Copied to: {destination}")
+
     dataset_path = f"{thread_dir}/dataset_global_filtered.csv"
     
     # Fallback to config dataset if filtered dataset doesn't exist
@@ -357,6 +369,10 @@ def get_altair_visualisation(state: State):
     df = pd.read_csv(dataset_path)
     data_values = df.to_dict('records')
     print(f"Dataset has {len(data_values)} rows")
+
+    df_original = pd.read_csv(config["dataset"])
+    data_values_original = df_original.to_dict('records')
+    print(f"Original dataset has {len(data_values_original)} rows")
     
     # Limit to first 1000 rows to avoid too large specification
     if len(data_values) > 1000:
@@ -405,10 +421,9 @@ def get_altair_visualisation(state: State):
             if attempt > 0:
                 human_message = HumanMessage(content=f"""
                 Please generate the Altair chart code for the visualisation.
-                
-                The DataFrame 'df' is already loaded with {len(data_values)} rows of data. 
-                It is already filtered to fulfil the targeted topic, so you don't need to filter the data again. 
-                However, you can still use the original dataset to generate the visualisation, which is stored in the file {config["dataset"]}, when you need to use the original dataset.
+                The full dataset is available as a DataFrame named 'df_original', containing {len(data_values_original)} rows.
+                A pre-filtered version of this dataset, focusing on the target topic, is provided as 'df', with {len(data_values)} rows. Filtering has already been applied, so you do not need to reapply filters.
+                If the visualization requires comparing the target topic against the full dataset, use both 'df' and 'df_original' accordingly.
                 
                 IMPORTANT: In Altair code:
                 - Use Python string methods like .lower() for case-insensitive matching
@@ -427,8 +442,9 @@ def get_altair_visualisation(state: State):
             else:
                 human_message = HumanMessage(content=f"""
                 Please generate the Altair chart code for the visualisation.
-                
-                The DataFrame 'df' is already loaded with {len(data_values)} rows of data. The data is already filtered to fulfil the targeted topic, so you don't need to filter the data again.
+                The full dataset is available as a DataFrame named 'df_original', containing {len(data_values_original)} rows.
+                A pre-filtered version of this dataset, focusing on the target topic, is provided as 'df', with {len(data_values)} rows. Filtering has already been applied, so you do not need to reapply filters.
+                If the visualization requires comparing the target topic against the full dataset, use both 'df' and 'df_original' accordingly.
                 
                 IMPORTANT: In Altair code:
                 - Use Python string methods like .lower() for case-insensitive matching
@@ -458,7 +474,7 @@ def get_altair_visualisation(state: State):
             print(altair_code)
             
             # Execute the Altair code and validate the chart
-            local_vars = {'df': df, 'alt': alt, 'pd': pd}
+            local_vars = {'df': df, 'df_original': df_original,'alt': alt, 'pd': pd}
             exec(altair_code, globals(), local_vars)
             
             # Get the chart from the local namespace

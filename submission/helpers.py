@@ -8,7 +8,10 @@ import pandas as pd
 import pandasql as ps
 
 from dotenv import load_dotenv
-load_dotenv()     
+
+from agents.vis_report.load_config import config
+
+load_dotenv()
 
 class _LLMProxy:
     def __init__(self, base, force_fc: bool):
@@ -49,7 +52,7 @@ def get_llm(**kw):
             api_key=os.environ["AZURE_OPENAI_API_KEY"],
             deployment_name=os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-5-mini"),
             # For submission, the default value is always gpt-4o, but you can choose from o1, o3 and o4-mini too.
-            api_version=os.getenv("AZURE_OPENAI_API_VERSION", "2025-08-07"),
+            api_version=os.getenv("AZURE_OPENAI_API_VERSION", "2025-01-01-preview"),
             **kw,
         )
         return _LLMProxy(llm, force_fc=True)
@@ -63,7 +66,7 @@ def get_llm(**kw):
             **kw,
         )
 
-def find_dataset_path(filename="dataset.csv"):
+def find_dataset_path(filename=config['dataset']):
     """
     Find the path of the dataset file
     """

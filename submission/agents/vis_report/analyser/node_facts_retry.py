@@ -11,7 +11,7 @@ from agents.vis_report.analyser.sandbox import run_in_sandbox, run_in_sandbox_wi
 from agents.vis_report.load_config import config
 
 
-def extract_facts(state: State, max_retries=3):
+def extract_facts(state: State, max_retries=5):
     """
     Generate python code to get the facts about the dataset with retry logic.
     """
@@ -118,7 +118,8 @@ def extract_facts(state: State, max_retries=3):
 
         # Run the code in sandbox
         try:
-            result = run_in_sandbox(response.model["python_script"])
+            result = run_in_sandbox_with_venv(response.model["python_script"])
+            # result = run_in_sandbox(response.model["python_script"]) # Use this for competition evaluation
             last_code = response.model["python_script"]
         except Exception as e:
             result = {

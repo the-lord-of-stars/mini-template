@@ -151,6 +151,50 @@ def filter_network(G: nx.Graph, filtered_df_path: str, filters: List[dict]) -> n
         elif filter['filter'] == 'author':
             filtered_G, filtered_df = apply_author_filter(filter)
 
+    # Add author attributes after filtering
+    def add_author_attributes(filtered_G, filtered_df):
+        # Count filtered papers for each author
+        author_paper_counts = {}
+        author_institutions = {}
+        
+        for _, row in filtered_df.iterrows():
+            try:
+                authors = row['AuthorNames-Deduped'].split(';') if pd.notna(row['AuthorNames-Deduped']) else []
+                affiliations = row['AuthorAffiliation'].split(';') if pd.notna(row['AuthorAffiliation']) else []
+                
+                # Count papers for each author
+                for author in authors:
+                    author = author.strip()
+                    if author in filtered_G.nodes():
+                        author_paper_counts[author] = author_paper_counts.get(author, 0) + 1
+                
+                # Extract institution for each author
+                for i, author in enumerate(authors):
+                    author = author.strip()
+                    if author in filtered_G.nodes():
+                        # Get corresponding affiliation if available
+                        if i < len(affiliations):
+                            institution = affiliations[i].strip()
+                            # If this author already has an institution, keep the first one found
+                            if author not in author_institutions:
+                                author_institutions[author] = institution
+                        else:
+                            # If no affiliation available, set to empty string
+                            if author not in author_institutions:
+                                author_institutions[author] = ""
+            except:
+                continue
+        
+        # Add attributes to graph nodes
+        for node in filtered_G.nodes():
+            filtered_G.nodes[node]['filtered_paper_count'] = author_paper_counts.get(node, 0)
+            filtered_G.nodes[node]['institution'] = author_institutions.get(node, "")
+        
+        return filtered_G
+
+    # Apply the attribute addition
+    filtered_G = add_author_attributes(filtered_G, filtered_df)
+
     return filtered_G, filtered_df
 
 def filter_network_with_sql(G: nx.Graph, df: pd.DataFrame, filters: List[dict]) -> nx.Graph:
@@ -236,6 +280,50 @@ def filter_network_with_sql(G: nx.Graph, df: pd.DataFrame, filters: List[dict]) 
         elif filter['filter'] == 'author':
             filtered_G, filtered_df = apply_author_filter(filter)
 
+    # Add author attributes after filtering
+    def add_author_attributes(filtered_G, filtered_df):
+        # Count filtered papers for each author
+        author_paper_counts = {}
+        author_institutions = {}
+        
+        for _, row in filtered_df.iterrows():
+            try:
+                authors = row['AuthorNames-Deduped'].split(';') if pd.notna(row['AuthorNames-Deduped']) else []
+                affiliations = row['AuthorAffiliation'].split(';') if pd.notna(row['AuthorAffiliation']) else []
+                
+                # Count papers for each author
+                for author in authors:
+                    author = author.strip()
+                    if author in filtered_G.nodes():
+                        author_paper_counts[author] = author_paper_counts.get(author, 0) + 1
+                
+                # Extract institution for each author
+                for i, author in enumerate(authors):
+                    author = author.strip()
+                    if author in filtered_G.nodes():
+                        # Get corresponding affiliation if available
+                        if i < len(affiliations):
+                            institution = affiliations[i].strip()
+                            # If this author already has an institution, keep the first one found
+                            if author not in author_institutions:
+                                author_institutions[author] = institution
+                        else:
+                            # If no affiliation available, set to empty string
+                            if author not in author_institutions:
+                                author_institutions[author] = ""
+            except:
+                continue
+        
+        # Add attributes to graph nodes
+        for node in filtered_G.nodes():
+            filtered_G.nodes[node]['filtered_paper_count'] = author_paper_counts.get(node, 0)
+            filtered_G.nodes[node]['institution'] = author_institutions.get(node, "")
+        
+        return filtered_G
+
+    # Apply the attribute addition
+    filtered_G = add_author_attributes(filtered_G, filtered_df)
+
     return filtered_G, filtered_df
 
 
@@ -289,10 +377,43 @@ def get_antv_script(container_id: str, network_json: dict) -> str:
     data_var = f"data_{unique_id}"
     graph_var = f"graph_{unique_id}"
     
+    # Create color palette for institutions
+    color_palette = [
+        '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+        '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+        '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#D7BDE2',
+        '#A9CCE3', '#F9E79F', '#D5A6BD', '#A2D9CE', '#FAD7A0'
+    ]
+    
     script_lines = [
         "<script>",
         f"const {data_var} = {network_json}",
         "const { Graph } = G6",
+        "",
+        "// Color palette for institutions",
+        f"const colorPalette = {color_palette};",
+        "",
+        "// Function to get color for institution",
+        "function getInstitutionColor(institution) {",
+        "    if (!institution || institution === '') return '#CCCCCC';",
+        "    const hash = institution.split('').reduce((a, b) => {",
+        "        a = ((a << 5) - a) + b.charCodeAt(0);",
+        "        return a & a;",
+        "    }, 0);",
+        "    return colorPalette[Math.abs(hash) % colorPalette.length];",
+        "}",
+        "",
+        "// Function to get node size based on paper count",
+        "function getNodeSize(paperCount) {",
+        "    const minSize = 40;",
+        "    const maxSize = 120;",
+        "    const minPapers = 1;",
+        f"    const maxPapers = Math.max(...{data_var}.nodes.map(n => n.filtered_paper_count || 1));",
+        "    if (paperCount <= minPapers) return minSize;",
+        "    if (paperCount >= maxPapers) return maxSize;",
+        "    return minSize + (paperCount - minPapers) * (maxSize - minSize) / (maxPapers - minPapers);",
+        "}",
+        "",
         f"const {graph_var} = new Graph(",
             "{",
             f"container: '{container_id}',",
@@ -314,6 +435,12 @@ def get_antv_script(container_id: str, network_json: dict) -> str:
             "node: {",
                 "style: {",
                     "labelText: d => d.id,",
+                    "size: d => getNodeSize(d.filtered_paper_count || 1),",
+                    "fill: d => getInstitutionColor(d.institution || ''),",
+                    "stroke: '#333333',",
+                    "lineWidth: 1,",
+                    "labelFontSize: 18,",
+                    "fillOpacity: 0.8,",
                 "},",
             "},",
         "});",
@@ -342,18 +469,19 @@ if __name__ == "__main__":
     # print(f"Network constructed with {G.number_of_nodes()} authors and {G.number_of_edges()} collaborations")
 
     task = "research on sensemaking in last ten years"
-    file_path = '../../dataset.csv'
-    file_path = 'dataset.csv'
+    file_path = '../../../dataset.csv'
+    # file_path = 'dataset.csv'
     response = llm_filter(task, file_path)
     
     filters = response.filters
     print('filters: ', filters)
 
     G, df = construct_network(file_path)
-    filtered_G, filtered_df = filter_network(G, df, filters)
+    # filtered_G, filtered_df = filter_network(G, df, filters)
+    filtered_G, filtered_df = filter_network_with_sql(G, df, filters)
 
     # Export filtered network to JSON format
-    nodes_data = [{"id": node} for node in filtered_G.nodes()]
+    nodes_data = [{"id": node, "filtered_paper_count": filtered_G.nodes[node]["filtered_paper_count"], "institution": filtered_G.nodes[node]["institution"]} for node in filtered_G.nodes()]
     edges_data = [{"source": u, "target": v, "value": filtered_G[u][v]["weight"], "filtered": filtered_G[u][v]["filtered"] if "filtered" in filtered_G[u][v] else True} 
                   for u, v in filtered_G.edges()]
     

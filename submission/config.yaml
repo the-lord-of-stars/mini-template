@@ -25,10 +25,10 @@ domain_knowledge: |
 
 dataset_url: https://raw.githubusercontent.com/demoPlz/mini-template/main/studio/dataset.csv
 
-max_section_number: 5
+max_section_number: 6
 
 max_analyses_per_section: 2
 
 dev: false
 
-thread_to_load: thread_20250819_125735
+thread_to_load: thread_20250829_103418

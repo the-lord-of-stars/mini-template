@@ -12,13 +12,14 @@ from agents.vis_report.memory import memory
 
 from agents.vis_report.load_config import config
 
+
 def write_content(state: State):
     """
     Write the content of the report.
     """
 
     print(f"📝 Writing content...")
-    
+
     new_state = state.copy()
     sections = new_state["report_outline"]
     simplified_outline = []
@@ -32,7 +33,14 @@ def write_content(state: State):
             "id": 0,
             "type": "introduction",
         }]
+
+        content_simplified = [{
+            "id": 0,
+            "type": "introduction",
+        }]
+
         section["content"] = content
+        section["content_simplified"] = content_simplified
 
         if len(analyses) == 0:
             continue
@@ -42,7 +50,19 @@ def write_content(state: State):
                 continue
             if not is_knowledge_valid(analysis):
                 continue
-            
+
+            vis_data = analysis["visualisation"]["specification"]
+            if isinstance(vis_data, str) and len(vis_data) > 1000:
+                vis_data = vis_data[:1000] + "...[truncated]"
+            print(vis_data)
+
+            content_simplified.append({
+                "id": len(content),
+                "type": "visualisation",
+                "visualisation": vis_data,
+                "facts": analysis["knowledge"]["facts"],
+            })
+
             content.append({
                 "id": len(content),
                 "type": "visualisation",
@@ -50,6 +70,7 @@ def write_content(state: State):
                 "facts": analysis["knowledge"]["facts"],
             })
             section["content"] = content
+            section["content_simplified"] = content_simplified
 
     for section in sections:
         simplified_outline.append({
@@ -57,7 +78,8 @@ def write_content(state: State):
             "section_name": section["section_name"],
             "section_size": section["section_size"],
             "section_description": section["section_description"],
-            "content": section["content"],
+            "content": section["content_simplified"],
+            # "content": section["content"],
         })
 
     system_message = SystemMessage(content=f"""
@@ -111,10 +133,10 @@ def write_content(state: State):
             section["content"][content_index]["text"] = content["text"]
         except StopIteration:
             print(f"❌ Section {content['section_number']} not found")
-            section["content"][content_index]["text"] = "Failed to write content for this section."
             continue
 
     memory.save_state(new_state)
 
     return new_state
+
 
